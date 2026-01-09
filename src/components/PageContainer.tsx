@@ -15,5 +15,3 @@ const PageContainer = ({ children }: Props) => {
 };
 
 export default PageContainer;
-
-                            </div>

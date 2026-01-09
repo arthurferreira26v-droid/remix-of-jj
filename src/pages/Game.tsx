@@ -22,17 +22,7 @@ import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { GameSaveData } from "@/types/gameState";
-import PageContainer from "../components/ui/PageContainer";
 
-const Game = () => {
-  return (
-    <PageContainer>
-      <h1>Game funcionando</h1>
-    </PageContainer>
-  );
-};
-
-export default Game;
 const Game = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
