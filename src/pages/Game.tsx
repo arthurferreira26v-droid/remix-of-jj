@@ -27,7 +27,7 @@ import PageContainer from "../components/ui/PageContainer";
 const Game = () => {
   return (
     <PageContainer>
-      <h1 className="text-2xl font-bold">Game funcionando</h1>
+      <h1>Game funcionando</h1>
     </PageContainer>
   );
 };
