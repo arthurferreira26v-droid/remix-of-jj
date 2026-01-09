@@ -3,6 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import PageContainer from "./components/PageContainer";
+
 import Index from "./pages/Index";
 import Game from "./pages/Game";
 import Match from "./pages/Match";
@@ -19,19 +22,21 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/jogo" element={<Game />} />
-          <Route path="/partida" element={<Match />} />
-          <Route path="/classificacao" element={<Standings />} />
-          <Route path="/calendario" element={<Calendar />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-         </Routes>
+        <PageContainer>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/jogo" element={<Game />} />
+            <Route path="/partida" element={<Match />} />
+            <Route path="/classificacao" element={<Standings />} />
+            <Route path="/calendario" element={<Calendar />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </PageContainer>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
 
 export default App;
+ 
