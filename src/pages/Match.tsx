@@ -11,7 +11,17 @@ import { toast } from "sonner";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useAuth } from "@/hooks/useAuth";
 import { evolveTeamPlayers } from "@/utils/playerEvolution";
+import PageContainer from "@/components/PageContainer";
 
+const Game = () => {
+  return (
+    <PageContainer>
+      {/* conteúdo da página */}
+    </PageContainer>
+  );
+};
+
+export default Game;
 interface MatchEvent {
   minute: number;
   type: 'goal' | 'yellow_card' | 'red_card' | 'penalty';

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, LogOut } from "lucide-react";
-
+export default Game;
 const Index = () => {
   const { user, loading, signOut } = useAuth();
   const [selectedLeague, setSelectedLeague] = useState("brasileiro");

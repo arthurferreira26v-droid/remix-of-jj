@@ -1,6 +1,16 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import PageContainer from "@/components/PageContainer";
 
+const Game = () => {
+  return (
+    <PageContainer>
+      {/* conteúdo da página */}
+    </PageContainer>
+  );
+};
+
+export default Game;
 const NotFound = () => {
   const location = useLocation();
 

@@ -6,7 +6,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { teams } from "@/data/teams";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import PageContainer from "@/components/PageContainer";
 
+const Game = () => {
+  return (
+    <PageContainer>
+      {/* conteúdo da página */}
+    </PageContainer>
+  );
+};
+
+export default Game;
 interface CalendarMatch {
   id: string;
   round: number;

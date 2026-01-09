@@ -3,7 +3,17 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { StandingsTable } from "@/components/StandingsTable";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import PageContainer from "@/components/PageContainer";
 
+const Game = () => {
+  return (
+    <PageContainer>
+      {/* conteúdo da página */}
+    </PageContainer>
+  );
+};
+
+export default Game;
 const Standings = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
