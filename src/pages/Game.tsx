@@ -22,12 +22,12 @@ import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { GameSaveData } from "@/types/gameState";
-import PageContainer from "@/components/PageContainer";
+import PageContainer from "../components/ui/PageContainer";
 
 const Game = () => {
   return (
     <PageContainer>
-      {/* conteúdo da página */}
+      <h1 className="text-2xl font-bold">Game funcionando</h1>
     </PageContainer>
   );
 };

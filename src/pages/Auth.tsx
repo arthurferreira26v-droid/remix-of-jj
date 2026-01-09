@@ -7,12 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import PageContainer from "@/components/PageContainer";
+import PageContainer from "../components/ui/PageContainer";
 
 const Game = () => {
   return (
     <PageContainer>
-      {/* conteúdo da página */}
+      <h1 className="text-2xl font-bold">Game funcionando</h1>
     </PageContainer>
   );
 };
