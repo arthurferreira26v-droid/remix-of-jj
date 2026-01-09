@@ -7,17 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import ntainer from "../components/ui/ntainer";
 
-const Game = () => {
-  return (
-    <PageContainer>
-      <h1 className="text-2xl font-bold">Game funcionando</h1>
-    </PageContainer>
-  );
-};
-
-export default Game;
 const authSchema = z.object({
   email: z.string().trim().email({ message: "Email inválido" }).max(255),
   password: z.string().min(6, { message: "Senha deve ter no mínimo 6 caracteres" }).max(100),
