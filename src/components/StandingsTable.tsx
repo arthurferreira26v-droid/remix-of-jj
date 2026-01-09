@@ -102,12 +102,12 @@ export const StandingsTable = () => {
   return (
     <div className="bg-black border border-border rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="bg-white/5 border-b border-border px-4 py-3">
-        <h2 className="text-lg font-bold text-white">CAMPEONATO BRASILEIRO - SÉRIE A</h2>
+      <div className="bg-white/5 border-b border-border px-3 sm:px-4 py-2 sm:py-3">
+        <h2 className="text-sm sm:text-lg font-bold text-white">BRASILEIRÃO - SÉRIE A</h2>
       </div>
 
       {/* Table Header */}
-      <div className="hidden md:grid grid-cols-[auto_50px_1fr_repeat(8,50px)] gap-2 px-4 py-3 border-b border-border text-xs font-bold text-muted-foreground">
+      <div className="hidden md:grid grid-cols-[auto_40px_1fr_repeat(8,40px)] gap-1 px-3 py-2 border-b border-border text-xs font-bold text-muted-foreground">
         <div className="w-1"></div>
         <div className="text-center">#</div>
         <div>TIME</div>
@@ -122,8 +122,8 @@ export const StandingsTable = () => {
       </div>
 
       {/* Mobile Table Header */}
-      <div className="md:hidden grid grid-cols-[auto_40px_1fr_50px_50px_50px] gap-2 px-4 py-3 border-b border-border text-xs font-bold text-muted-foreground">
-        <div className="w-1"></div>
+      <div className="md:hidden grid grid-cols-[auto_28px_1fr_36px_28px_36px] gap-1 px-2 py-2 border-b border-border text-[10px] font-bold text-muted-foreground">
+        <div className="w-0.5"></div>
         <div className="text-center">#</div>
         <div>TIME</div>
         <div className="text-center">PTS</div>
@@ -136,34 +136,34 @@ export const StandingsTable = () => {
         {standings.map((team) => (
           <div key={team.id}>
             {/* Desktop View */}
-            <div className="hidden md:grid grid-cols-[auto_50px_1fr_repeat(8,50px)] gap-2 px-4 py-3 hover:bg-white/5 transition-colors items-center">
+            <div className="hidden md:grid grid-cols-[auto_40px_1fr_repeat(8,40px)] gap-1 px-3 py-2 hover:bg-white/5 transition-colors items-center">
               {/* Position Indicator */}
               <div className="flex items-center">
                 {getPositionIndicator(team.position)}
               </div>
               
               {/* Position Number */}
-              <div className={`text-center font-bold ${getPositionColor(team.position)}`}>
+              <div className={`text-center font-bold text-sm ${getPositionColor(team.position)}`}>
                 {team.position}
               </div>
               
               {/* Team Name & Logo */}
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center p-1">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-white/10 rounded flex items-center justify-center p-0.5">
                   <img src={getTeamLogo(team.team_name, team.logo)} alt={team.team_name} className="w-full h-full object-contain" />
                 </div>
-                <span className="font-medium text-white truncate">{team.team_name}</span>
+                <span className="font-medium text-white truncate text-sm">{team.team_name}</span>
               </div>
               
               {/* Stats */}
-              <div className="text-center font-bold text-white">{team.points}</div>
-              <div className="text-center text-muted-foreground">{team.played}</div>
-              <div className="text-center text-green-500">{team.wins}</div>
-              <div className="text-center text-muted-foreground">{team.draws}</div>
-              <div className="text-center text-red-500">{team.losses}</div>
-              <div className="text-center text-muted-foreground">{team.goals_for}</div>
-              <div className="text-center text-muted-foreground">{team.goals_against}</div>
-              <div className={`text-center font-medium ${
+              <div className="text-center font-bold text-white text-sm">{team.points}</div>
+              <div className="text-center text-muted-foreground text-sm">{team.played}</div>
+              <div className="text-center text-green-500 text-sm">{team.wins}</div>
+              <div className="text-center text-muted-foreground text-sm">{team.draws}</div>
+              <div className="text-center text-red-500 text-sm">{team.losses}</div>
+              <div className="text-center text-muted-foreground text-sm">{team.goals_for}</div>
+              <div className="text-center text-muted-foreground text-sm">{team.goals_against}</div>
+              <div className={`text-center font-medium text-sm ${
                 team.goal_difference > 0 
                   ? 'text-green-500' 
                   : team.goal_difference < 0 
@@ -175,29 +175,34 @@ export const StandingsTable = () => {
             </div>
 
             {/* Mobile View */}
-            <div className="md:hidden grid grid-cols-[auto_40px_1fr_50px_50px_50px] gap-2 px-4 py-3 hover:bg-white/5 transition-colors items-center">
+            <div className="md:hidden grid grid-cols-[auto_28px_1fr_36px_28px_36px] gap-1 px-2 py-2 hover:bg-white/5 transition-colors items-center">
               {/* Position Indicator */}
               <div className="flex items-center">
-                {getPositionIndicator(team.position)}
+                <div className={`w-0.5 h-6 rounded-full ${
+                  team.position <= 4 ? 'bg-[#00ff87]' :
+                  team.position <= 6 ? 'bg-[#00b8ff]' :
+                  team.position <= 12 ? 'bg-orange-400' :
+                  team.position <= 16 ? 'bg-white/20' : 'bg-red-500'
+                }`} />
               </div>
               
               {/* Position Number */}
-              <div className={`text-center font-bold ${getPositionColor(team.position)}`}>
+              <div className={`text-center font-bold text-xs ${getPositionColor(team.position)}`}>
                 {team.position}
               </div>
               
               {/* Team Name & Logo */}
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center p-1">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <div className="w-5 h-5 bg-white/10 rounded flex-shrink-0 flex items-center justify-center p-0.5">
                   <img src={getTeamLogo(team.team_name, team.logo)} alt={team.team_name} className="w-full h-full object-contain" />
                 </div>
-                <span className="font-medium text-white truncate text-sm">{team.team_name}</span>
+                <span className="font-medium text-white truncate text-xs">{team.team_name}</span>
               </div>
               
               {/* Stats */}
-              <div className="text-center font-bold text-white">{team.points}</div>
-              <div className="text-center text-muted-foreground">{team.played}</div>
-              <div className={`text-center font-medium ${
+              <div className="text-center font-bold text-white text-xs">{team.points}</div>
+              <div className="text-center text-muted-foreground text-xs">{team.played}</div>
+              <div className={`text-center font-medium text-xs ${
                 team.goal_difference > 0 
                   ? 'text-green-500' 
                   : team.goal_difference < 0 
@@ -212,26 +217,26 @@ export const StandingsTable = () => {
       </div>
 
       {/* Legend */}
-      <div className="bg-white/5 border-t border-border px-4 py-4">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-[#00ff87] rounded-full" />
+      <div className="bg-white/5 border-t border-border px-2 sm:px-4 py-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 text-[10px] sm:text-xs">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-[#00ff87] rounded-full" />
             <span className="text-muted-foreground">Libertadores</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-[#00b8ff] rounded-full" />
-            <span className="text-muted-foreground">Pré-Libertadores</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-[#00b8ff] rounded-full" />
+            <span className="text-muted-foreground">Pré-Liberta</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-orange-400 rounded-full" />
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-orange-400 rounded-full" />
             <span className="text-muted-foreground">Sul-Americana</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-white/20 rounded-full" />
-            <span className="text-muted-foreground">Meio de tabela</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-white/20 rounded-full" />
+            <span className="text-muted-foreground">Meio tabela</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-red-500 rounded-full" />
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-red-500 rounded-full" />
             <span className="text-muted-foreground">Rebaixamento</span>
           </div>
         </div>

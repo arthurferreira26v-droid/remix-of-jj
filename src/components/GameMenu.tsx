@@ -35,87 +35,86 @@ export const GameMenu = ({
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-80">
+      <SheetContent side="right" className="w-64 sm:w-80 p-4">
         <SheetHeader>
-          <SheetTitle className="text-2xl font-bold">{teamName}</SheetTitle>
+          <SheetTitle className="text-xl font-bold">{teamName}</SheetTitle>
         </SheetHeader>
         
-        <div className="mt-8 space-y-2">
+        <div className="mt-6 space-y-1">
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 h-14"
+            className="w-full justify-start gap-2 h-11 text-sm"
             onClick={() => navigate(`/classificacao?time=${teamName}`)}
           >
-            <Trophy className="h-5 w-5" />
-            <span className="text-base">Classificação</span>
+            <Trophy className="h-4 w-4" />
+            <span>Classificação</span>
           </Button>
 
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 h-14"
+            className="w-full justify-start gap-2 h-11 text-sm"
             onClick={onManageSquad}
           >
-            <Users className="h-5 w-5" />
-            <span className="text-base">Gerenciar Elenco</span>
+            <Users className="h-4 w-4" />
+            <span>Gerenciar Elenco</span>
           </Button>
           
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 h-14"
+            className="w-full justify-start gap-2 h-11 text-sm"
             onClick={onTransferMarket}
           >
-            <TrendingUp className="h-5 w-5" />
-            <span className="text-base">Mercado de Transferências</span>
+            <TrendingUp className="h-4 w-4" />
+            <span>Transferências</span>
           </Button>
           
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 h-14"
+            className="w-full justify-start gap-2 h-11 text-sm"
             onClick={() => navigate(`/calendario?time=${teamName}`)}
           >
-            <Calendar className="h-5 w-5" />
-            <span className="text-base">Calendário</span>
+            <Calendar className="h-4 w-4" />
+            <span>Calendário</span>
           </Button>
           
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 h-14"
+            className="w-full justify-start gap-2 h-11 text-sm"
             onClick={onFinances}
           >
-            <Briefcase className="h-5 w-5" />
-            <span className="text-base">Finanças</span>
+            <Briefcase className="h-4 w-4" />
+            <span>Finanças</span>
           </Button>
 
           {/* Save/Load Section */}
-          <div className="pt-4 mt-4 border-t border-border">
+          <div className="pt-3 mt-3 border-t border-border">
             <Button
               variant="ghost"
-              className="w-full justify-start gap-3 h-14"
+              className="w-full justify-start gap-2 h-11 text-sm"
               onClick={onSaveGame}
             >
-              <Save className="h-5 w-5" />
-              <span className="text-base">Salvar Jogo</span>
+              <Save className="h-4 w-4" />
+              <span>Salvar Jogo</span>
             </Button>
 
             <Button
               variant="ghost"
-              className="w-full justify-start gap-3 h-14"
+              className="w-full justify-start gap-2 h-11 text-sm"
               onClick={onLoadGame}
             >
-              <Download className="h-5 w-5" />
-              <span className="text-base">Carregar Jogo</span>
+              <Download className="h-4 w-4" />
+              <span>Carregar Jogo</span>
             </Button>
           </div>
 
-          {/* Exit Section */}
-          <div className="pt-4 mt-4 border-t border-border">
+          <div className="pt-3 mt-3 border-t border-border">
             <Button
               variant="ghost"
-              className="w-full justify-start gap-3 h-14 text-red-500 hover:text-red-600 hover:bg-red-500/10"
+              className="w-full justify-start gap-2 h-11 text-sm text-red-500 hover:text-red-600 hover:bg-red-500/10"
               onClick={() => navigate("/")}
             >
-              <LogOut className="h-5 w-5" />
-              <span className="text-base font-semibold">Sair</span>
+              <LogOut className="h-4 w-4" />
+              <span className="font-semibold">Sair</span>
             </Button>
           </div>
         </div>
