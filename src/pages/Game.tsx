@@ -318,10 +318,10 @@ const Game = () => {
             onLoadGame={() => setShowLoadModal(true)}
           />
         </div>
-
-        {/* Caixa do Time */}
-        <TeamBudget budget={budget} />
       </header>
+
+      {/* Caixa do Time - Fora do header, não acompanha scroll */}
+      <TeamBudget budget={budget} />
 
       {/* Match Section */}
       <div className="container mx-auto px-4 py-8">

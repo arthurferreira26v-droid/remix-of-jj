@@ -92,10 +92,6 @@ export const FormationField = ({ formation, players, onPlayerClick, canSubstitut
             <div className="bg-black/70 px-2 py-0.5 rounded text-white text-[10px] font-medium whitespace-nowrap">
               {player.name}
             </div>
-            {/* Valor de mercado */}
-            <div className="bg-green-900/80 px-2 py-0.5 rounded text-green-400 text-[9px] font-bold whitespace-nowrap">
-              {formatMarketValue(calculateMarketValue(player.overall))}
-            </div>
           </div>
         );
       })}
