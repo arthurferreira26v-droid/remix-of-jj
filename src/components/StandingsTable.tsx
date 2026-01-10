@@ -67,55 +67,58 @@ export const StandingsTable = () => {
         </h2>
       </div>
 
-      {/* SCROLL GLOBAL */}
+      {/* SCROLL HORIZONTAL (APENAS STATS) */}
       <div className="overflow-x-auto">
-        {/* LARGURA GRANDE = MAIS CONTEÚDO */}
-        <div className="min-w-[1100px]">
+        <div className="min-w-[1050px]">
 
           {/* Header */}
-          <div className="flex px-4 py-2 text-xs text-muted-foreground border-b border-border">
-            <div className="w-6" />
-            <div className="w-12">#</div>
-            <div className="w-64">Time</div>
-            <div className="w-14 text-center">PTS</div>
-            <div className="w-14 text-center">J</div>
-            <div className="w-14 text-center">V</div>
-            <div className="w-14 text-center">E</div>
-            <div className="w-14 text-center">D</div>
-            <div className="w-16 text-center">SG</div>
+          <div className="flex px-3 py-2 text-[11px] text-muted-foreground border-b border-border">
+            <div className="w-5" />
+            <div className="w-10">#</div>
+            <div className="w-56">Time</div>
+            <div className="w-12 text-center font-semibold text-white">PTS</div>
+            <div className="w-10 text-center">J</div>
+            <div className="w-10 text-center">V</div>
+            <div className="w-10 text-center">E</div>
+            <div className="w-10 text-center">D</div>
+            <div className="w-12 text-center">SG</div>
           </div>
 
           {/* Rows */}
           {standings.map((team) => (
             <div
               key={team.id}
-              className="flex items-center px-4 py-3 border-b border-border hover:bg-white/5"
+              className="flex items-center px-3 py-2 border-b border-border hover:bg-white/5"
             >
-              <div className={`w-1 h-10 mr-3 rounded-full ${zoneColor(team.position)}`} />
+              <div
+                className={`w-1 h-8 mr-2 rounded-full ${zoneColor(
+                  team.position
+                )}`}
+              />
 
-              <div className="w-12 text-base font-bold text-white">
+              <div className="w-10 text-sm font-bold text-white">
                 {team.position}
               </div>
 
-              <div className="w-64 flex items-center gap-3">
+              <div className="w-56 flex items-center gap-2">
                 <img
                   src={getTeamLogo(team.team_name, team.logo)}
-                  className="w-8 h-8"
+                  className="w-7 h-7"
                 />
-                <span className="text-base text-white">
+                <span className="text-sm font-medium text-white truncate">
                   {team.team_name}
                 </span>
               </div>
 
-              <div className="w-14 text-center font-bold text-white">
+              <div className="w-12 text-center font-bold text-white">
                 {team.points}
               </div>
-              <div className="w-14 text-center">{team.played}</div>
-              <div className="w-14 text-center">{team.wins}</div>
-              <div className="w-14 text-center">{team.draws}</div>
-              <div className="w-14 text-center">{team.losses}</div>
+              <div className="w-10 text-center text-sm">{team.played}</div>
+              <div className="w-10 text-center text-sm">{team.wins}</div>
+              <div className="w-10 text-center text-sm">{team.draws}</div>
+              <div className="w-10 text-center text-sm">{team.losses}</div>
               <div
-                className={`w-16 text-center font-semibold ${
+                className={`w-12 text-center text-sm font-semibold ${
                   team.goal_difference > 0
                     ? "text-green-500"
                     : team.goal_difference < 0
