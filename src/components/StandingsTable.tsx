@@ -36,9 +36,7 @@ export const StandingsTable = () => {
         .order("goal_difference", { ascending: false });
 
       setStandings(
-        (data || [])
-          .map((team, i) => ({ ...team, position: i + 1 }))
-          .slice(0, 12) // MOSTRA APENAS 12
+        data?.map((team, i) => ({ ...team, position: i + 1 })) || []
       );
 
       setLoading(false);
@@ -59,7 +57,8 @@ export const StandingsTable = () => {
     if (pos <= 4) return "bg-green-500";
     if (pos <= 6) return "bg-blue-500";
     if (pos <= 12) return "bg-orange-400";
-    return "bg-white/30";
+    if (pos <= 16) return "bg-white/30";
+    return "bg-red-500";
   };
 
   return (
@@ -71,15 +70,14 @@ export const StandingsTable = () => {
       </div>
 
       {/* HEADER */}
-      <div className="flex items-center px-4 py-2 text-xs text-muted-foreground border-b border-border">
-        <div className="w-1" />
+      <div className="flex px-4 py-2 text-xs text-muted-foreground border-b border-border">
+        <div className="w-1 mr-2" />
         <div className="w-8">#</div>
-        <div className="w-44">Time</div>
+        <div className="w-48">Time</div>
         <div className="w-10 text-center font-bold">PTS</div>
         <div className="w-10 text-center">J</div>
 
-        {/* SCROLL HEADER */}
-        <div className="flex gap-6 ml-4 min-w-[260px] overflow-x-auto">
+        <div className="flex gap-4 ml-4 min-w-[220px]">
           <span className="w-6 text-center">V</span>
           <span className="w-6 text-center">E</span>
           <span className="w-6 text-center">D</span>
@@ -91,20 +89,20 @@ export const StandingsTable = () => {
       {standings.map((team) => (
         <div
           key={team.id}
-          className="flex items-center px-4 py-3 border-b border-border"
+          className="flex px-4 py-3 border-b border-border items-center"
         >
           <div className={`w-1 h-10 mr-2 rounded-full ${zoneColor(team.position)}`} />
 
-          <div className="w-8 text-sm font-bold text-white">
+          <div className="w-8 font-bold text-white">
             {team.position}
           </div>
 
-          <div className="w-44 flex items-center gap-3">
+          <div className="w-48 flex items-center gap-3">
             <img
               src={getTeamLogo(team.team_name, team.logo)}
               className="w-9 h-9"
             />
-            <span className="text-sm font-medium text-white truncate">
+            <span className="text-sm text-white truncate">
               {team.team_name}
             </span>
           </div>
@@ -117,8 +115,8 @@ export const StandingsTable = () => {
             {team.played}
           </div>
 
-          {/* SCROLL COLUNAS */}
-          <div className="flex gap-6 ml-4 min-w-[260px] overflow-x-auto">
+          {/* SCROLL HORIZONTAL */}
+          <div className="flex gap-4 ml-4 min-w-[220px] overflow-x-auto">
             <span className="w-6 text-center">{team.wins}</span>
             <span className="w-6 text-center">{team.draws}</span>
             <span className="w-6 text-center">{team.losses}</span>
