@@ -1,138 +1,102 @@
-// @ts-nocheck
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
-import { getTeamLogo } from "@/utils/teamLogos";
-import { useAuth } from "@/hooks/useAuth";
+import { TeamStanding } from "@/data/standings";
 
-export const StandingsTable = () => {
-  const { user, loading: authLoading } = useAuth();
-  const [searchParams] = useSearchParams();
-  const teamName = searchParams.get("time") || "Botafogo";
-  const [standings, setStandings] = useState([]);
-  const [loading, setLoading] = useState(true);
+interface Props {
+  standings: TeamStanding[];
+}
 
-  useEffect(() => {
-    const fetchStandings = async () => {
-      if (!user) return;
-
-      const { data: championships } = await supabase
-        .from("championships")
-        .select("id")
-        .eq("name", `Brasileirão - ${teamName}`)
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1);
-
-      if (!championships?.[0]) return;
-
-      const { data } = await supabase
-        .from("standings")
-        .select("*")
-        .eq("championship_id", championships[0].id)
-        .order("points", { ascending: false })
-        .order("goal_difference", { ascending: false });
-
-      setStandings(
-        data?.map((team, i) => ({ ...team, position: i + 1 })) || []
-      );
-      setLoading(false);
-    };
-
-    fetchStandings();
-  }, [teamName, user]);
-
-  if (loading || authLoading) {
-    return (
-      <div className="flex justify-center py-10">
-        <Loader2 className="w-8 h-8 animate-spin text-[#c8ff00]" />
-      </div>
-    );
-  }
-
-  const zoneColor = (pos: number) => {
-    if (pos <= 4) return "bg-green-500";
-    if (pos <= 6) return "bg-blue-500";
-    if (pos <= 12) return "bg-orange-400";
-    if (pos <= 16) return "bg-white/30";
-    return "bg-red-500";
-  };
-
+export default function StandingsTable({ standings }: Props) {
   return (
-    <div className="bg-black rounded-xl border border-border">
-      <div className="px-4 py-3 border-b border-border">
-        <h2 className="text-lg font-bold text-white">
-          BRASILEIRÃO – SÉRIE A
-        </h2>
-      </div>
+    <div className="w-full">
+      {/* HEADER */}
+      <div className="flex items-center px-2 py-2 text-[11px] text-white/60 border-b border-white/10">
+        <span className="w-6 text-center">#</span>
+        <span className="w-[140px]">Time</span>
+        <span className="w-10 text-center">PTS</span>
+        <span className="w-8 text-center">J</span>
 
-      {/* SCROLL HORIZONTAL (APENAS STATS) */}
-      <div className="overflow-x-auto">
-        <div className="min-w-[1050px]">
-
-          {/* Header */}
-          <div className="flex px-3 py-2 text-[11px] text-muted-foreground border-b border-border">
-            <div className="w-5" />
-            <div className="w-10">#</div>
-            <div className="w-56">Time</div>
-            <div className="w-12 text-center font-semibold text-white">PTS</div>
-            <div className="w-10 text-center">J</div>
-            <div className="w-10 text-center">V</div>
-            <div className="w-10 text-center">E</div>
-            <div className="w-10 text-center">D</div>
-            <div className="w-12 text-center">SG</div>
-          </div>
-
-          {/* Rows */}
-          {standings.map((team) => (
-            <div
-              key={team.id}
-              className="flex items-center px-3 py-2 border-b border-border hover:bg-white/5"
-            >
-              <div
-                className={`w-1 h-8 mr-2 rounded-full ${zoneColor(
-                  team.position
-                )}`}
-              />
-
-              <div className="w-10 text-sm font-bold text-white">
-                {team.position}
-              </div>
-
-              <div className="w-56 flex items-center gap-2">
-                <img
-                  src={getTeamLogo(team.team_name, team.logo)}
-                  className="w-7 h-7"
-                />
-                <span className="text-sm font-medium text-white truncate">
-                  {team.team_name}
-                </span>
-              </div>
-
-              <div className="w-12 text-center font-bold text-white">
-                {team.points}
-              </div>
-              <div className="w-10 text-center text-sm">{team.played}</div>
-              <div className="w-10 text-center text-sm">{team.wins}</div>
-              <div className="w-10 text-center text-sm">{team.draws}</div>
-              <div className="w-10 text-center text-sm">{team.losses}</div>
-              <div
-                className={`w-12 text-center text-sm font-semibold ${
-                  team.goal_difference > 0
-                    ? "text-green-500"
-                    : team.goal_difference < 0
-                    ? "text-red-500"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {team.goal_difference > 0 ? "+" : ""}
-                {team.goal_difference}
-              </div>
-            </div>
-          ))}
+        <div className="flex gap-3 pl-2 overflow-x-auto">
+          <HeaderStat label="V" />
+          <HeaderStat label="E" />
+          <HeaderStat label="D" />
+          <HeaderStat label="SG" />
         </div>
       </div>
+
+      {/* TIMES */}
+      {standings.slice(0, 13).map((team) => (
+        <div
+          key={team.teamId}
+          className="flex items-center border-b border-white/10 py-3"
+        >
+          {/* FAIXA LATERAL */}
+          <div
+            className={`w-1 h-10 rounded ${
+              team.position <= 4
+                ? "bg-green-500"
+                : team.position <= 6
+                ? "bg-blue-500"
+                : team.position <= 12
+                ? "bg-orange-500"
+                : "bg-red-500"
+            }`}
+          />
+
+          {/* POSIÇÃO */}
+          <span className="w-6 text-center text-sm text-white/70">
+            {team.position}
+          </span>
+
+          {/* TIME */}
+          <div className="flex items-center gap-2 w-[140px]">
+            <img
+              src={team.logo}
+              alt={team.teamName}
+              className="w-9 h-9"
+            />
+            <span className="text-sm font-semibold text-white truncate">
+              {team.teamName}
+            </span>
+          </div>
+
+          {/* PONTOS */}
+          <div className="w-10 text-center">
+            <span className="text-sm font-bold text-white">
+              {team.points}
+            </span>
+          </div>
+
+          {/* JOGOS */}
+          <div className="w-8 text-center">
+            <span className="text-sm text-white">
+              {team.played}
+            </span>
+          </div>
+
+          {/* STATS SCROLL */}
+          <div className="flex gap-3 pl-2 overflow-x-auto">
+            <Stat value={team.wins} />
+            <Stat value={team.draws} />
+            <Stat value={team.losses} />
+            <Stat value={team.goalDifference} />
+          </div>
+        </div>
+      ))}
     </div>
   );
-};
+}
+
+/* COMPONENTES AUXILIARES */
+
+function HeaderStat({ label }: { label: string }) {
+  return (
+    <span className="min-w-[28px] text-center">{label}</span>
+  );
+}
+
+function Stat({ value }: { value: number }) {
+  return (
+    <div className="min-w-[28px] text-center">
+      <span className="text-sm text-white">{value}</span>
+    </div>
+  );
+}
