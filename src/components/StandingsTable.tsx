@@ -1,103 +1,142 @@
-import { TeamStanding } from "@/data/standings";
+// @ts-nocheck
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { getTeamLogo } from "@/utils/teamLogos";
+import { useAuth } from "@/hooks/useAuth";
 
-interface Props {
-  standings: TeamStanding[];
-}
+export const StandingsTable = () => {
+  const { user, loading: authLoading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const teamName = searchParams.get("time") || "Botafogo";
 
-export default function StandingsTable({ standings }: Props) {
+  const [standings, setStandings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStandings = async () => {
+      if (!user) return;
+
+      const { data: championships } = await supabase
+        .from("championships")
+        .select("id")
+        .eq("name", `Brasileirão - ${teamName}`)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (!championships?.[0]) return;
+
+      const { data } = await supabase
+        .from("standings")
+        .select("*")
+        .eq("championship_id", championships[0].id)
+        .order("points", { ascending: false })
+        .order("goal_difference", { ascending: false });
+
+      setStandings(
+        (data || [])
+          .map((team, i) => ({ ...team, position: i + 1 }))
+          .slice(0, 12) // MOSTRA APENAS 12
+      );
+
+      setLoading(false);
+    };
+
+    fetchStandings();
+  }, [teamName, user]);
+
+  if (loading || authLoading) {
+    return (
+      <div className="flex justify-center py-10">
+        <Loader2 className="w-8 h-8 animate-spin text-[#c8ff00]" />
+      </div>
+    );
+  }
+
+  const zoneColor = (pos: number) => {
+    if (pos <= 4) return "bg-green-500";
+    if (pos <= 6) return "bg-blue-500";
+    if (pos <= 12) return "bg-orange-400";
+    return "bg-white/30";
+  };
+
   return (
-    <div className="w-full">
-      {/* HEADER */}
-      <div className="flex items-center px-2 py-2 text-[11px] text-white/60 border-b border-white/10">
-        <span className="w-6 text-center">#</span>
-        <span className="w-[140px]">Time</span>
-        <span className="w-10 text-center">PTS</span>
-        <span className="w-8 text-center">J</span>
+    <div className="bg-black rounded-xl border border-border">
+      <div className="px-4 py-3 border-b border-border">
+        <h2 className="text-lg font-bold text-white">
+          BRASILEIRÃO – SÉRIE A
+        </h2>
+      </div>
 
-        <div className="flex gap-3 pl-2 overflow-x-auto">
-          <HeaderStat label="V" />
-          <HeaderStat label="E" />
-          <HeaderStat label="D" />
-          <HeaderStat label="SG" />
+      {/* HEADER */}
+      <div className="flex items-center px-4 py-2 text-xs text-muted-foreground border-b border-border">
+        <div className="w-1" />
+        <div className="w-8">#</div>
+        <div className="w-44">Time</div>
+        <div className="w-10 text-center font-bold">PTS</div>
+        <div className="w-10 text-center">J</div>
+
+        {/* SCROLL HEADER */}
+        <div className="flex gap-6 ml-4 min-w-[260px] overflow-x-auto">
+          <span className="w-6 text-center">V</span>
+          <span className="w-6 text-center">E</span>
+          <span className="w-6 text-center">D</span>
+          <span className="w-8 text-center">SG</span>
         </div>
       </div>
 
-      {/* TIMES */}
-      {standings.slice(0, 13).map((team) => (
+      {/* ROWS */}
+      {standings.map((team) => (
         <div
-          key={team.teamId}
-          className="flex items-center border-b border-white/10 py-3"
+          key={team.id}
+          className="flex items-center px-4 py-3 border-b border-border"
         >
-          {/* FAIXA LATERAL */}
-          <div
-            className={`w-1 h-10 rounded ${
-              team.position <= 4
-                ? "bg-green-500"
-                : team.position <= 6
-                ? "bg-blue-500"
-                : team.position <= 12
-                ? "bg-orange-500"
-                : "bg-red-500"
-            }`}
-          />
+          <div className={`w-1 h-10 mr-2 rounded-full ${zoneColor(team.position)}`} />
 
-          {/* POSIÇÃO */}
-          <span className="w-6 text-center text-sm text-white/70">
+          <div className="w-8 text-sm font-bold text-white">
             {team.position}
-          </span>
+          </div>
 
-          {/* TIME */}
-          <div className="flex items-center gap-2 w-[140px]">
+          <div className="w-44 flex items-center gap-3">
             <img
-              src={team.logo}
-              alt={team.teamName}
+              src={getTeamLogo(team.team_name, team.logo)}
               className="w-9 h-9"
             />
-            <span className="text-sm font-semibold text-white truncate">
-              {team.teamName}
+            <span className="text-sm font-medium text-white truncate">
+              {team.team_name}
             </span>
           </div>
 
-          {/* PONTOS */}
-          <div className="w-10 text-center">
-            <span className="text-sm font-bold text-white">
-              {team.points}
-            </span>
+          <div className="w-10 text-center font-bold text-white">
+            {team.points}
           </div>
 
-          {/* JOGOS */}
-          <div className="w-8 text-center">
-            <span className="text-sm text-white">
-              {team.played}
-            </span>
+          <div className="w-10 text-center text-white">
+            {team.played}
           </div>
 
-          {/* STATS SCROLL */}
-          <div className="flex gap-3 pl-2 overflow-x-auto">
-            <Stat value={team.wins} />
-            <Stat value={team.draws} />
-            <Stat value={team.losses} />
-            <Stat value={team.goalDifference} />
+          {/* SCROLL COLUNAS */}
+          <div className="flex gap-6 ml-4 min-w-[260px] overflow-x-auto">
+            <span className="w-6 text-center">{team.wins}</span>
+            <span className="w-6 text-center">{team.draws}</span>
+            <span className="w-6 text-center">{team.losses}</span>
+            <span
+              className={`w-8 text-center font-semibold ${
+                team.goal_difference > 0
+                  ? "text-green-500"
+                  : team.goal_difference < 0
+                  ? "text-red-500"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {team.goal_difference > 0 ? "+" : ""}
+              {team.goal_difference}
+            </span>
           </div>
         </div>
       ))}
     </div>
   );
-}
-
-/* COMPONENTES AUXILIARES */
-
-function HeaderStat({ label }: { label: string }) {
-  return (
-    <span className="min-w-[28px] text-center">{label}</span>
-  );
-}
-
-function Stat({ value }: { value: number }) {
-  return (
-    <div className="min-w-[28px] text-center">
-      <span className="text-sm text-white">{value}</span>
-    </div>
-  );
-}
-.
+};
