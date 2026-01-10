@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
 const authSchema = z.object({
@@ -19,6 +19,7 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
@@ -88,7 +89,7 @@ const Auth = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#c8ff00]" />
+        <Loader2 className="w-8 h-8 animate-spin text-white" />
       </div>
     );
   }
@@ -96,21 +97,14 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-900 via-black to-zinc-900 flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/50 shadow-xl mb-6">
-            <span className="text-3xl">⚽</span>
-          </div>
-          <h1 className="text-2xl font-semibold text-white tracking-tight mb-2">
-            Gerenciador
-          </h1>
-          <p className="text-zinc-400 text-sm">
-            {isLogin ? "Entre na sua conta" : "Crie sua conta"}
-          </p>
-        </div>
-
         {/* Form Card */}
         <div className="bg-zinc-900/60 backdrop-blur-xl rounded-3xl p-8 border border-zinc-800/50 shadow-2xl">
+          <div className="text-center mb-6">
+            <p className="text-zinc-400 text-sm">
+              {isLogin ? "Entre na sua conta" : "Crie sua conta"}
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-zinc-300 text-sm font-medium">
@@ -134,15 +128,24 @@ const Auth = () => {
               <Label htmlFor="password" className="text-zinc-300 text-sm font-medium">
                 Senha
               </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="h-12 bg-zinc-800/50 border-zinc-700/50 text-white placeholder:text-zinc-500 rounded-xl focus:border-zinc-500 focus:ring-zinc-500/20 transition-all duration-200"
-                autoComplete={isLogin ? "current-password" : "new-password"}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-12 bg-zinc-800/50 border-zinc-700/50 text-white placeholder:text-zinc-500 rounded-xl focus:border-zinc-500 focus:ring-zinc-500/20 transition-all duration-200 pr-12"
+                  autoComplete={isLogin ? "current-password" : "new-password"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-red-400 text-xs mt-1">{errors.password}</p>
               )}
@@ -178,11 +181,6 @@ const Auth = () => {
             </button>
           </div>
         </div>
-
-        {/* Footer */}
-        <p className="text-center text-zinc-600 text-xs mt-8">
-          Gerencie seu time de futebol
-        </p>
       </div>
     </div>
   );
