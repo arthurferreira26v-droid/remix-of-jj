@@ -1,6 +1,6 @@
 import { Player } from "@/data/players";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
-import { X, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
+import { X, DollarSign, TrendingDown } from "lucide-react";
 
 interface PlayerValueModalProps {
   player: Player;
@@ -14,8 +14,8 @@ export const PlayerValueModal = ({ player, onClose, canSell = false, onSell }: P
   const sellValue = Math.floor(marketValue * 0.8); // Vende por 80% do valor
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <div className="bg-zinc-900 rounded-xl w-full max-w-sm mx-4 overflow-hidden border border-zinc-700">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
+      <div className="bg-zinc-900 rounded-xl w-full max-w-sm mx-4 overflow-hidden border border-zinc-700 animate-scale-in">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-zinc-700">
           <h3 className="text-lg font-bold text-white">Valor de Mercado</h3>
