@@ -100,3 +100,4 @@ function Stat({ value }: { value: number }) {
     </div>
   );
 }
+.
