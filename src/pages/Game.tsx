@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { GameMenu } from "@/components/GameMenu";
-import { FloatingMenu } from "@/components/FloatingMenu";
 import { MatchCard } from "@/components/MatchCard";
 import { TacticsManager } from "@/components/TacticsManager";
 import { SquadManager } from "@/components/SquadManager";
@@ -25,7 +24,6 @@ import { toast } from "sonner";
 import { GameSaveData } from "@/types/gameState";
 
 const Game = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -310,24 +308,10 @@ const Game = () => {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Menu flutuante que acompanha o scroll */}
-      <FloatingMenu onClick={() => setMenuOpen(true)} />
-      
-      {/* GameMenu Sheet controlado */}
-      <GameMenu 
-        teamName={teamName} 
-        open={menuOpen}
-        onOpenChange={setMenuOpen}
-        onManageSquad={() => setShowSquadManager(true)} 
-        onTransferMarket={() => setShowTransferMarket(true)}
-        onFinances={() => setShowFinances(true)}
-        onSaveGame={() => setShowSaveModal(true)}
-        onLoadGame={() => setShowLoadModal(true)}
-      />
-
-      {/* Header fixo com info do time */}
-      <header className="border-b border-[#1a2c4a] bg-black fixed top-0 left-0 right-0 z-40">
-        <div className="container mx-auto px-4 py-3 flex items-center">
+      {/* Header fixo com info do time e menu */}
+      <header className="border-b border-[#1a2c4a] bg-black fixed top-0 left-0 right-0 z-50">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Time selecionado - esquerda */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center p-1.5">
               <img src={selectedTeam?.logo} alt={teamName} className="w-full h-full object-contain" />
@@ -337,6 +321,16 @@ const Game = () => {
               <span className="text-xs text-muted-foreground">Jj</span>
             </div>
           </div>
+
+          {/* Menu hamburguer - direita */}
+          <GameMenu 
+            teamName={teamName} 
+            onManageSquad={() => setShowSquadManager(true)} 
+            onTransferMarket={() => setShowTransferMarket(true)}
+            onFinances={() => setShowFinances(true)}
+            onSaveGame={() => setShowSaveModal(true)}
+            onLoadGame={() => setShowLoadModal(true)}
+          />
         </div>
       </header>
 
