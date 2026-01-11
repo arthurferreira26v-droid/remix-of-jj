@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 
 interface GameMenuProps {
   teamName: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onManageSquad?: () => void;
   onTransferMarket?: () => void;
   onFinances?: () => void;
@@ -20,6 +22,8 @@ interface GameMenuProps {
 
 export const GameMenu = ({ 
   teamName, 
+  open,
+  onOpenChange,
   onManageSquad, 
   onTransferMarket, 
   onFinances,
@@ -29,12 +33,7 @@ export const GameMenu = ({
   const navigate = useNavigate();
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-foreground">
-          <Menu className="h-6 w-6" />
-        </Button>
-      </SheetTrigger>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-64 sm:w-80 p-4">
         <SheetHeader>
           <SheetTitle className="text-xl font-bold">{teamName}</SheetTitle>
