@@ -15,20 +15,21 @@ export const FormationField = ({ formation, players, onPlayerClick, canSubstitut
   // Mapeia jogadores para posições da formação
   const getPlayerForPosition = (role: string) => {
     // Mapeia os roles da formação para as posições dos jogadores
+    // Ordem de prioridade: posição exata primeiro, depois alternativas
     const positionMap: { [key: string]: string[] } = {
       GOL: ["GOL"],
       LE: ["LE"],
       LD: ["LD"],
       ZAG: ["ZAG"],
       VOL: ["VOL", "MC"],
-      MC: ["MC", "VOL"],
+      MC: ["MC", "VOL", "PE", "PD"],
       PE: ["PE", "MC", "PD"],
       PD: ["PD", "MC", "PE"],
-      ATA: ["ATA"],
-      MD: ["PD", "MC", "PE", "VOL"], // Meio direito pode usar PD, MC, PE ou VOL
-      ME: ["PE", "MC", "PD", "VOL"], // Meio esquerdo pode usar PE, MC, PD ou VOL
-      ALE: ["LE", "PE"], // Ala esquerdo usa lateral esquerdo ou ponta
-      ALD: ["LD", "PD"], // Ala direito usa lateral direito ou ponta
+      ATA: ["ATA", "PD", "PE"], // Atacante pode usar pontas se não houver atacante disponível
+      MD: ["PD", "MC", "PE", "VOL"], // Meio direito
+      ME: ["PE", "MC", "PD", "VOL"], // Meio esquerdo
+      ALE: ["LE", "PE", "MC"], // Ala esquerdo - lateral ou ponta esquerda
+      ALD: ["LD", "PD", "MC"], // Ala direito - lateral ou ponta direita
     };
 
     const positions = positionMap[role] || [role];
@@ -40,6 +41,13 @@ export const FormationField = ({ formation, players, onPlayerClick, canSubstitut
         usedPlayers.add(player.id);
         return player;
       }
+    }
+    
+    // Se não encontrou nenhum jogador compatível, tenta qualquer jogador não usado
+    const anyPlayer = players.find(p => !usedPlayers.has(p.id));
+    if (anyPlayer) {
+      usedPlayers.add(anyPlayer.id);
+      return anyPlayer;
     }
     
     return null;
