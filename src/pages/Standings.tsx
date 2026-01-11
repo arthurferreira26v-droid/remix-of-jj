@@ -34,9 +34,9 @@ const Standings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="border-b border-border bg-black backdrop-blur-sm sticky top-0 z-50">
+    <div className="h-screen bg-black flex flex-col overflow-hidden">
+      {/* Header Fixo */}
+      <header className="border-b border-border bg-black flex-shrink-0">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
           <button 
             onClick={handleBack}
@@ -48,9 +48,11 @@ const Standings = () => {
         </div>
       </header>
 
-      {/* Content */}
-      <div className="container mx-auto px-4 py-8">
-        <StandingsTable />
+      {/* Content com scroll */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="container mx-auto px-4 py-4">
+          <StandingsTable />
+        </div>
       </div>
     </div>
   );

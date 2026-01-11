@@ -67,79 +67,77 @@ export const StandingsTable = () => {
         </h2>
       </div>
 
-      {/* HEADER FIXO */}
-      <div className="grid grid-cols-[36px_1fr_56px_40px] px-4 py-2 text-xs text-muted-foreground border-b border-border">
-        <span>#</span>
-        <span>Time</span>
-        <span className="text-center">PTS</span>
-        <span className="text-center">J</span>
-      </div>
-
-      {/* LISTA */}
-      {standings.map((team) => (
-        <div
-          key={team.id}
-          className="border-b border-border"
-        >
-          {/* LINHA PRINCIPAL */}
-          <div className="grid grid-cols-[36px_1fr_56px_40px] items-center px-4 py-3">
-            <span className="text-white/70 font-medium">
-              {team.position}
-            </span>
-
-            <div className="flex items-center gap-3 min-w-0">
-              <img
-                src={getTeamLogo(team.team_name, team.logo)}
-                className="w-7 h-7 flex-shrink-0"
-              />
-              <span className="truncate text-white font-medium">
-                {team.team_name}
-              </span>
-            </div>
-
-            <span className="text-center font-bold text-white">
-              {team.points}
-            </span>
-
-            <span className="text-center text-white/80">
-              {team.played}
-            </span>
+      {/* HEADER DA TABELA */}
+      <div className="overflow-x-auto">
+        <div className="min-w-[500px]">
+          <div className="grid grid-cols-[32px_1fr_40px_32px_32px_32px_32px_40px] px-4 py-2 text-xs text-muted-foreground border-b border-border">
+            <span></span>
+            <span>Clube</span>
+            <span className="text-center">Pts</span>
+            <span className="text-center">PJ</span>
+            <span className="text-center">VIT</span>
+            <span className="text-center">E</span>
+            <span className="text-center">DER</span>
+            <span className="text-center">SG</span>
           </div>
 
-          {/* SCROLL HORIZONTAL – STATS */}
-          <div className="overflow-x-auto">
-            <div className="flex gap-6 px-4 pb-3 text-sm text-white/80 min-w-max">
-              <div className="flex gap-1">
-                <span className="text-muted-foreground">V</span>
-                <span>{team.wins}</span>
-              </div>
-              <div className="flex gap-1">
-                <span className="text-muted-foreground">E</span>
-                <span>{team.draws}</span>
-              </div>
-              <div className="flex gap-1">
-                <span className="text-muted-foreground">D</span>
-                <span>{team.losses}</span>
-              </div>
-              <div className="flex gap-1">
-                <span className="text-muted-foreground">SG</span>
-                <span
-                  className={
-                    team.goal_difference > 0
-                      ? "text-green-500"
-                      : team.goal_difference < 0
-                      ? "text-red-500"
-                      : ""
-                  }
-                >
-                  {team.goal_difference > 0 ? "+" : ""}
-                  {team.goal_difference}
+          {/* LISTA DE TIMES */}
+          {standings.map((team) => (
+            <div
+              key={team.id}
+              className="grid grid-cols-[32px_1fr_40px_32px_32px_32px_32px_40px] items-center px-4 py-3 border-b border-border hover:bg-white/5 transition-colors"
+            >
+              <span className="text-white/70 font-medium text-sm">
+                {team.position}
+              </span>
+
+              <div className="flex items-center gap-2 min-w-0">
+                <img
+                  src={getTeamLogo(team.team_name, team.logo)}
+                  className="w-6 h-6 flex-shrink-0"
+                  alt={team.team_name}
+                />
+                <span className="truncate text-white font-medium text-sm">
+                  {team.team_name}
                 </span>
               </div>
+
+              <span className="text-center font-bold text-white text-sm">
+                {team.points}
+              </span>
+
+              <span className="text-center text-white/80 text-sm">
+                {team.played}
+              </span>
+
+              <span className="text-center text-white/80 text-sm">
+                {team.wins}
+              </span>
+
+              <span className="text-center text-white/80 text-sm">
+                {team.draws}
+              </span>
+
+              <span className="text-center text-white/80 text-sm">
+                {team.losses}
+              </span>
+
+              <span
+                className={`text-center text-sm font-medium ${
+                  team.goal_difference > 0
+                    ? "text-green-500"
+                    : team.goal_difference < 0
+                    ? "text-red-500"
+                    : "text-white/80"
+                }`}
+              >
+                {team.goal_difference > 0 ? "+" : ""}
+                {team.goal_difference}
+              </span>
             </div>
-          </div>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   );
 };
