@@ -1,5 +1,5 @@
 // @ts-nocheck - Database types will be updated after migration
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { teams } from "@/data/teams";
 import { botafogoPlayers, flamengoPlayers, generateTeamPlayers, Player } from "@/data/players";
@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useAuth } from "@/hooks/useAuth";
 import { evolveTeamPlayers } from "@/utils/playerEvolution";
+import { PenaltyKickerModal } from "@/components/PenaltyKickerModal";
+
 interface MatchEvent {
   minute: number;
   type: 'goal' | 'yellow_card' | 'red_card' | 'penalty';
@@ -41,6 +43,8 @@ const Match = () => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isSavingMatch, setIsSavingMatch] = useState(false);
   const [matchEvents, setMatchEvents] = useState<MatchEvent[]>([]);
+  const [showPenaltyModal, setShowPenaltyModal] = useState(false);
+  const [pendingPenaltyMinute, setPendingPenaltyMinute] = useState<number | null>(null);
 
   const selectedTeam = teams.find(t => t.name === teamName);
   const opponent = teams.find(t => t.name === opponentName);
@@ -385,9 +389,24 @@ const Match = () => {
     return players[Math.floor(Math.random() * players.length)].name;
   };
 
+  // Callback para quando o usuário escolhe o batedor de pênalti
+  const handlePenaltyKickerSelected = (player: Player) => {
+    if (pendingPenaltyMinute !== null) {
+      setAwayScore(s => s + 1);
+      setMatchEvents(events => [...events, {
+        minute: pendingPenaltyMinute,
+        type: 'penalty',
+        team: 'away',
+        playerName: player.name
+      }]);
+      setPendingPenaltyMinute(null);
+      setIsPlaying(true);
+    }
+  };
+
   // Timer: 90 minutos em 30 segundos reais (333ms por minuto)
   useEffect(() => {
-    if (!isPlaying || minute >= 90) return;
+    if (!isPlaying || minute >= 90 || showPenaltyModal) return;
 
     const interval = setInterval(() => {
       setMinute(prev => {
@@ -397,23 +416,43 @@ const Match = () => {
         if (Math.random() < 0.05) {
           // Chance de gol
           const isHomeGoal = Math.random() < 0.5;
-          const scorer = getRandomPlayer(isHomeGoal ? 'home' : 'away');
           
           // Chance de ser pênalti (20% dos gols)
           const isPenalty = Math.random() < 0.2;
           
-          if (isHomeGoal) {
-            setHomeScore(s => s + 1);
+          if (isPenalty) {
+            if (!isHomeGoal) {
+              // Pênalti para o time do usuário - pausar e mostrar modal
+              setIsPlaying(false);
+              setPendingPenaltyMinute(next);
+              setShowPenaltyModal(true);
+              return next;
+            } else {
+              // Pênalti para o adversário
+              const scorer = getRandomPlayer('home');
+              setHomeScore(s => s + 1);
+              setMatchEvents(events => [...events, {
+                minute: next,
+                type: 'penalty',
+                team: 'home',
+                playerName: scorer
+              }]);
+            }
           } else {
-            setAwayScore(s => s + 1);
+            // Gol normal
+            const scorer = getRandomPlayer(isHomeGoal ? 'home' : 'away');
+            if (isHomeGoal) {
+              setHomeScore(s => s + 1);
+            } else {
+              setAwayScore(s => s + 1);
+            }
+            setMatchEvents(events => [...events, {
+              minute: next,
+              type: 'goal',
+              team: isHomeGoal ? 'home' : 'away',
+              playerName: scorer
+            }]);
           }
-          
-          setMatchEvents(events => [...events, {
-            minute: next,
-            type: isPenalty ? 'penalty' : 'goal',
-            team: isHomeGoal ? 'home' : 'away',
-            playerName: scorer
-          }]);
         }
         
         if (Math.random() < 0.15) {
@@ -464,7 +503,7 @@ const Match = () => {
     }, 333); // 30000ms / 90 = 333ms
 
     return () => clearInterval(interval);
-  }, [isPlaying, minute]);
+  }, [isPlaying, minute, showPenaltyModal]);
 
   // Função para renderizar ícone do evento
   const getEventIcon = (type: MatchEvent['type']) => {
@@ -718,6 +757,18 @@ const Match = () => {
             </div>
           </div>
         )}
+
+        {/* Modal de seleção de batedor de pênalti */}
+        <PenaltyKickerModal
+          isOpen={showPenaltyModal}
+          onClose={() => {
+            setShowPenaltyModal(false);
+            setIsPlaying(true);
+          }}
+          players={userStarters}
+          onSelectKicker={handlePenaltyKickerSelected}
+          teamName={teamName}
+        />
       </div>
     </div>
   );
