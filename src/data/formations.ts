@@ -64,11 +64,54 @@ export const formations: Formation[] = [
   },
 ];
 
-export const playStyles = [
-  { id: "balanced", name: "Equilibrado", description: "Balanço entre ataque e defesa" },
-  { id: "counter", name: "Contra-Ataque", description: "Defesa sólida, ataque rápido" },
-  { id: "possession", name: "Posse de Bola", description: "Controle do jogo, passes curtos" },
-  { id: "pressing", name: "Pressão", description: "Marcação alta, recuperação rápida" },
-  { id: "defensive", name: "Defensivo", description: "Foco total na defesa" },
-  { id: "attacking", name: "Ofensivo", description: "Ataque constante, risco maior" },
+export interface PlayStyle {
+  id: string;
+  name: string;
+  description: string;
+  bonuses: {
+    attack: number;  // % de bônus no ataque
+    defense: number; // % de bônus na defesa
+    possession: number; // % de bônus na posse
+    goalChance: number; // % modificador de chance de gol
+    concede: number; // % modificador de sofrer gol
+  };
+}
+
+export const playStyles: PlayStyle[] = [
+  { 
+    id: "balanced", 
+    name: "Equilibrado", 
+    description: "Balanço entre ataque e defesa",
+    bonuses: { attack: 0, defense: 0, possession: 0, goalChance: 0, concede: 0 }
+  },
+  { 
+    id: "counter", 
+    name: "Contra-Ataque", 
+    description: "Defesa sólida, ataque rápido",
+    bonuses: { attack: -10, defense: +15, possession: -10, goalChance: +5, concede: -10 }
+  },
+  { 
+    id: "possession", 
+    name: "Posse de Bola", 
+    description: "Controle do jogo, passes curtos",
+    bonuses: { attack: +5, defense: +5, possession: +20, goalChance: +5, concede: -5 }
+  },
+  { 
+    id: "pressing", 
+    name: "Pressão", 
+    description: "Marcação alta, recuperação rápida",
+    bonuses: { attack: +10, defense: +5, possession: +5, goalChance: +10, concede: +5 }
+  },
+  { 
+    id: "defensive", 
+    name: "Defensivo", 
+    description: "Foco total na defesa",
+    bonuses: { attack: -20, defense: +25, possession: -5, goalChance: -15, concede: -20 }
+  },
+  { 
+    id: "attacking", 
+    name: "Ofensivo", 
+    description: "Ataque constante, risco maior",
+    bonuses: { attack: +25, defense: -15, possession: +10, goalChance: +20, concede: +15 }
+  },
 ];
