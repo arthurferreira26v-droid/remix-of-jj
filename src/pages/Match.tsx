@@ -685,12 +685,12 @@ const Match = () => {
           </div>
         </div>
 
-        {/* Manage Button */}
-        <div className="max-w-2xl mx-auto mt-12">
+        {/* Botão fixo de Gerenciar Time */}
+        <div className="fixed bottom-6 left-4 right-4 z-40 max-w-2xl mx-auto">
           <Sheet>
             <SheetTrigger asChild>
-              <button className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-4 px-6 rounded-lg transition-colors flex items-center justify-center gap-2">
-                <span className="text-lg">GERENCIAR TIME</span>
+              <button className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center justify-center gap-2 backdrop-blur-sm">
+                <span className="text-lg">⚽ GERENCIAR TIME</span>
               </button>
             </SheetTrigger>
             <SheetContent side="bottom" className="bg-black border-border h-[90vh]">
@@ -738,6 +738,9 @@ const Match = () => {
             </SheetContent>
           </Sheet>
         </div>
+
+        {/* Spacer para evitar sobreposição com botão fixo */}
+        <div className="h-24" />
 
         {/* End Match Message */}
         {minute >= 90 && (

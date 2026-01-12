@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FormationField } from "@/components/FormationField";
 import { formations, playStyles } from "@/data/formations";
 import { Player } from "@/data/players";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface TacticsManagerProps {
   teamName: string;
@@ -12,15 +12,53 @@ interface TacticsManagerProps {
 }
 
 export const TacticsManager = ({ teamName, players = [], onStarterClick, canSubstitute = false }: TacticsManagerProps) => {
-  const [selectedFormation, setSelectedFormation] = useState("4-3-3");
-  const [selectedPlayStyle, setSelectedPlayStyle] = useState("counter");
+  // Carregar táticas do localStorage
+  const getInitialFormation = () => {
+    const saved = localStorage.getItem(`tactics_formation_${teamName}`);
+    return saved || "4-3-3";
+  };
+
+  const getInitialPlayStyle = () => {
+    const saved = localStorage.getItem(`tactics_playstyle_${teamName}`);
+    return saved || "counter";
+  };
+
+  const [selectedFormation, setSelectedFormation] = useState(getInitialFormation);
+  const [selectedPlayStyle, setSelectedPlayStyle] = useState(getInitialPlayStyle);
   const [openDropdown, setOpenDropdown] = useState<"style" | "formation" | null>(null);
 
   const formation = formations.find((f) => f.id === selectedFormation) || formations[0];
   const playStyle = playStyles.find((s) => s.id === selectedPlayStyle) || playStyles[0];
 
+  // Salvar táticas no localStorage quando mudar
+  useEffect(() => {
+    localStorage.setItem(`tactics_formation_${teamName}`, selectedFormation);
+  }, [selectedFormation, teamName]);
+
+  useEffect(() => {
+    localStorage.setItem(`tactics_playstyle_${teamName}`, selectedPlayStyle);
+  }, [selectedPlayStyle, teamName]);
+
   const toggleDropdown = (dropdown: "style" | "formation") => {
     setOpenDropdown(openDropdown === dropdown ? null : dropdown);
+  };
+
+  const getBonusIcon = (value: number) => {
+    if (value > 0) return <TrendingUp className="w-3 h-3 text-green-400" />;
+    if (value < 0) return <TrendingDown className="w-3 h-3 text-red-400" />;
+    return <Minus className="w-3 h-3 text-gray-400" />;
+  };
+
+  const getBonusColor = (value: number) => {
+    if (value > 0) return "text-green-400";
+    if (value < 0) return "text-red-400";
+    return "text-gray-400";
+  };
+
+  const formatBonus = (value: number) => {
+    if (value > 0) return `+${value}%`;
+    if (value < 0) return `${value}%`;
+    return "0%";
   };
 
   return (
@@ -46,7 +84,7 @@ export const TacticsManager = ({ teamName, players = [], onStarterClick, canSubs
           </button>
           
           {openDropdown === "style" && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg overflow-hidden shadow-lg z-50">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 rounded-xl overflow-hidden shadow-xl z-50 border border-zinc-700">
               {playStyles.map((style) => (
                 <button
                   key={style.id}
@@ -54,12 +92,43 @@ export const TacticsManager = ({ teamName, players = [], onStarterClick, canSubs
                     setSelectedPlayStyle(style.id);
                     setOpenDropdown(null);
                   }}
-                  className={`w-full px-4 py-3 text-left hover:bg-gray-100 transition-colors ${
-                    selectedPlayStyle === style.id ? "bg-[#c8ff00]" : ""
+                  className={`w-full px-4 py-4 text-left hover:bg-zinc-800 transition-colors border-b border-zinc-800 last:border-b-0 ${
+                    selectedPlayStyle === style.id ? "bg-[#c8ff00]/10" : ""
                   }`}
                 >
-                  <div className="font-medium text-black">{style.name}</div>
-                  <div className="text-xs text-gray-600">{style.description}</div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`font-semibold ${selectedPlayStyle === style.id ? "text-[#c8ff00]" : "text-white"}`}>
+                      {style.name}
+                    </span>
+                    {selectedPlayStyle === style.id && (
+                      <div className="w-2 h-2 rounded-full bg-[#c8ff00]" />
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400 mb-3">{style.description}</p>
+                  
+                  {/* Bônus Grid */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      {getBonusIcon(style.bonuses.attack)}
+                      <span className="text-gray-500">Ataque:</span>
+                      <span className={getBonusColor(style.bonuses.attack)}>{formatBonus(style.bonuses.attack)}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {getBonusIcon(style.bonuses.defense)}
+                      <span className="text-gray-500">Defesa:</span>
+                      <span className={getBonusColor(style.bonuses.defense)}>{formatBonus(style.bonuses.defense)}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {getBonusIcon(style.bonuses.possession)}
+                      <span className="text-gray-500">Posse:</span>
+                      <span className={getBonusColor(style.bonuses.possession)}>{formatBonus(style.bonuses.possession)}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {getBonusIcon(style.bonuses.goalChance)}
+                      <span className="text-gray-500">Chance gol:</span>
+                      <span className={getBonusColor(style.bonuses.goalChance)}>{formatBonus(style.bonuses.goalChance)}</span>
+                    </div>
+                  </div>
                 </button>
               ))}
             </div>
@@ -77,7 +146,7 @@ export const TacticsManager = ({ teamName, players = [], onStarterClick, canSubs
           </button>
           
           {openDropdown === "formation" && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg overflow-hidden shadow-lg z-50">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 rounded-xl overflow-hidden shadow-xl z-50 border border-zinc-700">
               {formations.map((form) => (
                 <button
                   key={form.id}
@@ -85,15 +154,40 @@ export const TacticsManager = ({ teamName, players = [], onStarterClick, canSubs
                     setSelectedFormation(form.id);
                     setOpenDropdown(null);
                   }}
-                  className={`w-full px-4 py-3 text-left hover:bg-gray-100 transition-colors ${
-                    selectedFormation === form.id ? "bg-[#c8ff00]" : ""
+                  className={`w-full px-4 py-3 text-left hover:bg-zinc-800 transition-colors border-b border-zinc-800 last:border-b-0 ${
+                    selectedFormation === form.id ? "bg-[#c8ff00]/10" : ""
                   }`}
                 >
-                  <div className="font-medium text-black">{form.name}</div>
+                  <div className="flex items-center justify-between">
+                    <span className={`font-semibold ${selectedFormation === form.id ? "text-[#c8ff00]" : "text-white"}`}>
+                      {form.name}
+                    </span>
+                    {selectedFormation === form.id && (
+                      <div className="w-2 h-2 rounded-full bg-[#c8ff00]" />
+                    )}
+                  </div>
                 </button>
               ))}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Resumo dos bônus ativos */}
+      <div className="mt-4 bg-zinc-900 rounded-lg p-3">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-gray-400 font-medium">Bônus ativos ({playStyle.name}):</span>
+          <div className="flex items-center gap-4">
+            <span className={getBonusColor(playStyle.bonuses.attack)}>
+              ATK {formatBonus(playStyle.bonuses.attack)}
+            </span>
+            <span className={getBonusColor(playStyle.bonuses.defense)}>
+              DEF {formatBonus(playStyle.bonuses.defense)}
+            </span>
+            <span className={getBonusColor(playStyle.bonuses.goalChance)}>
+              GOL {formatBonus(playStyle.bonuses.goalChance)}
+            </span>
+          </div>
         </div>
       </div>
     </div>
