@@ -12,29 +12,34 @@ interface FormationFieldProps {
 export const FormationField = ({ formation, players, onPlayerClick, canSubstitute = false }: FormationFieldProps) => {
   const usedPlayers = new Set<string>();
 
-  // Mapeia jogadores para posições da formação
-  const getPlayerForPosition = (role: string) => {
-    // Mapeia os roles da formação para as posições dos jogadores
-    // Ordem de prioridade: posição exata primeiro, depois alternativas
-    const positionMap: { [key: string]: string[] } = {
-      GOL: ["GOL"],
-      LE: ["LE"],
-      LD: ["LD"],
-      ZAG: ["ZAG"],
-      VOL: ["VOL", "MC"],
-      MC: ["MC", "VOL", "PE", "PD"],
-      PE: ["PE", "MC", "PD"],
-      PD: ["PD", "MC", "PE"],
-      ATA: ["ATA", "PD", "PE"], // Atacante pode usar pontas se não houver atacante disponível
-      MD: ["PD", "MC", "PE", "VOL"], // Meio direito
-      ME: ["PE", "MC", "PD", "VOL"], // Meio esquerdo
-      ALE: ["LE", "PE", "MC"], // Ala esquerdo - lateral ou ponta esquerda
-      ALD: ["LD", "PD", "MC"], // Ala direito - lateral ou ponta direita
-    };
+  // Mapeia os roles da formação para as posições ideais dos jogadores
+  const positionMap: { [key: string]: string[] } = {
+    GOL: ["GOL"],
+    LE: ["LE"],
+    LD: ["LD"],
+    ZAG: ["ZAG"],
+    VOL: ["VOL", "MC"],
+    MC: ["MC", "VOL", "PE", "PD"],
+    PE: ["PE", "MC", "PD"],
+    PD: ["PD", "MC", "PE"],
+    ATA: ["ATA", "PD", "PE"],
+    MD: ["PD", "MC", "PE", "VOL"],
+    ME: ["PE", "MC", "PD", "VOL"],
+    ALE: ["LE", "PE", "MC"],
+    ALD: ["LD", "PD", "MC"],
+  };
 
+  // Verifica se o jogador está fora de posição
+  const isOutOfPosition = (player: Player, role: string): boolean => {
+    const idealPositions = positionMap[role] || [role];
+    return !idealPositions.includes(player.position);
+  };
+
+  // Mapeia jogadores para posições da formação
+  const getPlayerForPosition = (role: string): Player | null => {
     const positions = positionMap[role] || [role];
     
-    // Procura um jogador que ainda não foi usado e que tenha uma das posições válidas
+    // Primeiro tenta encontrar jogador na posição ideal
     for (const pos of positions) {
       const player = players.find(p => p.position === pos && !usedPlayers.has(p.id));
       if (player) {
@@ -43,7 +48,7 @@ export const FormationField = ({ formation, players, onPlayerClick, canSubstitut
       }
     }
     
-    // Se não encontrou nenhum jogador compatível, tenta qualquer jogador não usado
+    // Se não encontrou, pega qualquer jogador disponível
     const anyPlayer = players.find(p => !usedPlayers.has(p.id));
     if (anyPlayer) {
       usedPlayers.add(anyPlayer.id);
@@ -77,6 +82,8 @@ export const FormationField = ({ formation, players, onPlayerClick, canSubstitut
         const player = getPlayerForPosition(pos.role);
         if (!player) return null;
 
+        const outOfPosition = isOutOfPosition(player, pos.role);
+
         return (
           <div
             key={`${player.id}-${index}`}
@@ -92,6 +99,10 @@ export const FormationField = ({ formation, players, onPlayerClick, canSubstitut
               <div className="absolute -top-2 -left-2 w-7 h-7 rounded-full bg-[hsl(var(--overall-blue))] flex items-center justify-center text-white text-[10px] font-bold z-10">
                 {player.overall}
               </div>
+              {/* Indicador de fora de posição */}
+              {outOfPosition && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-yellow-400 border border-yellow-600 z-20" title="Jogador fora de posição" />
+              )}
               <div className={`w-10 h-10 bg-black border-2 ${canSubstitute ? 'border-[#c8ff00]' : 'border-white'} rounded-full flex items-center justify-center shadow-lg`}>
                 <span className="text-white text-xs font-bold">{player.number}</span>
               </div>
