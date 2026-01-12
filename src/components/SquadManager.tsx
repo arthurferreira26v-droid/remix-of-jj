@@ -31,11 +31,6 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
   const handleStarterClick = (starter: Player) => {
     if (!selectedReserve) return;
     
-    // Verificar se as posições são compatíveis
-    if (starter.position !== selectedReserve.position) {
-      alert("Os jogadores devem ter a mesma posição para serem substituídos!");
-      return;
-    }
 
     // Fazer a troca
     const updatedPlayers = localPlayers.map(p => {

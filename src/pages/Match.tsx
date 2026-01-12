@@ -80,10 +80,6 @@ const Match = () => {
   const handleStarterClick = (starter: Player) => {
     if (!selectedReserve) return;
 
-    if (starter.position !== selectedReserve.position) {
-      alert("Os jogadores devem ter a mesma posição para serem substituídos!");
-      return;
-    }
 
     const updatedPlayers = userPlayers.map((p) => {
       if (p.id === starter.id) {
