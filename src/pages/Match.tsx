@@ -15,7 +15,7 @@ import { PenaltyKickerModal } from "@/components/PenaltyKickerModal";
 
 interface MatchEvent {
   minute: number;
-  type: 'goal' | 'yellow_card' | 'red_card' | 'penalty';
+  type: 'goal' | 'yellow_card' | 'red_card' | 'penalty' | 'penalty_missed';
   team: 'home' | 'away';
   playerName: string;
 }
@@ -392,13 +392,31 @@ const Match = () => {
   // Callback para quando o usuário escolhe o batedor de pênalti
   const handlePenaltyKickerSelected = (player: Player) => {
     if (pendingPenaltyMinute !== null) {
-      setAwayScore(s => s + 1);
-      setMatchEvents(events => [...events, {
-        minute: pendingPenaltyMinute,
-        type: 'penalty',
-        team: 'away',
-        playerName: player.name
-      }]);
+      // Calcular chance de acerto baseado na posição
+      // Atacantes (ATA, PE, PD): 80% de acerto
+      // Meias e outros: 50% de acerto
+      const isAttacker = ['ATA', 'PE', 'PD'].includes(player.position);
+      const successChance = isAttacker ? 0.80 : 0.50;
+      const isGoal = Math.random() < successChance;
+      
+      if (isGoal) {
+        setAwayScore(s => s + 1);
+        setMatchEvents(events => [...events, {
+          minute: pendingPenaltyMinute,
+          type: 'penalty',
+          team: 'away',
+          playerName: player.name
+        }]);
+      } else {
+        // Pênalti perdido
+        setMatchEvents(events => [...events, {
+          minute: pendingPenaltyMinute,
+          type: 'penalty_missed',
+          team: 'away',
+          playerName: player.name
+        }]);
+      }
+      
       setPendingPenaltyMinute(null);
       setIsPlaying(true);
     }
@@ -511,7 +529,9 @@ const Match = () => {
       case 'goal':
         return '⚽';
       case 'penalty':
-        return 'penalty goal';
+        return '⚽';
+      case 'penalty_missed':
+        return '🔴';
       case 'yellow_card':
         return '🟨';
       case 'red_card':
@@ -689,8 +709,8 @@ const Match = () => {
         <div className="fixed bottom-6 left-4 right-4 z-40 max-w-2xl mx-auto">
           <Sheet>
             <SheetTrigger asChild>
-              <button className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center justify-center gap-2 backdrop-blur-sm">
-                <span className="text-lg">⚽ GERENCIAR TIME</span>
+              <button className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center justify-center backdrop-blur-sm">
+                <span className="text-lg font-bold">GERENCIAR TIME</span>
               </button>
             </SheetTrigger>
             <SheetContent side="bottom" className="bg-black border-border h-[90vh]">
