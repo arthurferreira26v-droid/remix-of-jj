@@ -50,12 +50,17 @@ const Game = () => {
     }
   }, [user, authLoading, navigate]);
   
-  // Initialize players state - carregar do localStorage se existir
+  // Initialize players state - gerar novos ou carregar de save
   const getInitialPlayers = () => {
+    // Verificar se há jogadores salvos de um save carregado
     const savedPlayers = localStorage.getItem(`players_${teamName}`);
-    if (savedPlayers) {
+    const isLoadedFromSave = sessionStorage.getItem(`loaded_save_${teamName}`) === 'true';
+    
+    if (savedPlayers && isLoadedFromSave) {
       return JSON.parse(savedPlayers);
     }
+    
+    // Sempre gerar novos jogadores se não veio de um save
     return teamName === "Botafogo" 
       ? botafogoPlayers 
       : teamName === "Flamengo"
@@ -64,9 +69,11 @@ const Game = () => {
   };
   const [players, setPlayers] = useState<Player[]>(getInitialPlayers);
 
-  // Salvar jogadores no localStorage quando mudar
+  // Atualizar jogadores (NÃO salva automaticamente - apenas via save explícito)
   const updatePlayers = (updatedPlayers: Player[]) => {
     setPlayers(updatedPlayers);
+    // Salvar no localStorage apenas para manter estado durante a sessão
+    // Será limpo ao escolher novo time se não vier de um save
     localStorage.setItem(`players_${teamName}`, JSON.stringify(updatedPlayers));
   };
 
@@ -205,12 +212,18 @@ const Game = () => {
 
   // Handle loading a save
   const handleLoadComplete = useCallback((saveData: GameSaveData) => {
+    // Marcar que o jogo foi carregado de um save
+    sessionStorage.setItem(`loaded_save_${saveData.clubName}`, 'true');
+    
     // Update players from save
     const loadedPlayers = saveData.players.map(p => ({
       ...p,
       isStarter: p.status === 'titular'
     }));
-    updatePlayers(loadedPlayers);
+    
+    // Salvar jogadores no localStorage para persistir durante a sessão
+    localStorage.setItem(`players_${saveData.clubName}`, JSON.stringify(loadedPlayers));
+    setPlayers(loadedPlayers);
     
     // Update financial data
     setTotalSales(saveData.totalSales);
@@ -223,8 +236,9 @@ const Game = () => {
       setBudget(saveData.budget);
     }
     
-    toast.success(`Jogo carregado: ${saveData.clubName}`);
-  }, [teamName, budget, setBudget, updatePlayers]);
+    // Recarregar a página para pegar os dados do save
+    window.location.reload();
+  }, [teamName, budget, setBudget]);
 
   if (loading || userFormLoading || opponentFormLoading || budgetLoading || authLoading) {
     return (

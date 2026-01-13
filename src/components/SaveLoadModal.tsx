@@ -89,6 +89,9 @@ export function SaveLoadModal({
   const handleLoad = async (slotNumber: number) => {
     const data = await loadGame(slotNumber);
     if (data) {
+      // Marcar que o jogo foi carregado de um save para não resetar o campeonato
+      sessionStorage.setItem(`loaded_save_${data.clubName}`, 'true');
+      
       toast.success('Jogo carregado!', {
         icon: <Download className="h-4 w-4 text-primary" />
       });

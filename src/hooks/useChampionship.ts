@@ -118,6 +118,9 @@ export const useChampionship = (userTeamName: string) => {
         ? `Brasileirão - ${userTeamName}`
         : `Liga dos Campeões - ${userTeamName}`;
 
+      // Verificar se veio de um load de save (flag no sessionStorage)
+      const isLoadedFromSave = sessionStorage.getItem(`loaded_save_${userTeamName}`) === 'true';
+
       try {
         const { data: existingChampionships, error: fetchError } = await supabase
           .from("championships")
@@ -130,10 +133,13 @@ export const useChampionship = (userTeamName: string) => {
         if (fetchError) throw fetchError;
 
         let championshipId: string;
-        let needsReset = false;
 
-        if (existingChampionships && existingChampionships.length > 0) {
+        // Se existe campeonato E veio de um save carregado, manter o campeonato
+        if (existingChampionships && existingChampionships.length > 0 && isLoadedFromSave) {
           championshipId = existingChampionships[0].id;
+          
+          // Limpar a flag após usar
+          sessionStorage.removeItem(`loaded_save_${userTeamName}`);
           
           // Verificar se todas as partidas foram jogadas
           const { data: remainingMatches } = await supabase
@@ -167,9 +173,23 @@ export const useChampionship = (userTeamName: string) => {
           } else {
             setChampionship(existingChampionships[0]);
           }
-        }
+        } else {
+          // Deletar campeonato existente se houver (começar do zero)
+          if (existingChampionships && existingChampionships.length > 0) {
+            const oldChampionshipId = existingChampionships[0].id;
+            await supabase.from("matches").delete().eq("championship_id", oldChampionshipId);
+            await supabase.from("standings").delete().eq("championship_id", oldChampionshipId);
+            await supabase.from("team_budgets").delete().eq("championship_id", oldChampionshipId);
+            await supabase.from("championships").delete().eq("id", oldChampionshipId);
+          }
 
-        if (!existingChampionships || existingChampionships.length === 0 || needsReset) {
+          // Limpar dados locais do time (sempre começar fresh)
+          localStorage.removeItem(`players_${userTeamName}`);
+          localStorage.removeItem(`tactics_formation_${userTeamName}`);
+          localStorage.removeItem(`tactics_playstyle_${userTeamName}`);
+          localStorage.removeItem(`investment_${userTeamName}`);
+
+          // Criar novo campeonato começando da rodada 1
           const { data: newChampionship, error: createError } = await supabase
             .from("championships")
             .insert({
