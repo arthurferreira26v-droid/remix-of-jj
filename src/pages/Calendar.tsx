@@ -238,9 +238,26 @@ const Calendar = () => {
             {matches.map((match) => {
               const isHome = match.isHome;
               const homeAwayLabel = isHome ? "Em casa" : "Fora";
-              const resultLabel = match.is_played
-                ? `${match.home_score} x ${match.away_score}`
-                : "- x -";
+              
+              // Mostrar resultado do ponto de vista do time do usuário
+              let resultLabel = "- x -";
+              let resultColor = "text-white";
+              
+              if (match.is_played && match.home_score !== null && match.away_score !== null) {
+                // Gols do time do usuário vs gols do adversário
+                const userGoals = isHome ? match.home_score : match.away_score;
+                const opponentGoals = isHome ? match.away_score : match.home_score;
+                resultLabel = `${userGoals} x ${opponentGoals}`;
+                
+                // Cor baseada no resultado
+                if (userGoals > opponentGoals) {
+                  resultColor = "text-green-400"; // Vitória
+                } else if (userGoals < opponentGoals) {
+                  resultColor = "text-red-400"; // Derrota
+                } else {
+                  resultColor = "text-yellow-400"; // Empate
+                }
+              }
 
               return (
                 <div
@@ -257,7 +274,7 @@ const Calendar = () => {
                   </div>
 
                   <div className="flex flex-col items-end">
-                    <span className="text-base font-semibold text-white">{resultLabel}</span>
+                    <span className={`text-base font-semibold ${resultColor}`}>{resultLabel}</span>
                     <span className="text-[0.7rem] text-muted-foreground">
                       {match.is_played ? "Jogada" : "Próxima"}
                     </span>
