@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { FormationField } from "@/components/FormationField";
 import { formations, playStyles } from "@/data/formations";
 import { Player } from "@/data/players";
-import { ChevronDown, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 interface TacticsManagerProps {
   teamName: string;
@@ -43,24 +43,6 @@ export const TacticsManager = ({ teamName, players = [], onStarterClick, canSubs
     setOpenDropdown(openDropdown === dropdown ? null : dropdown);
   };
 
-  const getBonusIcon = (value: number) => {
-    if (value > 0) return <TrendingUp className="w-3 h-3 text-green-400" />;
-    if (value < 0) return <TrendingDown className="w-3 h-3 text-red-400" />;
-    return <Minus className="w-3 h-3 text-gray-400" />;
-  };
-
-  const getBonusColor = (value: number) => {
-    if (value > 0) return "text-green-400";
-    if (value < 0) return "text-red-400";
-    return "text-gray-400";
-  };
-
-  const formatBonus = (value: number) => {
-    if (value > 0) return `+${value}%`;
-    if (value < 0) return `${value}%`;
-    return "0%";
-  };
-
   return (
     <div className="bg-black p-4 md:p-6">
       {/* Campo */}
@@ -92,11 +74,11 @@ export const TacticsManager = ({ teamName, players = [], onStarterClick, canSubs
                     setSelectedPlayStyle(style.id);
                     setOpenDropdown(null);
                   }}
-                  className={`w-full px-4 py-4 text-left hover:bg-zinc-800 transition-colors border-b border-zinc-800 last:border-b-0 ${
+                  className={`w-full px-4 py-3 text-left hover:bg-zinc-800 transition-colors border-b border-zinc-800 last:border-b-0 ${
                     selectedPlayStyle === style.id ? "bg-[#c8ff00]/10" : ""
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between">
                     <span className={`font-semibold ${selectedPlayStyle === style.id ? "text-[#c8ff00]" : "text-white"}`}>
                       {style.name}
                     </span>
@@ -104,31 +86,7 @@ export const TacticsManager = ({ teamName, players = [], onStarterClick, canSubs
                       <div className="w-2 h-2 rounded-full bg-[#c8ff00]" />
                     )}
                   </div>
-                  <p className="text-xs text-gray-400 mb-3">{style.description}</p>
-                  
-                  {/* Bônus Grid */}
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="flex items-center gap-1.5">
-                      {getBonusIcon(style.bonuses.attack)}
-                      <span className="text-gray-500">Ataque:</span>
-                      <span className={getBonusColor(style.bonuses.attack)}>{formatBonus(style.bonuses.attack)}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      {getBonusIcon(style.bonuses.defense)}
-                      <span className="text-gray-500">Defesa:</span>
-                      <span className={getBonusColor(style.bonuses.defense)}>{formatBonus(style.bonuses.defense)}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      {getBonusIcon(style.bonuses.possession)}
-                      <span className="text-gray-500">Posse:</span>
-                      <span className={getBonusColor(style.bonuses.possession)}>{formatBonus(style.bonuses.possession)}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      {getBonusIcon(style.bonuses.goalChance)}
-                      <span className="text-gray-500">Chance gol:</span>
-                      <span className={getBonusColor(style.bonuses.goalChance)}>{formatBonus(style.bonuses.goalChance)}</span>
-                    </div>
-                  </div>
+                  <p className="text-xs text-gray-400 mt-1">{style.description}</p>
                 </button>
               ))}
             </div>
@@ -173,23 +131,6 @@ export const TacticsManager = ({ teamName, players = [], onStarterClick, canSubs
         </div>
       </div>
 
-      {/* Resumo dos bônus ativos */}
-      <div className="mt-4 bg-zinc-900 rounded-lg p-3">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-gray-400 font-medium">Bônus ativos ({playStyle.name}):</span>
-          <div className="flex items-center gap-4">
-            <span className={getBonusColor(playStyle.bonuses.attack)}>
-              ATK {formatBonus(playStyle.bonuses.attack)}
-            </span>
-            <span className={getBonusColor(playStyle.bonuses.defense)}>
-              DEF {formatBonus(playStyle.bonuses.defense)}
-            </span>
-            <span className={getBonusColor(playStyle.bonuses.goalChance)}>
-              GOL {formatBonus(playStyle.bonuses.goalChance)}
-            </span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
