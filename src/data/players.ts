@@ -20,7 +20,7 @@ export const botafogoPlayers: Player[] = [
   { id: "2", name: "Vitinho", number: 2, position: "LD", overall: 77, age: 25, isStarter: true },
   { id: "4", name: "Mateo Ponte", number: 4, position: "LD", overall: 75, age: 20, isStarter: false },
   { id: "13", name: "Alex Telles", number: 13, position: "LE", overall: 82, age: 31, isStarter: true },
-  { id: "21", name: "Marçal", number: 21, positions: "LE|ZAG", overall: 73, age: 35, isStarter: false },
+  { id: "21", name: "Marçal", number: 21, positions: "LE", overall: 77, age: 35, isStarter: false },
   
   // Zagueiros
   { id: "31", name: "Kaio Pantaleão", number: 31, position: "ZAG", overall: 72, age: 19, isStarter: false },
