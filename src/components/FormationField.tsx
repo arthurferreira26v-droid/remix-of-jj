@@ -11,36 +11,71 @@ interface FormationFieldProps {
 export const FormationField = ({
   formation,
   players,
+  onPlayerClick,
+  canSubstitute = false,
 }: FormationFieldProps) => {
-  return (
-    <div className="relative w-full aspect-[3/4] bg-red-700 rounded-lg overflow-hidden border-4 border-yellow-400">
-      
-      {/* TEXTO TESTE */}
-      <div className="absolute top-2 left-2 text-white text-xl font-bold z-50">
-        TESTE FORMATION FIELD
-      </div>
+  const usedPlayers = new Set<string>();
 
-      {/* CAMPO SVG */}
+  const getPlayerForPosition = (): Player | null => {
+    const player = players.find(p => !usedPlayers.has(p.id));
+    if (player) {
+      usedPlayers.add(player.id);
+      return player;
+    }
+    return null;
+  };
+
+  return (
+    <div className="relative w-full aspect-[3/4] bg-gradient-to-b from-green-800 to-green-900 rounded-lg overflow-hidden border-2 border-white/20">
+
+      {/* 🔥 CAMPO DE FUTEBOL (SVG) */}
       <svg
-        className="absolute inset-0 w-full h-full"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
+        className="absolute inset-0 w-full h-full opacity-40"
+        xmlns="http://www.w3.org/2000/svg"
       >
         {/* Linha do meio */}
-        <line x1="0" y1="50" x2="100" y2="50" stroke="white" strokeWidth="1" />
+        <line x1="0" y1="50%" x2="100%" y2="50%" stroke="white" strokeWidth="2" />
 
         {/* Círculo central */}
-        <circle cx="50" cy="50" r="9" fill="none" stroke="white" strokeWidth="1" />
-        <circle cx="50" cy="50" r="1" fill="white" />
+        <circle cx="50%" cy="50%" r="60" fill="none" stroke="white" strokeWidth="2" />
+        <circle cx="50%" cy="50%" r="4" fill="white" />
 
         {/* Área superior */}
-        <rect x="25" y="2" width="50" height="16" fill="none" stroke="white" strokeWidth="1" />
-        <rect x="35" y="2" width="30" height="8" fill="none" stroke="white" strokeWidth="1" />
+        <rect x="25%" y="2%" width="50%" height="18%" fill="none" stroke="white" strokeWidth="2" />
+        <rect x="35%" y="2%" width="30%" height="10%" fill="none" stroke="white" strokeWidth="2" />
 
         {/* Área inferior */}
-        <rect x="25" y="82" width="50" height="16" fill="none" stroke="white" strokeWidth="1" />
-        <rect x="35" y="90" width="30" height="8" fill="none" stroke="white" strokeWidth="1" />
+        <rect x="25%" y="80%" width="50%" height="18%" fill="none" stroke="white" strokeWidth="2" />
+        <rect x="35%" y="88%" width="30%" height="10%" fill="none" stroke="white" strokeWidth="2" />
       </svg>
+
+      {/* ⚽ JOGADORES */}
+      {formation.positions.map((pos, index) => {
+        const player = getPlayerForPosition();
+        if (!player) return null;
+
+        return (
+          <div
+            key={`${player.id}-${index}`}
+            className={`absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 ${
+              onPlayerClick ? "cursor-pointer" : ""
+            }`}
+            style={{
+              left: `${pos.x}%`,
+              top: `${pos.y}%`,
+            }}
+            onClick={onPlayerClick ? () => onPlayerClick(player) : undefined}
+          >
+            <div className="w-10 h-10 bg-black border-2 border-white rounded-full flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs font-bold">{player.number}</span>
+            </div>
+
+            <div className="bg-black/70 px-2 py-0.5 rounded text-white text-[10px] font-medium whitespace-nowrap">
+              {player.name}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -48,10 +83,6 @@ export const FormationField = ({
 
 
 
-
-
-
-    
 
 
 
