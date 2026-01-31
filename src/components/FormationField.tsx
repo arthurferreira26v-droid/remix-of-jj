@@ -16,7 +16,7 @@ export const FormationField = ({
 }: FormationFieldProps) => {
   const usedPlayers = new Set<string>();
 
-  // Verifica se está fora de posição
+  // Verifica se o jogador está fora de posição
   const isOutOfPosition = (player: Player, role: string): boolean => {
     // Goleiro só no gol
     if (role === "GOL") {
@@ -29,13 +29,13 @@ export const FormationField = ({
 
     const playerPositions = player.position.split("|");
 
-    // Se o jogador TEM a posição, não está fora
+    // Se o jogador TEM a posição, está OK
     return !playerPositions.includes(role);
   };
 
   // Escolhe jogador para a posição
   const getPlayerForPosition = (role: string): Player | null => {
-    // 1️⃣ Prioridade absoluta: jogador que tenha essa posição
+    // 1️⃣ prioridade: jogador com a posição exata
     let player = players.find(
       (p) =>
         !usedPlayers.has(p.id) &&
@@ -47,7 +47,7 @@ export const FormationField = ({
       return player;
     }
 
-    // 2️⃣ Jogador de linha em qualquer posição (menos GOL)
+    // 2️⃣ qualquer jogador de linha (menos GOL)
     player = players.find(
       (p) => !usedPlayers.has(p.id) && p.position !== "GOL"
     );
@@ -60,15 +60,37 @@ export const FormationField = ({
     return null;
   };
 
-  // 🔒 Cria a escalação antes do render (evita bugs)
+  // 🔒 Define a escalação ANTES do render
   const lineup: (Player | null)[] = [];
-
   formation.positions.forEach((pos) => {
     lineup.push(getPlayerForPosition(pos.role));
   });
 
   return (
     <div className="relative w-full aspect-[3/4] bg-gradient-to-b from-green-800 to-green-900 rounded-lg overflow-hidden border-2 border-white/20">
+      
+      {/* CAMPO DE FUTEBOL */}
+      <svg
+        className="absolute inset-0 w-full h-full opacity-30"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Linha do meio */}
+        <line x1="0" y1="50%" x2="100%" y2="50%" stroke="white" strokeWidth="2" />
+
+        {/* Círculo central */}
+        <circle cx="50%" cy="50%" r="60" fill="none" stroke="white" strokeWidth="2" />
+        <circle cx="50%" cy="50%" r="4" fill="white" />
+
+        {/* Área superior */}
+        <rect x="25%" y="2%" width="50%" height="18%" fill="none" stroke="white" strokeWidth="2" />
+        <rect x="35%" y="2%" width="30%" height="10%" fill="none" stroke="white" strokeWidth="2" />
+
+        {/* Área inferior */}
+        <rect x="25%" y="80%" width="50%" height="18%" fill="none" stroke="white" strokeWidth="2" />
+        <rect x="35%" y="88%" width="30%" height="10%" fill="none" stroke="white" strokeWidth="2" />
+      </svg>
+
+      {/* JOGADORES */}
       {formation.positions.map((pos, index) => {
         const player = lineup[index];
         if (!player) return null;
@@ -116,7 +138,7 @@ export const FormationField = ({
               {player.name}
             </div>
 
-            {/* POSIÇÕES (LE / ZAG) */}
+            {/* POSIÇÕES */}
             <div className="text-[9px] text-white/80">
               {playerPositionsLabel}
             </div>
