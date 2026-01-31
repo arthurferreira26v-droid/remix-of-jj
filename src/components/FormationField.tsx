@@ -98,53 +98,69 @@ export const FormationField = ({
         const outOfPosition = isOutOfPosition(player, pos.role);
         const playerPositionsLabel = player.position.replace(/\|/g, " / ");
 
-        return (
-          <div
-            key={`${player.id}-${index}`}
-            className={`absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 ${
-              onPlayerClick ? "cursor-pointer" : ""
-            }`}
-            style={{
-              left: `${pos.x}%`,
-              top: `${pos.y}%`,
-            }}
-            onClick={onPlayerClick ? () => onPlayerClick(player) : undefined}
-          >
-            <div className="relative">
-              <div className="absolute -top-2 -left-2 w-7 h-7 rounded-full bg-[hsl(var(--overall-blue))] flex items-center justify-center text-white text-[10px] font-bold z-10">
-                {player.overall}
-              </div>
+       return (
+  <div className="relative w-full aspect-[3/4] bg-green-700 rounded-lg overflow-hidden border-2 border-white/30">
 
-              {outOfPosition && (
-                <div
-                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-yellow-400 border border-yellow-600 z-20"
-                  title="Jogador fora de posição"
-                />
-              )}
+    {/* LINHA CENTRAL */}
+    <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white/40" />
 
-              <div
-                className={`w-10 h-10 bg-black border-2 ${
-                  canSubstitute ? "border-[#c8ff00]" : "border-white"
-                } rounded-full flex items-center justify-center shadow-lg`}
-              >
-                <span className="text-white text-xs font-bold">
-                  {player.number}
-                </span>
-              </div>
+    {/* CÍRCULO CENTRAL */}
+    <div className="absolute top-1/2 left-1/2 w-28 h-28 border-2 border-white/40 rounded-full -translate-x-1/2 -translate-y-1/2" />
+    <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-white rounded-full -translate-x-1/2 -translate-y-1/2" />
+
+    {/* ÁREA SUPERIOR */}
+    <div className="absolute top-2 left-1/4 w-1/2 h-[18%] border-2 border-white/40" />
+    <div className="absolute top-2 left-[35%] w-[30%] h-[10%] border-2 border-white/40" />
+
+    {/* ÁREA INFERIOR */}
+    <div className="absolute bottom-2 left-1/4 w-1/2 h-[18%] border-2 border-white/40" />
+    <div className="absolute bottom-2 left-[35%] w-[30%] h-[10%] border-2 border-white/40" />
+
+    {/* JOGADORES */}
+    {formation.positions.map((pos, index) => {
+      const player = lineup[index];
+      if (!player) return null;
+
+      const outOfPosition = isOutOfPosition(player, pos.role);
+      const playerPositionsLabel = player.position.replace(/\|/g, " / ");
+
+      return (
+        <div
+          key={`${player.id}-${index}`}
+          className={`absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 ${
+            onPlayerClick ? "cursor-pointer" : ""
+          }`}
+          style={{
+            left: `${pos.x}%`,
+            top: `${pos.y}%`,
+          }}
+          onClick={onPlayerClick ? () => onPlayerClick(player) : undefined}
+        >
+          <div className="relative">
+            <div className="absolute -top-2 -left-2 w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold z-10">
+              {player.overall}
             </div>
 
-            {/* Nome */}
-            <div className="bg-black/70 px-2 py-0.5 rounded text-white text-[10px] font-medium whitespace-nowrap">
-              {player.name}
-            </div>
+            {outOfPosition && (
+              <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-yellow-400 border border-yellow-600 z-20" />
+            )}
 
-            {/* POSIÇÕES */}
-            <div className="text-[9px] text-white/80">
-              {playerPositionsLabel}
+            <div className="w-10 h-10 bg-black border-2 border-white rounded-full flex items-center justify-center">
+              <span className="text-white text-xs font-bold">
+                {player.number}
+              </span>
             </div>
           </div>
-        );
-      })}
-    </div>
-  );
-};
+
+          <div className="bg-black/70 px-2 py-0.5 rounded text-white text-[10px]">
+            {player.name}
+          </div>
+
+          <div className="text-[9px] text-white/80">
+            {playerPositionsLabel}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+);
