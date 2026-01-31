@@ -1,6 +1,5 @@
 import { Player } from "@/data/players";
 import { Formation } from "@/data/formations";
-import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 
 interface FormationFieldProps {
   formation: Formation;
@@ -17,27 +16,9 @@ export const FormationField = ({
 }: FormationFieldProps) => {
   const usedPlayers = new Set<string>();
 
-  // Regras:
-  // - GOL só joga no GOL
-  // - Jogadores de linha podem jogar em qualquer posição
-  const positionMap: { [key: string]: string[] } = {
-    GOL: ["GOL"],
-    LE: ["LE", "ZAG", "LD", "VOL", "MC", "ME", "MD", "PE", "PD", "ATA"],
-    LD: ["LD", "ZAG", "LE", "VOL", "MC", "ME", "MD", "PE", "PD", "ATA"],
-    ZAG: ["ZAG", "LE", "LD", "VOL", "MC"],
-    VOL: ["VOL", "MC", "ZAG", "LE", "LD"],
-    MC: ["MC", "VOL", "ME", "MD", "PE", "PD"],
-    ME: ["ME", "MC", "PE", "MD"],
-    MD: ["MD", "MC", "PD", "ME"],
-    PE: ["PE", "ME", "MC", "ATA"],
-    PD: ["PD", "MD", "MC", "ATA"],
-    ATA: ["ATA", "PE", "PD"],
-    ALE: ["LE", "ME", "MC"],
-    ALD: ["LD", "MD", "MC"],
-  };
-
-  // Verifica se o jogador está fora de posição
+  // Verifica se está fora de posição
   const isOutOfPosition = (player: Player, role: string): boolean => {
+    // Goleiro só no gol
     if (role === "GOL") {
       return player.position !== "GOL";
     }
@@ -47,14 +28,14 @@ export const FormationField = ({
     }
 
     const playerPositions = player.position.split("|");
+
+    // Se o jogador TEM a posição, não está fora
     return !playerPositions.includes(role);
   };
 
   // Escolhe jogador para a posição
   const getPlayerForPosition = (role: string): Player | null => {
-    const allowedPositions = positionMap[role] || [];
-
-    // 1️⃣ prioridade: jogador que tenha exatamente a posição
+    // 1️⃣ Prioridade absoluta: jogador que tenha essa posição
     let player = players.find(
       (p) =>
         !usedPlayers.has(p.id) &&
@@ -66,20 +47,7 @@ export const FormationField = ({
       return player;
     }
 
-    // 2️⃣ jogadores de linha em qualquer posição (menos GOL)
-    player = players.find(
-      (p) =>
-        !usedPlayers.has(p.id) &&
-        p.position !== "GOL" &&
-        allowedPositions.some(pos => p.position.split("|").includes(pos))
-    );
-
-    if (player) {
-      usedPlayers.add(player.id);
-      return player;
-    }
-
-    // 3️⃣ último recurso: qualquer jogador de linha livre
+    // 2️⃣ Jogador de linha em qualquer posição (menos GOL)
     player = players.find(
       (p) => !usedPlayers.has(p.id) && p.position !== "GOL"
     );
@@ -92,14 +60,21 @@ export const FormationField = ({
     return null;
   };
 
+  // 🔒 Cria a escalação antes do render (evita bugs)
+  const lineup: (Player | null)[] = [];
+
+  formation.positions.forEach((pos) => {
+    lineup.push(getPlayerForPosition(pos.role));
+  });
+
   return (
     <div className="relative w-full aspect-[3/4] bg-gradient-to-b from-green-800 to-green-900 rounded-lg overflow-hidden border-2 border-white/20">
-      {/* Jogadores */}
       {formation.positions.map((pos, index) => {
-        const player = getPlayerForPosition(pos.role);
+        const player = lineup[index];
         if (!player) return null;
 
         const outOfPosition = isOutOfPosition(player, pos.role);
+        const playerPositionsLabel = player.position.replace(/\|/g, " / ");
 
         return (
           <div
@@ -136,8 +111,14 @@ export const FormationField = ({
               </div>
             </div>
 
+            {/* Nome */}
             <div className="bg-black/70 px-2 py-0.5 rounded text-white text-[10px] font-medium whitespace-nowrap">
               {player.name}
+            </div>
+
+            {/* POSIÇÕES (LE / ZAG) */}
+            <div className="text-[9px] text-white/80">
+              {playerPositionsLabel}
             </div>
           </div>
         );
