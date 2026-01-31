@@ -9,74 +9,91 @@ interface FormationFieldProps {
   canSubstitute?: boolean;
 }
 
-export const FormationField = ({ formation, players, onPlayerClick, canSubstitute = false }: FormationFieldProps) => {
+export const FormationField = ({
+  formation,
+  players,
+  onPlayerClick,
+  canSubstitute = false,
+}: FormationFieldProps) => {
   const usedPlayers = new Set<string>();
 
-  // Mapeia os roles da formação para as posições ideais dos jogadores
+  // Regras:
+  // - GOL só joga no GOL
+  // - Jogadores de linha podem jogar em qualquer posição
   const positionMap: { [key: string]: string[] } = {
     GOL: ["GOL"],
-    LE: ["LE"],
-    LD: ["LD"],
-    ZAG: ["ZAG"],
-    VOL: ["VOL", "MC"],
-    MC: ["MC", "VOL", "PE", "PD"],
-    PE: ["PE", "MC", "PD"],
-    PD: ["PD", "MC", "PE"],
-    ATA: ["ATA", "PD", "PE"],
-    MD: ["PD", "MC", "PE", "VOL"],
-    ME: ["PE", "MC", "PD", "VOL"],
-    ALE: ["LE", "PE", "MC"],
-    ALD: ["LD", "PD", "MC"],
+    LE: ["LE", "ZAG", "LD", "VOL", "MC", "ME", "MD", "PE", "PD", "ATA"],
+    LD: ["LD", "ZAG", "LE", "VOL", "MC", "ME", "MD", "PE", "PD", "ATA"],
+    ZAG: ["ZAG", "LE", "LD", "VOL", "MC"],
+    VOL: ["VOL", "MC", "ZAG", "LE", "LD"],
+    MC: ["MC", "VOL", "ME", "MD", "PE", "PD"],
+    ME: ["ME", "MC", "PE", "MD"],
+    MD: ["MD", "MC", "PD", "ME"],
+    PE: ["PE", "ME", "MC", "ATA"],
+    PD: ["PD", "MD", "MC", "ATA"],
+    ATA: ["ATA", "PE", "PD"],
+    ALE: ["LE", "ME", "MC"],
+    ALD: ["LD", "MD", "MC"],
   };
 
   // Verifica se o jogador está fora de posição
   const isOutOfPosition = (player: Player, role: string): boolean => {
-    const idealPositions = positionMap[role] || [role];
-    return !idealPositions.includes(player.position);
+    if (role === "GOL") {
+      return player.position !== "GOL";
+    }
+
+    if (player.position === "GOL") {
+      return true;
+    }
+
+    const playerPositions = player.position.split("|");
+    return !playerPositions.includes(role);
   };
 
-  // Mapeia jogadores para posições da formação
+  // Escolhe jogador para a posição
   const getPlayerForPosition = (role: string): Player | null => {
-    const positions = positionMap[role] || [role];
-    
-    // Primeiro tenta encontrar jogador na posição ideal
-    for (const pos of positions) {
-      const player = players.find(p => p.position === pos && !usedPlayers.has(p.id));
-      if (player) {
-        usedPlayers.add(player.id);
-        return player;
-      }
+    const allowedPositions = positionMap[role] || [];
+
+    // 1️⃣ prioridade: jogador que tenha exatamente a posição
+    let player = players.find(
+      (p) =>
+        !usedPlayers.has(p.id) &&
+        p.position.split("|").includes(role)
+    );
+
+    if (player) {
+      usedPlayers.add(player.id);
+      return player;
     }
-    
-    // Se não encontrou, pega qualquer jogador disponível
-    const anyPlayer = players.find(p => !usedPlayers.has(p.id));
-    if (anyPlayer) {
-      usedPlayers.add(anyPlayer.id);
-      return anyPlayer;
+
+    // 2️⃣ jogadores de linha em qualquer posição (menos GOL)
+    player = players.find(
+      (p) =>
+        !usedPlayers.has(p.id) &&
+        p.position !== "GOL" &&
+        allowedPositions.some(pos => p.position.split("|").includes(pos))
+    );
+
+    if (player) {
+      usedPlayers.add(player.id);
+      return player;
     }
-    
+
+    // 3️⃣ último recurso: qualquer jogador de linha livre
+    player = players.find(
+      (p) => !usedPlayers.has(p.id) && p.position !== "GOL"
+    );
+
+    if (player) {
+      usedPlayers.add(player.id);
+      return player;
+    }
+
     return null;
   };
 
   return (
     <div className="relative w-full aspect-[3/4] bg-gradient-to-b from-green-800 to-green-900 rounded-lg overflow-hidden border-2 border-white/20">
-      {/* Campo de futebol - linhas */}
-      <svg className="absolute inset-0 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
-        {/* Linha do meio */}
-        <line x1="0" y1="50%" x2="100%" y2="50%" stroke="white" strokeWidth="2" />
-        {/* Círculo central */}
-        <circle cx="50%" cy="50%" r="60" fill="none" stroke="white" strokeWidth="2" />
-        <circle cx="50%" cy="50%" r="4" fill="white" />
-        {/* Área grande de cima */}
-        <rect x="25%" y="2%" width="50%" height="18%" fill="none" stroke="white" strokeWidth="2" />
-        {/* Área pequena de cima */}
-        <rect x="35%" y="2%" width="30%" height="10%" fill="none" stroke="white" strokeWidth="2" />
-        {/* Área grande de baixo */}
-        <rect x="25%" y="80%" width="50%" height="18%" fill="none" stroke="white" strokeWidth="2" />
-        {/* Área pequena de baixo */}
-        <rect x="35%" y="88%" width="30%" height="10%" fill="none" stroke="white" strokeWidth="2" />
-      </svg>
-
       {/* Jogadores */}
       {formation.positions.map((pos, index) => {
         const player = getPlayerForPosition(pos.role);
@@ -87,27 +104,38 @@ export const FormationField = ({ formation, players, onPlayerClick, canSubstitut
         return (
           <div
             key={`${player.id}-${index}`}
-            className={`absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 ${onPlayerClick ? "cursor-pointer" : ""}`}
+            className={`absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 ${
+              onPlayerClick ? "cursor-pointer" : ""
+            }`}
             style={{
               left: `${pos.x}%`,
               top: `${pos.y}%`,
             }}
             onClick={onPlayerClick ? () => onPlayerClick(player) : undefined}
           >
-            {/* Círculo do jogador */}
             <div className="relative">
               <div className="absolute -top-2 -left-2 w-7 h-7 rounded-full bg-[hsl(var(--overall-blue))] flex items-center justify-center text-white text-[10px] font-bold z-10">
                 {player.overall}
               </div>
-              {/* Indicador de fora de posição */}
+
               {outOfPosition && (
-                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-yellow-400 border border-yellow-600 z-20" title="Jogador fora de posição" />
+                <div
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-yellow-400 border border-yellow-600 z-20"
+                  title="Jogador fora de posição"
+                />
               )}
-              <div className={`w-10 h-10 bg-black border-2 ${canSubstitute ? 'border-[#c8ff00]' : 'border-white'} rounded-full flex items-center justify-center shadow-lg`}>
-                <span className="text-white text-xs font-bold">{player.number}</span>
+
+              <div
+                className={`w-10 h-10 bg-black border-2 ${
+                  canSubstitute ? "border-[#c8ff00]" : "border-white"
+                } rounded-full flex items-center justify-center shadow-lg`}
+              >
+                <span className="text-white text-xs font-bold">
+                  {player.number}
+                </span>
               </div>
             </div>
-            {/* Nome do jogador */}
+
             <div className="bg-black/70 px-2 py-0.5 rounded text-white text-[10px] font-medium whitespace-nowrap">
               {player.name}
             </div>
