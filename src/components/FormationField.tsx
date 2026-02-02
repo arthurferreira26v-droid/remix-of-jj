@@ -57,7 +57,7 @@ export const FormationField = ({
         return (
           <div
             key={`${player.id}-${index}`}
-            className={`absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 ${
+            className={`absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-0.5 ${
               onPlayerClick ? "cursor-pointer" : ""
             }`}
             style={{
@@ -66,11 +66,18 @@ export const FormationField = ({
             }}
             onClick={onPlayerClick ? () => onPlayerClick(player) : undefined}
           >
-            <div className="w-10 h-10 bg-black border-2 border-white rounded-full flex items-center justify-center shadow-lg">
+            {/* Número do jogador */}
+            <div className="w-9 h-9 bg-black border-2 border-white rounded-full flex items-center justify-center shadow-lg">
               <span className="text-white text-xs font-bold">{player.number}</span>
             </div>
 
-            <div className="bg-black/70 px-2 py-0.5 rounded text-white text-[10px] font-medium whitespace-nowrap">
+            {/* OVR azul */}
+            <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center shadow-md -mt-1">
+              <span className="text-white text-[9px] font-bold">{player.overall}</span>
+            </div>
+
+            {/* Nome do jogador */}
+            <div className="bg-black/80 px-1.5 py-0.5 rounded text-white text-[9px] font-medium whitespace-nowrap">
               {player.name}
             </div>
           </div>
