@@ -66,18 +66,26 @@ export const FormationField = ({
             }}
             onClick={onPlayerClick ? () => onPlayerClick(player) : undefined}
           >
-            {/* Número do jogador */}
-            <div className="w-9 h-9 bg-black border-2 border-white rounded-full flex items-center justify-center shadow-lg">
-              <span className="text-white text-xs font-bold">{player.number}</span>
+            {/* Container do número + OVR */}
+            <div className="relative">
+              {/* Número do jogador */}
+              <div className="w-9 h-9 bg-black border-2 border-white rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-white text-xs font-bold">{player.number}</span>
+              </div>
+
+              {/* OVR azul no canto superior direito */}
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center shadow-md border border-white">
+                <span className="text-white text-[8px] font-bold">{player.overall}</span>
+              </div>
             </div>
 
-            {/* OVR azul */}
-            <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center shadow-md -mt-1">
-              <span className="text-white text-[9px] font-bold">{player.overall}</span>
+            {/* Posição do jogador */}
+            <div className="bg-black/80 px-1.5 py-0.5 rounded text-white text-[9px] font-medium">
+              {pos.role}
             </div>
 
             {/* Nome do jogador */}
-            <div className="bg-black/80 px-1.5 py-0.5 rounded text-white text-[9px] font-medium whitespace-nowrap">
+            <div className="bg-black/60 px-1.5 py-0.5 rounded text-white text-[8px] font-medium whitespace-nowrap">
               {player.name}
             </div>
           </div>
