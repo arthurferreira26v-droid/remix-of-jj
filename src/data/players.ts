@@ -2,7 +2,8 @@ export interface Player {
   id: string;
   name: string;
   number: number;
-  position: string;
+  position: string; // Posição principal
+  altPositions?: string[]; // Posições alternativas (sem penalidade)
   overall: number;
   age: number;
   isStarter?: boolean;
@@ -26,17 +27,15 @@ export const botafogoPlayers: Player[] = [
   { id: "31", name: "Kaio Pantaleão", number: 31, position: "ZAG", overall: 72, age: 19, isStarter: false },
   { id: "20", name: "Alexander Barboza", number: 20, position: "ZAG", overall: 79, age: 30, isStarter: true },
   { id: "15", name: "Bastos", number: 15, position: "ZAG", overall: 78, age: 33, isStarter: false },
-  { id: "57", name: "Marçal", number: 57, position: "ZAG", overall: 77, age: 21, isStarter: true },
+  { id: "57", name: "Marçal", number: 57, position: "ZAG", altPositions: ["LE"], overall: 77, age: 21, isStarter: true },
   
   // Volantes
   { id: "35", name: "Danilo", number: 35, position: "VOL", overall: 80, age: 33, isStarter: true },
-  { id: "17", name: "Marlon Freitas", number: 17, position: "VOL", overall: 81, age: 29, isStarter: true },
-  { id: "25", name: "Allan", number: 25, position: "VOL", overall: 76, age: 32, isStarter: false },
+  { id: "25", name: "Allan", number: 25, position: "VOL", overall: 76, age: 32, isStarter: true },
   { id: "28", name: "Newton", number: 28, position: "VOL", overall: 74, age: 22, isStarter: false },
   
   // Meias Ofensivos
-  { id: "10", name: "Savarino", number: 10, position: "MC", overall: 83, age: 27, isStarter: true },
-  { id: "23", name: "Santi Rodríguez", number: 23, position: "MC", overall: 75, age: 23, isStarter: false },
+  { id: "23", name: "Santi Rodríguez", number: 23, position: "MC", overall: 75, age: 23, isStarter: true },
   { id: "8", name: "Álvaro Montoro", number: 8, position: "MC", overall: 73, age: 20, isStarter: false },
   
   // Pontas

@@ -54,6 +54,12 @@ export const FormationField = ({
         const player = getPlayerForPosition();
         if (!player) return null;
 
+        // Verifica se jogador está na posição correta
+        const playerPositions = player.position.split("|");
+        const altPositions = player.altPositions || [];
+        const allValidPositions = [...playerPositions, ...altPositions];
+        const isInPosition = allValidPositions.includes(pos.role);
+
         return (
           <div
             key={`${player.id}-${index}`}
@@ -66,7 +72,7 @@ export const FormationField = ({
             }}
             onClick={onPlayerClick ? () => onPlayerClick(player) : undefined}
           >
-            {/* Container do número + OVR */}
+            {/* Container do número + OVR + Aviso */}
             <div className="relative">
               {/* Número do jogador */}
               <div className="w-9 h-9 bg-black border-2 border-white rounded-full flex items-center justify-center shadow-lg">
@@ -77,10 +83,19 @@ export const FormationField = ({
               <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center shadow-md border border-white">
                 <span className="text-white text-[8px] font-bold">{player.overall}</span>
               </div>
+
+              {/* Aviso amarelo se fora de posição */}
+              {!isInPosition && (
+                <div className="absolute -top-1 -left-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center shadow-md border border-white">
+                  <span className="text-black text-[9px] font-bold">!</span>
+                </div>
+              )}
             </div>
 
             {/* Posição do jogador */}
-            <div className="bg-black/80 px-1.5 py-0.5 rounded text-white text-[9px] font-medium">
+            <div className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${
+              isInPosition ? "bg-black/80 text-white" : "bg-yellow-500/90 text-black"
+            }`}>
               {pos.role}
             </div>
 
