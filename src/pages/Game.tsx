@@ -100,11 +100,38 @@ const Game = () => {
   const { budget, setBudget, loading: budgetLoading } = useTeamBudget(teamName, championship?.id);
 
   const [selectedReserve, setSelectedReserve] = useState<Player | null>(null);
+  const [selectedStarter, setSelectedStarter] = useState<Player | null>(null);
 
   const starters = players.filter((p) => p.isStarter);
   const reserves = players.filter((p) => !p.isStarter);
 
+  // Ordenação dos titulares baseada na ordem salva (para manter posições trocadas)
+  const getStarterOrder = () => {
+    const savedOrder = localStorage.getItem(`starter_order_${teamName}`);
+    if (savedOrder) {
+      const orderIds = JSON.parse(savedOrder) as string[];
+      return starters.sort((a, b) => {
+        const indexA = orderIds.indexOf(a.id);
+        const indexB = orderIds.indexOf(b.id);
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+        return indexA - indexB;
+      });
+    }
+    return starters;
+  };
+
+  const orderedStarters = getStarterOrder();
+
+  const saveStarterOrder = (newOrder: Player[]) => {
+    const orderIds = newOrder.map(p => p.id);
+    localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(orderIds));
+  };
+
   const handleReserveClick = (player: Player) => {
+    // Limpar seleção de titular se houver
+    setSelectedStarter(null);
+    
     if (selectedReserve?.id === player.id) {
       // Se clicar no mesmo jogador, abre o modal de valor
       setSelectedPlayerForValue(player);
@@ -119,25 +146,54 @@ const Game = () => {
   };
 
   const handleStarterClick = (starter: Player) => {
-    if (!selectedReserve) {
-      // Se não tiver reserva selecionado, mostra o valor
-      setSelectedPlayerForValue(starter);
+    // Se tiver um reserva selecionado, troca reserva <-> titular
+    if (selectedReserve) {
+      const updatedPlayers = players.map((p) => {
+        if (p.id === starter.id) {
+          return { ...p, isStarter: false };
+        }
+        if (p.id === selectedReserve.id) {
+          return { ...p, isStarter: true };
+        }
+        return p;
+      });
+      
+      // Atualizar ordem: colocar o novo titular na posição do antigo
+      const newOrder = orderedStarters.map(p => 
+        p.id === starter.id ? { ...selectedReserve, isStarter: true } : p
+      );
+      saveStarterOrder(newOrder);
+      
+      updatePlayers(updatedPlayers);
+      setSelectedReserve(null);
       return;
     }
 
-
-    const updatedPlayers = players.map((p) => {
-      if (p.id === starter.id) {
-        return { ...p, isStarter: false };
+    // Se já tem um titular selecionado, troca posições entre eles
+    if (selectedStarter) {
+      if (selectedStarter.id === starter.id) {
+        // Clicou no mesmo, abre modal de valor
+        setSelectedPlayerForValue(starter);
+        setSelectedStarter(null);
+        return;
       }
-      if (p.id === selectedReserve.id) {
-        return { ...p, isStarter: true };
-      }
-      return p;
-    });
+      
+      // Trocar posições no campo (swap na ordem)
+      const newOrder = orderedStarters.map(p => {
+        if (p.id === selectedStarter.id) return starter;
+        if (p.id === starter.id) return selectedStarter;
+        return p;
+      });
+      saveStarterOrder(newOrder);
+      
+      setSelectedStarter(null);
+      // Forçar re-render
+      setPlayers([...players]);
+      return;
+    }
 
-    updatePlayers(updatedPlayers);
-    setSelectedReserve(null);
+    // Nenhum selecionado ainda - selecionar este titular
+    setSelectedStarter(starter);
   };
 
   const handleSellPlayer = (player: Player) => {
@@ -370,9 +426,10 @@ const Game = () => {
       <div className="container mx-auto px-4 pb-12 pt-8 space-y-6">
         <TacticsManager
           teamName={teamName}
-          players={starters}
+          players={orderedStarters}
           onStarterClick={handleStarterClick}
           canSubstitute={!!selectedReserve}
+          selectedStarterId={selectedStarter?.id}
         />
 
         <div className="bg-zinc-900 rounded-lg p-4">
