@@ -44,6 +44,63 @@ export type Database = {
         }
         Relationships: []
       }
+      game_saves: {
+        Row: {
+          budget: number
+          championship_id: string | null
+          club_name: string
+          created_at: string
+          current_round: number | null
+          has_active_investment: boolean
+          id: string
+          players: Json
+          season: string
+          season_stats: Json
+          settings: Json
+          slot_number: number
+          total_purchases: number
+          total_sales: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget?: number
+          championship_id?: string | null
+          club_name: string
+          created_at?: string
+          current_round?: number | null
+          has_active_investment?: boolean
+          id?: string
+          players?: Json
+          season?: string
+          season_stats?: Json
+          settings?: Json
+          slot_number: number
+          total_purchases?: number
+          total_sales?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget?: number
+          championship_id?: string | null
+          club_name?: string
+          created_at?: string
+          current_round?: number | null
+          has_active_investment?: boolean
+          id?: string
+          players?: Json
+          season?: string
+          season_stats?: Json
+          settings?: Json
+          slot_number?: number
+          total_purchases?: number
+          total_sales?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           away_score: number | null

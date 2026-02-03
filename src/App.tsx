@@ -11,6 +11,7 @@ import Standings from "./pages/Standings";
 import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import SaveSelection from "./pages/SaveSelection";
 
 const queryClient = new QueryClient();
 
@@ -21,7 +22,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<SaveSelection />} />
+          <Route path="/selecionar-time" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/jogo" element={<Game />} />
           <Route path="/partida" element={<Match />} />
