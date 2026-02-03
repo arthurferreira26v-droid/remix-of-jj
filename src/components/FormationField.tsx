@@ -99,12 +99,14 @@ export const FormationField = ({
               )}
             </div>
 
-            {/* Posição do jogador */}
-            <div className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${
-              isInPosition ? "bg-black/80 text-white" : "bg-yellow-500/90 text-black"
-            }`}>
-              {pos.role}
-            </div>
+            {/* Posição do jogador (para goleiro mostra o nome) */}
+            {pos.role !== "GOL" && (
+              <div className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${
+                isInPosition ? "bg-black/80 text-white" : "bg-yellow-500/90 text-black"
+              }`}>
+                {pos.role}
+              </div>
+            )}
 
             {/* Nome do jogador */}
             <div className="bg-black/60 px-1.5 py-0.5 rounded text-white text-[8px] font-medium whitespace-nowrap">
