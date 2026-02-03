@@ -6,6 +6,7 @@ interface FormationFieldProps {
   players: Player[];
   onPlayerClick?: (player: Player) => void;
   canSubstitute?: boolean;
+  selectedPlayerId?: string;
 }
 
 export const FormationField = ({
@@ -13,6 +14,7 @@ export const FormationField = ({
   players,
   onPlayerClick,
   canSubstitute = false,
+  selectedPlayerId,
 }: FormationFieldProps) => {
   const usedPlayers = new Set<string>();
 
@@ -59,13 +61,14 @@ export const FormationField = ({
         const altPositions = player.altPositions || [];
         const allValidPositions = [...playerPositions, ...altPositions];
         const isInPosition = allValidPositions.includes(pos.role);
+        const isSelected = player.id === selectedPlayerId;
 
         return (
           <div
             key={`${player.id}-${index}`}
             className={`absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-0.5 ${
               onPlayerClick ? "cursor-pointer" : ""
-            }`}
+            } ${isSelected ? "scale-110 z-10" : ""}`}
             style={{
               left: `${pos.x}%`,
               top: `${pos.y}%`,
@@ -74,9 +77,13 @@ export const FormationField = ({
           >
             {/* Container do número + OVR + Aviso */}
             <div className="relative">
-              {/* Número do jogador */}
-              <div className="w-9 h-9 bg-black border-2 border-white rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-white text-xs font-bold">{player.number}</span>
+              {/* Número do jogador - verde se selecionado */}
+              <div className={`w-9 h-9 border-2 rounded-full flex items-center justify-center shadow-lg ${
+                isSelected 
+                  ? "bg-[#c8ff00] border-[#c8ff00]" 
+                  : "bg-black border-white"
+              }`}>
+                <span className={`text-xs font-bold ${isSelected ? "text-black" : "text-white"}`}>{player.number}</span>
               </div>
 
               {/* OVR azul no canto superior direito */}
