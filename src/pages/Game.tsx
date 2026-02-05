@@ -10,24 +10,30 @@ import { TransferMarket } from "@/components/TransferMarket";
 import { FinancesModal } from "@/components/FinancesModal";
 import { SaveLoadModal } from "@/components/SaveLoadModal";
 import { teams } from "@/data/teams";
-import { botafogoPlayers, flamengoPlayers, generateTeamPlayers, Player } from "@/data/players";
+import {
+  botafogoPlayers,
+  flamengoPlayers,
+  generateTeamPlayers,
+  type Player,
+} from "@/data/players";
 import { Loader2 } from "lucide-react";
 import { useChampionship } from "@/hooks/useChampionship";
 import { useTeamForm } from "@/hooks/useTeamForm";
 import { useTeamBudget } from "@/hooks/useTeamBudget";
 import { useAuth } from "@/hooks/useAuth";
-import { useSaveLoad } from "@/hooks/useSaveLoad";
+import { useCloudSaveLoad, type CloudSaveData } from "@/hooks/useCloudSaveLoad";
 import { getTeamLogo } from "@/utils/teamLogos";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { GameSaveData } from "@/types/gameState";
 
 const Game = () => {
   const { user, loading: authLoading } = useAuth();
+  const { loadGame: loadCloudGame } = useCloudSaveLoad();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const teamName = searchParams.get("time") || "Seu Time";
+  const loadSlotParam = searchParams.get("loadSlot");
+
   const [showSquadManager, setShowSquadManager] = useState(false);
   const [showTransferMarket, setShowTransferMarket] = useState(false);
   const [showFinances, setShowFinances] = useState(false);
@@ -39,9 +45,6 @@ const Game = () => {
   });
   const [totalPurchases, setTotalPurchases] = useState(0);
   const [selectedPlayerForValue, setSelectedPlayerForValue] = useState<Player | null>(null);
-  
-  // Save/Load hook
-  const { autoSave } = useSaveLoad();
   
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -266,35 +269,62 @@ const Game = () => {
     }
   }), [teamName, budget, totalSales, totalPurchases, hasActiveInvestment, players, championship]);
 
-  // Handle loading a save
-  const handleLoadComplete = useCallback((saveData: GameSaveData) => {
-    // Marcar que o jogo foi carregado de um save
-    sessionStorage.setItem(`loaded_save_${saveData.clubName}`, 'true');
-    
-    // Update players from save
-    const loadedPlayers = saveData.players.map(p => ({
-      ...p,
-      isStarter: p.status === 'titular'
-    }));
-    
-    // Salvar jogadores no localStorage para persistir durante a sessão
-    localStorage.setItem(`players_${saveData.clubName}`, JSON.stringify(loadedPlayers));
-    setPlayers(loadedPlayers);
-    
-    // Update financial data
-    setTotalSales(saveData.totalSales);
-    setTotalPurchases(saveData.totalPurchases);
-    setHasActiveInvestment(saveData.hasActiveInvestment);
-    localStorage.setItem(`investment_${teamName}`, saveData.hasActiveInvestment.toString());
-    
-    // Update budget in database
-    if (saveData.budget !== budget) {
-      setBudget(saveData.budget);
-    }
-    
-    // Recarregar a página para pegar os dados do save
-    window.location.reload();
-  }, [teamName, budget, setBudget]);
+  // Handle loading a save (Cloud)
+  const handleLoadComplete = useCallback(
+    (save: CloudSaveData) => {
+      sessionStorage.setItem(`loaded_save_${save.club_name}`, "true");
+
+      const loadedPlayers = (save.players as unknown as Player[]) ?? [];
+      localStorage.setItem(`players_${save.club_name}`, JSON.stringify(loadedPlayers));
+      setPlayers(loadedPlayers);
+
+      setTotalSales(save.total_sales ?? 0);
+      setTotalPurchases(save.total_purchases ?? 0);
+      setHasActiveInvestment(!!save.has_active_investment);
+      localStorage.setItem(
+        `investment_${save.club_name}`,
+        (!!save.has_active_investment).toString(),
+      );
+
+      if (typeof save.budget === "number" && save.budget !== budget) {
+        setBudget(save.budget);
+      }
+
+      window.location.reload();
+    },
+    [budget, setBudget],
+  );
+
+  // Se veio da tela inicial com loadSlot, carregar o save do slot automaticamente
+  useEffect(() => {
+    if (!user) return;
+    if (!loadSlotParam) return;
+
+    const slot = Number(loadSlotParam);
+    if (!Number.isFinite(slot) || slot < 1) return;
+
+    let isActive = true;
+    (async () => {
+      const data = await loadCloudGame(slot);
+      if (!isActive) return;
+
+      if (!data) {
+        toast.error("Nenhum save encontrado neste slot");
+        return;
+      }
+
+      // limpar query param para evitar loop
+      navigate(`/jogo?time=${encodeURIComponent(data.club_name)}`, {
+        replace: true,
+      });
+
+      handleLoadComplete(data);
+    })();
+
+    return () => {
+      isActive = false;
+    };
+  }, [user, loadSlotParam, loadCloudGame, navigate, handleLoadComplete]);
 
   if (loading || userFormLoading || opponentFormLoading || budgetLoading || authLoading) {
     return (

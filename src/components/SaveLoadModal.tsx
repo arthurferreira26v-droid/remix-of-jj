@@ -1,16 +1,28 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useSaveLoad, GameSaveParams } from "@/hooks/useSaveLoad";
-import { GameSaveData, SaveSlot } from "@/types/gameState";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  useCloudSaveLoad,
+  type CloudSaveParams,
+  type CloudSaveData,
+} from "@/hooks/useCloudSaveLoad";
 import { formatMarketValue } from "@/utils/marketValue";
-import { 
-  Save, 
-  Download, 
-  Trash2, 
-  Clock, 
-  Users, 
+import {
+  Save,
+  Download,
+  Trash2,
+  Clock,
+  Users,
   Trophy,
   Calendar,
   Loader2,
@@ -19,27 +31,74 @@ import {
   TrendingUp,
   ChevronRight,
   Cloud,
-  Check
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 
 interface SaveLoadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: 'save' | 'load';
-  currentGameData?: GameSaveParams;
-  onLoadComplete?: (data: GameSaveData) => void;
+  mode: "save" | "load";
+  currentGameData?: CloudSaveParams;
+  onLoadComplete?: (data: CloudSaveData) => void;
 }
 
-export function SaveLoadModal({ 
-  isOpen, 
-  onClose, 
-  mode, 
+type UISaveData = {
+  clubName: string;
+  season: string;
+  budget: number;
+  players: unknown[];
+  currentRound?: number;
+  savedAt: string;
+};
+
+type UISaveSlot = {
+  id: string;
+  slotNumber: number;
+  isEmpty: boolean;
+  saveData: UISaveData | null;
+};
+
+const toUiSlots = (
+  slots: Awaited<ReturnType<ReturnType<typeof useCloudSaveLoad>["getSaveSlots"]>>,
+): UISaveSlot[] => {
+  return slots.map((s) => {
+    if (!s.saveData) {
+      return {
+        id: `slot_${s.slotNumber}`,
+        slotNumber: s.slotNumber,
+        isEmpty: true,
+        saveData: null,
+      };
+    }
+
+    return {
+      id: s.saveData.id,
+      slotNumber: s.slotNumber,
+      isEmpty: false,
+      saveData: {
+        clubName: s.saveData.club_name,
+        season: s.saveData.season,
+        budget: s.saveData.budget,
+        players: (s.saveData.players as unknown[]) ?? [],
+        currentRound: s.saveData.current_round ?? undefined,
+        savedAt: s.saveData.updated_at ?? s.saveData.created_at,
+      },
+    };
+  });
+};
+
+export function SaveLoadModal({
+  isOpen,
+  onClose,
+  mode,
   currentGameData,
-  onLoadComplete 
+  onLoadComplete,
 }: SaveLoadModalProps) {
-  const { slots, loading, saveGame, loadGame, deleteSave, getSaveSlots } = useSaveLoad();
-  const [localSlots, setLocalSlots] = useState<SaveSlot[]>([]);
+  const { loading, saveGame, loadGame, deleteSave, getSaveSlots } =
+    useCloudSaveLoad();
+
+  const [localSlots, setLocalSlots] = useState<UISaveSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showOverwriteConfirm, setShowOverwriteConfirm] = useState(false);
@@ -47,20 +106,28 @@ export function SaveLoadModal({
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      const freshSlots = getSaveSlots();
-      setLocalSlots(freshSlots);
-      setSelectedSlot(null);
-    }
+    if (!isOpen) return;
+    setSelectedSlot(null);
+
+    let isActive = true;
+    (async () => {
+      const fresh = await getSaveSlots();
+      if (!isActive) return;
+      setLocalSlots(toUiSlots(fresh));
+    })();
+
+    return () => {
+      isActive = false;
+    };
   }, [isOpen, getSaveSlots]);
 
   const handleSave = async (slotNumber: number) => {
     if (!currentGameData) {
-      toast.error('Nenhum dado de jogo disponível');
+      toast.error("Nenhum dado de jogo disponível");
       return;
     }
 
-    const slot = localSlots.find(s => s.slotNumber === slotNumber);
+    const slot = localSlots.find((s) => s.slotNumber === slotNumber);
     if (slot && !slot.isEmpty) {
       setPendingSlot(slotNumber);
       setShowOverwriteConfirm(true);
@@ -72,16 +139,17 @@ export function SaveLoadModal({
 
   const performSave = async (slotNumber: number) => {
     if (!currentGameData) return;
-    
+
     setIsSaving(true);
     const success = await saveGame(slotNumber, currentGameData);
     setIsSaving(false);
-    
+
     if (success) {
-      toast.success('Jogo salvo com sucesso!', {
-        icon: <Check className="h-4 w-4 text-primary" />
+      toast.success("Jogo salvo com sucesso!", {
+        icon: <Check className="h-4 w-4 text-primary" />,
       });
-      setLocalSlots(getSaveSlots());
+      const fresh = await getSaveSlots();
+      setLocalSlots(toUiSlots(fresh));
       setTimeout(() => onClose(), 500);
     }
   };
@@ -89,15 +157,12 @@ export function SaveLoadModal({
   const handleLoad = async (slotNumber: number) => {
     const data = await loadGame(slotNumber);
     if (data) {
-      // Marcar que o jogo foi carregado de um save para não resetar o campeonato
-      sessionStorage.setItem(`loaded_save_${data.clubName}`, 'true');
-      
-      toast.success('Jogo carregado!', {
-        icon: <Download className="h-4 w-4 text-primary" />
+      sessionStorage.setItem(`loaded_save_${data.club_name}`, "true");
+
+      toast.success("Jogo carregado!", {
+        icon: <Download className="h-4 w-4 text-primary" />,
       });
-      if (onLoadComplete) {
-        onLoadComplete(data);
-      }
+      onLoadComplete?.(data);
       onClose();
     }
   };
@@ -109,13 +174,14 @@ export function SaveLoadModal({
 
   const confirmDelete = async () => {
     if (pendingSlot === null) return;
-    
+
     const success = await deleteSave(pendingSlot);
     if (success) {
-      toast.success('Save excluído');
-      setLocalSlots(getSaveSlots());
+      toast.success("Save excluído");
+      const fresh = await getSaveSlots();
+      setLocalSlots(toUiSlots(fresh));
     }
-    
+
     setShowDeleteConfirm(false);
     setPendingSlot(null);
   };
@@ -135,37 +201,37 @@ export function SaveLoadModal({
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'Agora mesmo';
+    if (diffMins < 1) return "Agora mesmo";
     if (diffMins < 60) return `${diffMins}min atrás`;
     if (diffHours < 24) return `${diffHours}h atrás`;
     if (diffDays < 7) return `${diffDays}d atrás`;
-    
-    return date.toLocaleDateString('pt-BR', { 
-      day: '2-digit', 
-      month: 'short',
-      year: 'numeric'
+
+    return date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
     });
   };
 
   const getSlotGradient = (slotNumber: number, isEmpty: boolean) => {
-    if (isEmpty) return 'from-muted/30 to-muted/10';
+    if (isEmpty) return "from-muted/30 to-muted/10";
     const gradients = [
-      'from-primary/20 via-primary/10 to-transparent',
-      'from-blue-500/20 via-blue-500/10 to-transparent',
-      'from-purple-500/20 via-purple-500/10 to-transparent',
-      'from-orange-500/20 via-orange-500/10 to-transparent',
-      'from-pink-500/20 via-pink-500/10 to-transparent',
+      "from-primary/20 via-primary/10 to-transparent",
+      "from-blue-500/20 via-blue-500/10 to-transparent",
+      "from-purple-500/20 via-purple-500/10 to-transparent",
+      "from-orange-500/20 via-orange-500/10 to-transparent",
+      "from-pink-500/20 via-pink-500/10 to-transparent",
     ];
     return gradients[(slotNumber - 1) % gradients.length];
   };
 
   const getSlotAccent = (slotNumber: number) => {
     const accents = [
-      'border-primary/50 shadow-primary/20',
-      'border-blue-500/50 shadow-blue-500/20',
-      'border-purple-500/50 shadow-purple-500/20',
-      'border-orange-500/50 shadow-orange-500/20',
-      'border-pink-500/50 shadow-pink-500/20',
+      "border-primary/50 shadow-primary/20",
+      "border-blue-500/50 shadow-blue-500/20",
+      "border-purple-500/50 shadow-purple-500/20",
+      "border-orange-500/50 shadow-orange-500/20",
+      "border-pink-500/50 shadow-pink-500/20",
     ];
     return accents[(slotNumber - 1) % accents.length];
   };
@@ -178,11 +244,15 @@ export function SaveLoadModal({
           <div className="relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-accent/20" />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
-            
+
             <DialogHeader className="relative z-10 p-6 pb-4">
               <div className="flex items-center gap-3">
-                <div className={`p-3 rounded-2xl ${mode === 'save' ? 'bg-primary/20' : 'bg-blue-500/20'}`}>
-                  {mode === 'save' ? (
+                <div
+                  className={`p-3 rounded-2xl ${
+                    mode === "save" ? "bg-primary/20" : "bg-blue-500/20"
+                  }`}
+                >
+                  {mode === "save" ? (
                     <Cloud className="h-6 w-6 text-primary" />
                   ) : (
                     <Download className="h-6 w-6 text-blue-400" />
@@ -190,13 +260,12 @@ export function SaveLoadModal({
                 </div>
                 <div>
                   <DialogTitle className="text-2xl font-bold text-foreground">
-                    {mode === 'save' ? 'Salvar Progresso' : 'Carregar Jogo'}
+                    {mode === "save" ? "Salvar Progresso" : "Carregar Jogo"}
                   </DialogTitle>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    {mode === 'save' 
-                      ? 'Escolha um slot para salvar seu progresso' 
-                      : 'Selecione um save para continuar jogando'
-                    }
+                    {mode === "save"
+                      ? "Escolha um slot para salvar seu progresso"
+                      : "Selecione um save para continuar jogando"}
                   </p>
                 </div>
               </div>
@@ -217,30 +286,42 @@ export function SaveLoadModal({
                   onClick={() => setSelectedSlot(slot.slotNumber)}
                   className={`
                     group relative overflow-hidden rounded-2xl border-2 transition-all duration-300 cursor-pointer
-                    ${slot.isEmpty 
-                      ? 'border-dashed border-border/50 hover:border-border' 
-                      : `border-solid ${getSlotAccent(slot.slotNumber)} shadow-lg hover:shadow-xl`
+                    ${
+                      slot.isEmpty
+                        ? "border-dashed border-border/50 hover:border-border"
+                        : `border-solid ${getSlotAccent(
+                            slot.slotNumber,
+                          )} shadow-lg hover:shadow-xl`
                     }
-                    ${selectedSlot === slot.slotNumber 
-                      ? 'ring-2 ring-primary ring-offset-2 ring-offset-background scale-[1.02]' 
-                      : 'hover:scale-[1.01]'
+                    ${
+                      selectedSlot === slot.slotNumber
+                        ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-[1.02]"
+                        : "hover:scale-[1.01]"
                     }
                   `}
                 >
                   {/* Background Gradient */}
-                  <div className={`absolute inset-0 bg-gradient-to-r ${getSlotGradient(slot.slotNumber, slot.isEmpty)}`} />
-                  
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-r ${getSlotGradient(
+                      slot.slotNumber,
+                      slot.isEmpty,
+                    )}`}
+                  />
+
                   {/* Content */}
                   <div className="relative z-10 p-4">
                     <div className="flex items-center gap-4">
                       {/* Slot Icon */}
-                      <div className={`
+                      <div
+                        className={`
                         relative flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center
-                        ${slot.isEmpty 
-                          ? 'bg-muted/50 border-2 border-dashed border-border' 
-                          : 'bg-gradient-to-br from-card to-muted/50 border border-border/50'
+                        ${
+                          slot.isEmpty
+                            ? "bg-muted/50 border-2 border-dashed border-border"
+                            : "bg-gradient-to-br from-card to-muted/50 border border-border/50"
                         }
-                      `}>
+                      `}
+                      >
                         {slot.isEmpty ? (
                           <Save className="h-6 w-6 text-muted-foreground/50" />
                         ) : (
@@ -267,7 +348,7 @@ export function SaveLoadModal({
                             </span>
                           )}
                         </div>
-                        
+
                         {slot.isEmpty ? (
                           <p className="text-muted-foreground text-sm">
                             Slot disponível para salvar
@@ -277,7 +358,7 @@ export function SaveLoadModal({
                             <h3 className="text-lg font-bold text-foreground truncate">
                               {slot.saveData.clubName}
                             </h3>
-                            
+
                             {/* Stats Row */}
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
                               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -286,7 +367,9 @@ export function SaveLoadModal({
                               </div>
                               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                 <Users className="h-3.5 w-3.5" />
-                                <span>{slot.saveData.players.length} jogadores</span>
+                                <span>
+                                  {slot.saveData.players.length} jogadores
+                                </span>
                               </div>
                               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                 <TrendingUp className="h-3.5 w-3.5" />
@@ -317,7 +400,7 @@ export function SaveLoadModal({
 
                       {/* Actions */}
                       <div className="flex items-center gap-2">
-                        {mode === 'save' ? (
+                        {mode === "save" ? (
                           <Button
                             size="sm"
                             onClick={(e) => {
@@ -350,7 +433,7 @@ export function SaveLoadModal({
                             Carregar
                           </Button>
                         )}
-                        
+
                         {!slot.isEmpty && (
                           <Button
                             size="sm"
@@ -364,8 +447,12 @@ export function SaveLoadModal({
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         )}
-                        
-                        <ChevronRight className={`h-5 w-5 text-muted-foreground/50 transition-transform ${selectedSlot === slot.slotNumber ? 'rotate-90' : ''}`} />
+
+                        <ChevronRight
+                          className={`h-5 w-5 text-muted-foreground/50 transition-transform ${
+                            selectedSlot === slot.slotNumber ? "rotate-90" : ""
+                          }`}
+                        />
                       </div>
                     </div>
                   </div>
@@ -402,12 +489,15 @@ export function SaveLoadModal({
               Excluir Save
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O save será excluído permanentemente.
+              Esta ação não pode ser desfeita. O save será excluído
+              permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-border">Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel className="border-border">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
@@ -418,7 +508,10 @@ export function SaveLoadModal({
       </AlertDialog>
 
       {/* Overwrite Confirmation */}
-      <AlertDialog open={showOverwriteConfirm} onOpenChange={setShowOverwriteConfirm}>
+      <AlertDialog
+        open={showOverwriteConfirm}
+        onOpenChange={setShowOverwriteConfirm}
+      >
         <AlertDialogContent className="bg-card border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-accent">
@@ -426,12 +519,15 @@ export function SaveLoadModal({
               Sobrescrever Save
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Este slot já contém um save. Deseja substituí-lo? Esta ação não pode ser desfeita.
+              Este slot já contém um save. Deseja substituí-lo? Esta ação não pode
+              ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-border">Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel className="border-border">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmOverwrite}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >

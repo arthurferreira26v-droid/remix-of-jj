@@ -123,7 +123,7 @@ export function useCloudSaveLoad() {
         total_sales: params.totalSales,
         total_purchases: params.totalPurchases,
         has_active_investment: params.hasActiveInvestment,
-        players: params.players as unknown as null,
+        players: params.players as unknown as any,
         championship_id: params.championshipId,
         current_round: params.currentRound,
         season_stats: {
