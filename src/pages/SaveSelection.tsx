@@ -37,10 +37,12 @@ const SaveSelection = () => {
   }, [user]);
 
   const fetchSaves = async () => {
+    if (!user) return;
     try {
       const { data, error } = await supabase
         .from("game_saves")
         .select("id, slot_number, club_name, season, updated_at")
+        .eq("user_id", user.id)
         .order("slot_number", { ascending: true });
 
       if (error) throw error;
