@@ -120,8 +120,82 @@ export const useChampionship = (userTeamName: string) => {
 
       // Verificar se veio de um load de save (flag no sessionStorage)
       const isLoadedFromSave = sessionStorage.getItem(`loaded_save_${userTeamName}`) === 'true';
+      const loadedChampionshipId = sessionStorage.getItem(`loaded_championship_${userTeamName}`);
 
       try {
+        let championshipId: string;
+        let existingChampionship: any = null;
+
+        // Se veio de um save com championship_id específico, buscar esse campeonato
+        if (isLoadedFromSave && loadedChampionshipId) {
+          const { data: savedChampionship, error: savedError } = await supabase
+            .from("championships")
+            .select("*")
+            .eq("id", loadedChampionshipId)
+            .eq("user_id", user.id)
+            .single();
+
+          if (!savedError && savedChampionship) {
+            existingChampionship = savedChampionship;
+            championshipId = savedChampionship.id;
+            
+            // Limpar a flag após usar
+            sessionStorage.removeItem(`loaded_save_${userTeamName}`);
+            sessionStorage.removeItem(`loaded_championship_${userTeamName}`);
+            
+            // Verificar se todas as partidas foram jogadas
+            const { data: remainingMatches } = await supabase
+              .from("matches")
+              .select("id")
+              .eq("championship_id", championshipId)
+              .eq("is_played", false)
+              .limit(1);
+            
+            // Se não há partidas restantes, verificar vencedor
+            if (!remainingMatches || remainingMatches.length === 0) {
+              setIsChampionComplete(true);
+              
+              // Verificar se o usuário ganhou o campeonato
+              const { data: standings } = await supabase
+                .from("standings")
+                .select("team_name, points, played, goal_difference")
+                .eq("championship_id", championshipId)
+                .order("points", { ascending: false })
+                .order("goal_difference", { ascending: false })
+                .limit(1);
+              
+              if (standings && standings.length > 0) {
+                const winner = standings[0];
+                setUserWonChampionship(winner.team_name === userTeamName);
+              }
+              
+              setChampionship(savedChampionship);
+              setLoading(false);
+              return;
+            }
+            
+            setChampionship(savedChampionship);
+            
+            // Buscar próxima partida
+            const { data: matches, error: matchError } = await supabase
+              .from("matches")
+              .select("*")
+              .eq("championship_id", championshipId)
+              .eq("is_played", false)
+              .or(`home_team_name.eq.${userTeamName},away_team_name.eq.${userTeamName}`)
+              .order("round", { ascending: true })
+              .limit(1);
+
+            if (!matchError && matches && matches.length > 0) {
+              setNextMatch(matches[0]);
+            }
+            
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Busca padrão por nome do campeonato
         const { data: existingChampionships, error: fetchError } = await supabase
           .from("championships")
           .select("*")
@@ -132,14 +206,13 @@ export const useChampionship = (userTeamName: string) => {
 
         if (fetchError) throw fetchError;
 
-        let championshipId: string;
-
-        // Se existe campeonato E veio de um save carregado, manter o campeonato
+        // Se existe campeonato E veio de um save carregado (sem championship_id específico), manter
         if (existingChampionships && existingChampionships.length > 0 && isLoadedFromSave) {
           championshipId = existingChampionships[0].id;
           
-          // Limpar a flag após usar
+          // Limpar as flags após usar
           sessionStorage.removeItem(`loaded_save_${userTeamName}`);
+          sessionStorage.removeItem(`loaded_championship_${userTeamName}`);
           
           // Verificar se todas as partidas foram jogadas
           const { data: remainingMatches } = await supabase

@@ -272,7 +272,13 @@ const Game = () => {
   // Handle loading a save (Cloud)
   const handleLoadComplete = useCallback(
     (save: CloudSaveData) => {
+      // Marcar que este jogo veio de um save carregado
       sessionStorage.setItem(`loaded_save_${save.club_name}`, "true");
+      
+      // Salvar o championship_id para que useChampionship restaure o campeonato correto
+      if (save.championship_id) {
+        sessionStorage.setItem(`loaded_championship_${save.club_name}`, save.championship_id);
+      }
 
       const loadedPlayers = (save.players as unknown as Player[]) ?? [];
       localStorage.setItem(`players_${save.club_name}`, JSON.stringify(loadedPlayers));
