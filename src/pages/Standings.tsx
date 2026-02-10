@@ -1,8 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { StandingsTable } from "@/components/StandingsTable";
-import { ChevronLeft, Loader2 } from "lucide-react";
+import { LibertadoresGroups } from "@/components/LibertadoresGroups";
+import { ChevronLeft, ChevronDown, ChevronUp, Check, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+
+type Competition = "brasileirao" | "libertadores";
+
+const competitions = [
+  { id: "brasileirao" as Competition, label: "Brasileirão" },
+  { id: "libertadores" as Competition, label: "Libertadores" },
+];
 
 const Standings = () => {
   const { user, loading: authLoading } = useAuth();
@@ -10,7 +18,21 @@ const Standings = () => {
   const [searchParams] = useSearchParams();
   const teamName = searchParams.get("time") || "Botafogo";
 
-  // Redirect to auth if not authenticated
+  const [selected, setSelected] = useState<Competition>("brasileirao");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
@@ -29,29 +51,71 @@ const Standings = () => {
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
+
+  const currentLabel = competitions.find((c) => c.id === selected)!.label;
 
   return (
     <div className="h-screen bg-black flex flex-col overflow-hidden">
-      {/* Header Fixo */}
+      {/* Header */}
       <header className="border-b border-border bg-black flex-shrink-0">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <button 
+          <button
             onClick={handleBack}
             className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors"
           >
             <ChevronLeft className="w-6 h-6 text-white" />
           </button>
-          <h1 className="text-xl font-bold text-white">Classificação</h1>
+
+          {/* Dropdown */}
+          <div ref={dropdownRef} className="relative">
+            <button
+              onClick={() => setDropdownOpen((o) => !o)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-white/5 hover:bg-white/10 transition-colors"
+            >
+              <span className="text-lg font-bold text-white">{currentLabel}</span>
+              {dropdownOpen ? (
+                <ChevronUp className="w-5 h-5 text-white/60" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-white/60" />
+              )}
+            </button>
+
+            {dropdownOpen && (
+              <div className="absolute left-0 top-full mt-2 z-50 w-52 rounded-xl border border-border bg-[#1a1a1a] shadow-lg overflow-hidden">
+                {competitions.map((comp) => (
+                  <button
+                    key={comp.id}
+                    onClick={() => {
+                      setSelected(comp.id);
+                      setDropdownOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/10 transition-colors"
+                  >
+                    {selected === comp.id ? (
+                      <Check className="w-4 h-4 text-[#c8ff00]" />
+                    ) : (
+                      <span className="w-4" />
+                    )}
+                    <span className="text-white font-medium text-sm">
+                      {comp.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* Content com scroll */}
+      {/* Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="container mx-auto px-4 py-4">
-          <StandingsTable />
+          {selected === "brasileirao" ? (
+            <StandingsTable />
+          ) : (
+            <LibertadoresGroups />
+          )}
         </div>
       </div>
     </div>
