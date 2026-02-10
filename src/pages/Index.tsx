@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TeamCard } from "@/components/TeamCard";
-import { LeagueSelector } from "@/components/LeagueSelector";
-import { teams, leagues } from "@/data/teams";
+import { teams } from "@/data/teams";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,7 +9,7 @@ import { Loader2, LogOut } from "lucide-react";
 
 const Index = () => {
   const { user, loading, signOut } = useAuth();
-  const [selectedLeague, setSelectedLeague] = useState("brasileiro");
+  
   const navigate = useNavigate();
 
   // Redirect to auth if not authenticated
@@ -20,7 +19,7 @@ const Index = () => {
     }
   }, [user, loading, navigate]);
 
-  const filteredTeams = teams.filter((team) => team.league === selectedLeague);
+  const filteredTeams = teams;
 
   const handleTeamSelect = (teamName: string) => {
     toast.success(`Time ${teamName} selecionado!`, {
@@ -66,17 +65,6 @@ const Index = () => {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12 max-w-7xl">
-        <div className="mb-8 text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
-            Selecione a Liga
-          </h2>
-        </div>
-
-        <LeagueSelector
-          leagues={leagues}
-          selectedLeague={selectedLeague}
-          onSelect={setSelectedLeague}
-        />
 
         <div className="mb-8">
           <h3 className="text-2xl font-bold text-foreground mb-6 text-center">
