@@ -1,8 +1,3 @@
-import realMadridLogo from "@/assets/teams/real-madrid.png";
-import barcelonaLogo from "@/assets/teams/barcelona.png";
-import manCityLogo from "@/assets/teams/man-city.png";
-import liverpoolLogo from "@/assets/teams/liverpool.png";
-import psgLogo from "@/assets/teams/psg.png";
 import vascoLogo from "@/assets/teams/vasco.png";
 import santosLogo from "@/assets/teams/santos.png";
 import flamengoLogo from "@/assets/teams/flamengo.png";
@@ -49,22 +44,8 @@ export const teams: Team[] = [
   { id: "mirassol", name: "Mirassol", league: "brasileiro", rating: 2, logo: mirassolLogo },
   { id: "remo", name: "Remo", league: "brasileiro", rating: 2, logo: remoLogo },
 
-  // Europeu
-  { id: "real-madrid", name: "Real Madrid", league: "europeu", rating: 5, logo: realMadridLogo },
-  { id: "barcelona", name: "Barcelona", league: "europeu", rating: 5, logo: barcelonaLogo },
-  { id: "man-city", name: "Manchester City", league: "europeu", rating: 5, logo: manCityLogo },
-  { id: "liverpool", name: "Liverpool", league: "europeu", rating: 4, logo: liverpoolLogo },
-  { id: "bayern", name: "Bayern Munich", league: "europeu", rating: 5, logo: "https://upload.wikimedia.org/wikipedia/commons/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg" },
-  { id: "psg", name: "Paris Saint-Germain", league: "europeu", rating: 4, logo: psgLogo },
-  { id: "juventus", name: "Juventus", league: "europeu", rating: 4, logo: "https://upload.wikimedia.org/wikipedia/commons/a/a8/Juventus_FC_-_pictogram_black_%28Italy%2C_2017%29.svg" },
-  { id: "milan", name: "AC Milan", league: "europeu", rating: 4, logo: "https://upload.wikimedia.org/wikipedia/commons/d/d0/Logo_of_AC_Milan.svg" },
-  { id: "chelsea", name: "Chelsea", league: "europeu", rating: 4, logo: "https://upload.wikimedia.org/wikipedia/commons/c/cc/Chelsea_FC.svg" },
-  { id: "arsenal", name: "Arsenal", league: "europeu", rating: 4, logo: "https://upload.wikimedia.org/wikipedia/commons/5/53/Arsenal_FC.svg" },
-  { id: "inter", name: "Inter Milan", league: "europeu", rating: 4, logo: "https://upload.wikimedia.org/wikipedia/commons/0/05/FC_Internazionale_Milano_2021.svg" },
-  { id: "atletico", name: "Atlético Madrid", league: "europeu", rating: 4, logo: "https://upload.wikimedia.org/wikipedia/commons/f/f4/Atletico_Madrid_2017_logo.svg" },
 ];
 
 export const leagues = [
   { id: "brasileiro", name: "Brasileiro", flag: "🇧🇷" },
-  { id: "europeu", name: "Europeu", flag: "🇪🇺" },
 ];
