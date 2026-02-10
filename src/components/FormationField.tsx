@@ -16,16 +16,42 @@ export const FormationField = ({
   canSubstitute = false,
   selectedPlayerId,
 }: FormationFieldProps) => {
-  const usedPlayers = new Set<string>();
+  // Assign players to formation positions intelligently
+  const assignedPlayers = (() => {
+    const available = [...players];
+    const assignments: (Player | null)[] = new Array(formation.positions.length).fill(null);
 
-  const getPlayerForPosition = (): Player | null => {
-    const player = players.find(p => !usedPlayers.has(p.id));
-    if (player) {
-      usedPlayers.add(player.id);
-      return player;
+    // Pass 1: Assign players whose primary position matches the role
+    for (let i = 0; i < formation.positions.length; i++) {
+      const role = formation.positions[i].role;
+      const idx = available.findIndex(p => p.position === role);
+      if (idx !== -1) {
+        assignments[i] = available[idx];
+        available.splice(idx, 1);
+      }
     }
-    return null;
-  };
+
+    // Pass 2: Assign players whose altPositions match the role
+    for (let i = 0; i < formation.positions.length; i++) {
+      if (assignments[i]) continue;
+      const role = formation.positions[i].role;
+      const idx = available.findIndex(p => p.altPositions?.includes(role));
+      if (idx !== -1) {
+        assignments[i] = available[idx];
+        available.splice(idx, 1);
+      }
+    }
+
+    // Pass 3: Fill remaining slots with whoever is left
+    for (let i = 0; i < formation.positions.length; i++) {
+      if (assignments[i]) continue;
+      if (available.length > 0) {
+        assignments[i] = available.shift()!;
+      }
+    }
+
+    return assignments;
+  })();
 
   return (
     <div className="relative w-full aspect-[3/4] bg-gradient-to-b from-green-800 to-green-900 rounded-lg overflow-hidden border-2 border-white/20">
@@ -53,7 +79,7 @@ export const FormationField = ({
 
       {/* ⚽ JOGADORES */}
       {formation.positions.map((pos, index) => {
-        const player = getPlayerForPosition();
+        const player = assignedPlayers[index];
         if (!player) return null;
 
         // Verifica se jogador está na posição correta
