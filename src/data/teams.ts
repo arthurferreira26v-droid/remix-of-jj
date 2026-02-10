@@ -1,16 +1,17 @@
 import vascoLogo from "@/assets/teams/vasco.png";
 import santosLogo from "@/assets/teams/santos.png";
 import flamengoLogo from "@/assets/teams/flamengo.png";
-import corinthiansLogo from "@/assets/teams/corinthians.png";
+import corinthiansLogo from "@/assets/teams/corinthians.svg";
 import fluminenseLogo from "@/assets/teams/fluminense.png";
 import gremioLogo from "@/assets/teams/gremio.svg";
-import atleticoMgLogo from "@/assets/teams/atletico-mg.png";
-import remoLogo from "@/assets/teams/remo.png";
+import atleticoMgLogo from "@/assets/teams/atletico-mg.svg";
+import remoLogo from "@/assets/teams/remo.svg";
 import mirassolLogo from "@/assets/teams/mirassol.png";
 import bahiaLogo from "@/assets/teams/bahia.png";
 import bragantinoLogo from "@/assets/teams/bragantino.png";
 import vitoriaLogo from "@/assets/teams/vitoria.png";
 import athleticoPrLogo from "@/assets/teams/athletico-pr.svg";
+import coritibaLogo from "@/assets/teams/coritiba.svg";
 
 export interface Team {
   id: string;
@@ -39,7 +40,7 @@ export const teams: Team[] = [
   { id: "bahia", name: "Bahia", league: "brasileiro", rating: 3, logo: bahiaLogo },
   { id: "bragantino", name: "Bragantino", league: "brasileiro", rating: 3, logo: bragantinoLogo },
   { id: "vitoria", name: "Vitória", league: "brasileiro", rating: 2, logo: vitoriaLogo },
-  { id: "coritiba", name: "Coritiba", league: "brasileiro", rating: 2, logo: "https://upload.wikimedia.org/wikipedia/commons/c/c9/Coritiba_FBC_-_parana.svg" },
+  { id: "coritiba", name: "Coritiba", league: "brasileiro", rating: 2, logo: coritibaLogo },
   { id: "chapecoense", name: "Chapecoense", league: "brasileiro", rating: 2, logo: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Associacao_Chapecoense_de_Futebol_logo.svg" },
   { id: "mirassol", name: "Mirassol", league: "brasileiro", rating: 2, logo: mirassolLogo },
   { id: "remo", name: "Remo", league: "brasileiro", rating: 2, logo: remoLogo },
