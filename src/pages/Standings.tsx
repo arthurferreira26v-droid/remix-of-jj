@@ -4,6 +4,8 @@ import { StandingsTable } from "@/components/StandingsTable";
 import { LibertadoresGroups } from "@/components/LibertadoresGroups";
 import { ChevronLeft, ChevronDown, ChevronUp, Check, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLibertadores } from "@/hooks/useLibertadores";
+import { useChampionship } from "@/hooks/useChampionship";
 
 type Competition = "brasileirao" | "libertadores";
 
@@ -21,6 +23,9 @@ const Standings = () => {
   const [selected, setSelected] = useState<Competition>("brasileirao");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const { championship } = useChampionship(teamName);
+  const { groups, loading: libertLoading, preLibertadoresResults } = useLibertadores(teamName, championship?.id);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -114,7 +119,11 @@ const Standings = () => {
           {selected === "brasileirao" ? (
             <StandingsTable />
           ) : (
-            <LibertadoresGroups />
+            <LibertadoresGroups 
+              groups={groups} 
+              loading={libertLoading}
+              preLibertadoresResults={preLibertadoresResults}
+            />
           )}
         </div>
       </div>
