@@ -1,0 +1,1 @@
+ALTER TABLE public.standings ADD COLUMN group_name text;

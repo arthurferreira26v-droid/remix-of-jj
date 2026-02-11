@@ -165,6 +165,7 @@ export type Database = {
           goal_difference: number
           goals_against: number
           goals_for: number
+          group_name: string | null
           id: string
           logo: string
           losses: number
@@ -182,6 +183,7 @@ export type Database = {
           goal_difference?: number
           goals_against?: number
           goals_for?: number
+          group_name?: string | null
           id?: string
           logo: string
           losses?: number
@@ -199,6 +201,7 @@ export type Database = {
           goal_difference?: number
           goals_against?: number
           goals_for?: number
+          group_name?: string | null
           id?: string
           logo?: string
           losses?: number
