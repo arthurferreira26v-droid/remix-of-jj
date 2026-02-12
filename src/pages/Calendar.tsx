@@ -16,6 +16,7 @@ interface CalendarMatch {
   is_played: boolean;
   isHome: boolean;
   opponentName: string;
+  competitionLabel: string;
 }
 
 const Calendar = () => {
@@ -40,42 +41,45 @@ const Calendar = () => {
       setLoading(true);
       try {
         const userTeam = teams.find((t) => t.name === teamName);
-        if (!userTeam) {
+        if (!userTeam || !user) {
           setMatches([]);
           return;
         }
 
-        const championshipName =
+        // Buscar todos os campeonatos do usuário relacionados ao time
+        const championshipNames = [
           userTeam.league === "brasileiro"
             ? `Brasileirão - ${teamName}`
-            : `Liga dos Campeões - ${teamName}`;
-
-        if (!user) {
-          setMatches([]);
-          return;
-        }
+            : `Liga dos Campeões - ${teamName}`,
+          `Pré-Libertadores - ${teamName}`,
+          `Libertadores - ${teamName}`,
+        ];
 
         const { data: championships } = await supabase
           .from("championships")
-          .select("id, total_rounds")
-          .eq("name", championshipName)
+          .select("id, name, total_rounds")
           .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(1);
+          .in("name", championshipNames)
+          .order("created_at", { ascending: false });
 
-        const championship = championships?.[0];
-        if (!championship) {
+        if (!championships || championships.length === 0) {
           setMatches([]);
           setTotalRounds(0);
           return;
         }
-        
-        setTotalRounds(championship.total_rounds);
+
+        // Use brasileirão total_rounds for the reset check
+        const brasileirao = championships.find(c => c.name.startsWith("Brasileirão"));
+        setTotalRounds(brasileirao?.total_rounds || 0);
+
+        // Fetch matches from all championships
+        const allChampIds = championships.map(c => c.id);
+        const champNameMap = new Map(championships.map(c => [c.id, c.name]));
 
         const { data: allMatches } = await supabase
           .from("matches")
-          .select("id, round, home_team_name, away_team_name, home_score, away_score, is_played")
-          .eq("championship_id", championship.id)
+          .select("id, round, home_team_name, away_team_name, home_score, away_score, is_played, championship_id")
+          .in("championship_id", allChampIds)
           .order("round", { ascending: true });
 
         if (!allMatches) {
@@ -91,6 +95,11 @@ const Calendar = () => {
           .map((match) => {
             const isHome = match.home_team_name === teamName;
             const opponentName = isHome ? match.away_team_name : match.home_team_name;
+            const champName = champNameMap.get(match.championship_id) || "";
+            let competitionLabel = "";
+            if (champName.startsWith("Pré-Libertadores")) competitionLabel = "Pré-Lib";
+            else if (champName.startsWith("Libertadores")) competitionLabel = "Libertadores";
+            else competitionLabel = "Brasileirão";
 
             return {
               id: match.id,
@@ -102,6 +111,7 @@ const Calendar = () => {
               is_played: match.is_played,
               isHome,
               opponentName,
+              competitionLabel,
             };
           });
 
@@ -266,7 +276,7 @@ const Calendar = () => {
                 >
                   <div className="flex flex-col">
                     <span className="text-xs text-muted-foreground">
-                      {match.round}ª rodada • {homeAwayLabel}
+                      {match.competitionLabel} • {match.round}ª rodada • {homeAwayLabel}
                     </span>
                     <span className="text-sm font-medium text-white">
                       {teamName} vs {match.opponentName}

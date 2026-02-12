@@ -22,13 +22,13 @@ interface PreLibertadoresResult {
   team_name: string;
   opponent1: string;
   opponent1_logo: string;
-  result1: "win" | "loss" | "draw";
+  result1: "win" | "loss" | "draw" | "pending";
   score1: string;
   opponent2: string;
   opponent2_logo: string;
-  result2: "win" | "loss" | "draw";
+  result2: "win" | "loss" | "draw" | "pending";
   score2: string;
-  qualified: boolean;
+  qualified: boolean | null;
 }
 
 interface Props {
@@ -59,12 +59,14 @@ export const LibertadoresGroups = ({ groups, loading, preLibertadoresResults }: 
               <div key={result.team_name} className="space-y-2">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-white font-bold text-sm">{result.team_name}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                    result.qualified 
+                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    result.qualified === true
                       ? "bg-green-500/20 text-green-400" 
-                      : "bg-red-500/20 text-red-400"
+                      : result.qualified === false
+                      ? "bg-red-500/20 text-red-400"
+                      : "bg-yellow-500/20 text-yellow-400"
                   }`}>
-                    {result.qualified ? "Classificado" : "Eliminado"}
+                    {result.qualified === true ? "Classificado" : result.qualified === false ? "Eliminado" : "Em andamento"}
                   </span>
                 </div>
                 {/* Match 1 */}

@@ -15,6 +15,7 @@ interface MatchCardProps {
   userForm: MatchResult[];
   opponentForm: MatchResult[];
   isHome: boolean;
+  championshipId?: string;
 }
 
 export const MatchCard = ({
@@ -28,6 +29,7 @@ export const MatchCard = ({
   userForm,
   opponentForm,
   isHome,
+  championshipId,
 }: MatchCardProps) => {
   const navigate = useNavigate();
 
@@ -37,7 +39,11 @@ export const MatchCard = ({
     if (savedPlayers) {
       localStorage.setItem('match_players', savedPlayers);
     }
-    navigate(`/partida?time=${userTeam}&adversario=${opponentTeam}`);
+    let url = `/partida?time=${userTeam}&adversario=${opponentTeam}`;
+    if (championshipId) {
+      url += `&campeonatoId=${championshipId}`;
+    }
+    navigate(url);
   };
 
   // Define which team goes on left and right based on home/away
