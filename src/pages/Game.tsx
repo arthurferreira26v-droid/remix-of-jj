@@ -18,6 +18,7 @@ import {
 } from "@/data/players";
 import { Loader2 } from "lucide-react";
 import { useChampionship } from "@/hooks/useChampionship";
+import { useLibertadores } from "@/hooks/useLibertadores";
 import { useTeamForm } from "@/hooks/useTeamForm";
 import { useTeamBudget } from "@/hooks/useTeamBudget";
 import { useAuth } from "@/hooks/useAuth";
@@ -85,6 +86,16 @@ const Game = () => {
   
   // Get championship data
   const { championship, nextMatch, loading, isChampionComplete, userWonChampionship, resetChampionship } = useChampionship(teamName);
+  
+  const PRE_LIBERTADORES_TEAMS = ["Botafogo", "Bahia"];
+  
+  // Libertadores data
+  const { 
+    nextLibertadoresMatch, 
+    nextLibertadoresChampionshipId,
+    libertadoresId,
+    loading: libertadoresLoading 
+  } = useLibertadores(teamName, championship?.id);
   
   // Determine if user is home or away based on match data
   const isHome = nextMatch ? nextMatch.home_team_name === teamName : false;
@@ -332,7 +343,7 @@ const Game = () => {
     };
   }, [user, loadSlotParam, loadCloudGame, navigate, handleLoadComplete]);
 
-  if (loading || userFormLoading || opponentFormLoading || budgetLoading || authLoading) {
+  if (loading || userFormLoading || opponentFormLoading || budgetLoading || authLoading || libertadoresLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#c8ff00]" />
@@ -442,20 +453,58 @@ const Game = () => {
       {/* Caixa do Time - Fora do header, não acompanha scroll */}
       <TeamBudget budget={budget} />
 
-      {/* Match Section */}
+      {/* Libertadores Match Section */}
+      {nextLibertadoresMatch && (
+        <div className="container mx-auto px-4 pt-6">
+          <h3 className="text-sm font-bold text-[#c8ff00] mb-3">
+            {nextLibertadoresChampionshipId && nextLibertadoresMatch.championship_id ? 
+              (nextLibertadoresMatch.round <= 4 && PRE_LIBERTADORES_TEAMS.includes(teamName) && !libertadoresId
+                ? `Pré-Libertadores - Jogo ${nextLibertadoresMatch.round}/4`
+                : `Libertadores - ${nextLibertadoresMatch.round}ª Rodada`) 
+              : "Libertadores"}
+          </h3>
+          <MatchCard
+            userTeam={teamName}
+            userLogo={getTeamLogo(teamName, selectedTeam?.logo || "")}
+            userPosition=""
+            opponentTeam={nextLibertadoresMatch.home_team_name === teamName ? nextLibertadoresMatch.away_team_name : nextLibertadoresMatch.home_team_name}
+            opponentLogo={getTeamLogo(
+              nextLibertadoresMatch.home_team_name === teamName ? nextLibertadoresMatch.away_team_name : nextLibertadoresMatch.home_team_name,
+              nextLibertadoresMatch.home_team_name === teamName ? nextLibertadoresMatch.away_team_logo : nextLibertadoresMatch.home_team_logo
+            )}
+            opponentPosition=""
+            round={nextLibertadoresMatch.round <= 4 && PRE_LIBERTADORES_TEAMS.includes(teamName) && !libertadoresId
+              ? `Pré-Libertadores - Jogo ${nextLibertadoresMatch.round}`
+              : `Libertadores - ${nextLibertadoresMatch.round}ª Rodada`}
+            userForm={[]}
+            opponentForm={[]}
+            isHome={nextLibertadoresMatch.home_team_name === teamName}
+            championshipId={nextLibertadoresChampionshipId || undefined}
+          />
+        </div>
+      )}
+
+      {/* Match Section - Brasileirão */}
       <div className="container mx-auto px-4 py-8">
-        <MatchCard
-          userTeam={teamName}
-          userLogo={getTeamLogo(teamName, selectedTeam?.logo || "")}
-          userPosition="1º"
-          opponentTeam={opponentName}
-          opponentLogo={getTeamLogo(opponentName, opponentLogo)}
-          opponentPosition="8º"
-          round={`${nextMatch.round}ª Rodada`}
-          userForm={userForm}
-          opponentForm={opponentForm}
-          isHome={isHome}
-        />
+        {nextMatch && (
+          <>
+            {nextLibertadoresMatch && (
+              <h3 className="text-sm font-bold text-white/60 mb-3">Brasileirão - {nextMatch.round}ª Rodada</h3>
+            )}
+            <MatchCard
+              userTeam={teamName}
+              userLogo={getTeamLogo(teamName, selectedTeam?.logo || "")}
+              userPosition="1º"
+              opponentTeam={opponentName}
+              opponentLogo={getTeamLogo(opponentName, opponentLogo)}
+              opponentPosition="8º"
+              round={`${nextMatch.round}ª Rodada`}
+              userForm={userForm}
+              opponentForm={opponentForm}
+              isHome={isHome}
+            />
+          </>
+        )}
       </div>
 
       {/* Tactics Manager Section */}
