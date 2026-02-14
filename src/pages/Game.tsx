@@ -87,7 +87,12 @@ const Game = () => {
   // Get championship data
   const { championship, nextMatch, loading, isChampionComplete, userWonChampionship, resetChampionship } = useChampionship(teamName);
   
-  const PRE_LIBERTADORES_TEAMS = ["Botafogo", "Bahia"];
+  // Dynamic Libertadores team lists
+  const PRE_LIBERTADORES_TEAMS = (() => {
+    const stored = localStorage.getItem('lib_prelib_teams');
+    if (stored) return JSON.parse(stored) as string[];
+    return ["Botafogo", "Bahia"];
+  })();
   
   // Libertadores data
   const { 
@@ -96,6 +101,26 @@ const Game = () => {
     libertadoresId,
     loading: libertadoresLoading 
   } = useLibertadores(teamName, championship?.id);
+
+  // Alternation logic: Lib group stage rounds map to BR round thresholds
+  const LIB_ROUND_AFTER_BR = [3, 6, 10, 14, 18, 22];
+
+  const shouldShowLibertadoresMatch = (): boolean => {
+    if (!nextLibertadoresMatch) return false;
+    // Pre-Libertadores always plays first (before Brasileirão starts)
+    const isPreLibMatch = PRE_LIBERTADORES_TEAMS.includes(teamName) && !libertadoresId;
+    if (isPreLibMatch) return true;
+    // Group stage: show when BR round has passed the threshold
+    if (!nextMatch) return true;
+    const libRound = nextLibertadoresMatch.round;
+    const brRound = nextMatch.round;
+    if (libRound <= LIB_ROUND_AFTER_BR.length) {
+      return brRound > LIB_ROUND_AFTER_BR[libRound - 1];
+    }
+    return false;
+  };
+
+  const showLibMatch = shouldShowLibertadoresMatch();
   
   // Determine if user is home or away based on match data
   const isHome = nextMatch ? nextMatch.home_team_name === teamName : false;
@@ -404,7 +429,7 @@ const Game = () => {
     }
   }
 
-  if (!nextMatch && !loading) {
+  if (!nextMatch && !nextLibertadoresMatch && !loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
@@ -415,7 +440,7 @@ const Game = () => {
     );
   }
 
-  if (!nextMatch) {
+  if (!nextMatch && !nextLibertadoresMatch) {
     return null;
   }
 
@@ -454,13 +479,13 @@ const Game = () => {
       <TeamBudget budget={budget} />
 
       {/* Libertadores Match Section */}
-      {nextLibertadoresMatch && (
+      {showLibMatch && nextLibertadoresMatch && (
         <div className="container mx-auto px-4 pt-6">
           <h3 className="text-sm font-bold text-[#c8ff00] mb-3">
             {nextLibertadoresChampionshipId && nextLibertadoresMatch.championship_id ? 
               (nextLibertadoresMatch.round <= 4 && PRE_LIBERTADORES_TEAMS.includes(teamName) && !libertadoresId
                 ? `Pré-Libertadores - Jogo ${nextLibertadoresMatch.round}/4`
-                : `Libertadores - ${nextLibertadoresMatch.round}ª Rodada`) 
+                : `Quarta-feira • Libertadores - ${nextLibertadoresMatch.round}ª Rodada`) 
               : "Libertadores"}
           </h3>
           <MatchCard
@@ -484,9 +509,12 @@ const Game = () => {
         </div>
       )}
 
-      {/* Match Section - Brasileirão (only shows when no Libertadores/Pré-Lib match is pending) */}
-      {!nextLibertadoresMatch && nextMatch && (
+      {/* Match Section - Brasileirão */}
+      {!showLibMatch && nextMatch && (
         <div className="container mx-auto px-4 py-8">
+          <h3 className="text-sm font-bold text-white/60 mb-3">
+            Sábado • Brasileirão - {nextMatch.round}ª Rodada
+          </h3>
           <MatchCard
             userTeam={teamName}
             userLogo={getTeamLogo(teamName, selectedTeam?.logo || "")}

@@ -341,19 +341,55 @@ export const useChampionship = (userTeamName: string) => {
   }, [userTeamName, user]);
 
   const resetChampionship = async () => {
-    if (!championship) return;
+    if (!championship || !user) return;
     
     setLoading(true);
     
-    // Deletar campeonato atual e dados relacionados
+    // Get final standings to determine next season Libertadores qualifiers
+    const { data: finalStandings } = await supabase
+      .from("standings")
+      .select("team_name, points, goal_difference")
+      .eq("championship_id", championship.id)
+      .order("points", { ascending: false })
+      .order("goal_difference", { ascending: false });
+    
+    if (finalStandings && finalStandings.length >= 6) {
+      const directQualifiers = finalStandings.slice(0, 4).map(s => s.team_name);
+      const preLibTeams = finalStandings.slice(4, 6).map(s => s.team_name);
+      localStorage.setItem('lib_direct_qualifiers', JSON.stringify(directQualifiers));
+      localStorage.setItem('lib_prelib_teams', JSON.stringify(preLibTeams));
+    }
+    
+    // Delete Libertadores/Pré-Lib championships for this team
+    const libNames = [
+      `Libertadores - ${userTeamName}`,
+      `Pré-Libertadores - ${userTeamName}`,
+    ];
+    const { data: libChamps } = await supabase
+      .from("championships")
+      .select("id")
+      .eq("user_id", user.id)
+      .in("name", libNames);
+    
+    if (libChamps) {
+      for (const c of libChamps) {
+        await supabase.from("matches").delete().eq("championship_id", c.id);
+        await supabase.from("standings").delete().eq("championship_id", c.id);
+        await supabase.from("team_budgets").delete().eq("championship_id", c.id);
+        await supabase.from("championships").delete().eq("id", c.id);
+      }
+    }
+    
+    // Delete main championship
     await supabase.from("matches").delete().eq("championship_id", championship.id);
     await supabase.from("standings").delete().eq("championship_id", championship.id);
+    await supabase.from("team_budgets").delete().eq("championship_id", championship.id);
     await supabase.from("championships").delete().eq("id", championship.id);
     
     // Reinicializar
     setIsChampionComplete(false);
     setUserWonChampionship(false);
-    window.location.href = "/";
+    window.location.href = `/jogo?time=${encodeURIComponent(userTeamName)}`;
   };
 
   return { 

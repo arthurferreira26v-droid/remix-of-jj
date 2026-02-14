@@ -22,6 +22,7 @@ interface CalendarMatch {
 
 interface AggregateConfrontoCard {
   type: "aggregate";
+  sortKey: number;
   opponentName: string;
   competitionLabel: string;
   leg1: CalendarMatch | null;
@@ -33,6 +34,7 @@ interface AggregateConfrontoCard {
 
 interface SingleMatchCard {
   type: "single";
+  sortKey: number;
   match: CalendarMatch;
 }
 
@@ -191,9 +193,10 @@ const Calendar = () => {
       confrontoMap.set(m.opponentName, existing);
     }
 
+    const LIB_ROUND_AFTER_BR = [3, 6, 10, 14, 18, 22];
     const cards: CalendarCard[] = [];
 
-    // Add aggregate confronto cards
+    // Add aggregate confronto cards (Pré-Lib always first)
     confrontoMap.forEach((legs, opponent) => {
       const sorted = [...legs].sort((a, b) => a.round - b.round);
       const leg1 = sorted[0] || null;
@@ -216,6 +219,7 @@ const Calendar = () => {
 
       cards.push({
         type: "aggregate",
+        sortKey: 0,
         opponentName: opponent,
         competitionLabel: "Pré-Libertadores",
         leg1,
@@ -226,10 +230,17 @@ const Calendar = () => {
       });
     });
 
-    // Add single match cards for other competitions
+    // Add single match cards for other competitions with interleaved sort keys
     for (const m of otherMatches) {
-      cards.push({ type: "single", match: m });
+      const isLib = m.competitionLabel === "Libertadores";
+      const sortKey = isLib 
+        ? (LIB_ROUND_AFTER_BR[m.round - 1] || m.round + 22) + 0.5
+        : m.round;
+      cards.push({ type: "single", sortKey, match: m });
     }
+
+    // Sort by calendar position (Pre-Lib first, then interleaved BR/Lib)
+    cards.sort((a, b) => a.sortKey - b.sortKey);
 
     return cards;
   };
@@ -355,7 +366,7 @@ const Calendar = () => {
                   >
                     <div className="px-4 py-3 flex items-center justify-between border-b border-border/40">
                       <div>
-                        <span className="text-[10px] uppercase tracking-wider text-[#c8ff00] font-bold">{competitionLabel}</span>
+                        <span className="text-[10px] uppercase tracking-wider text-[#c8ff00] font-bold">Fase Preliminar • {competitionLabel}</span>
                         <p className="text-sm font-medium text-white mt-0.5">
                           {teamName} vs {opponentName}
                         </p>
@@ -400,7 +411,7 @@ const Calendar = () => {
                 >
                   <div className="flex flex-col">
                     <span className="text-xs text-muted-foreground">
-                      {match.competitionLabel} • {match.round}ª rodada • {homeAwayLabel}
+                      {match.competitionLabel === "Brasileirão" ? "Sáb" : "Qua"} • {match.competitionLabel} • {match.round}ª rodada • {homeAwayLabel}
                     </span>
                     <span className="text-sm font-medium text-white">
                       {teamName} vs {match.opponentName}
