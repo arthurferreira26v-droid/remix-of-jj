@@ -4,15 +4,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { teams, Team } from "@/data/teams";
 import { useAuth } from "@/hooks/useAuth";
 
-// Times classificados diretamente na primeira temporada
-const DIRECT_QUALIFIERS_FIRST_SEASON = [
-  "Flamengo", "Palmeiras", "Fluminense", "Mirassol", "Cruzeiro"
-];
+// Dynamic qualifiers - check localStorage for season-specific qualifiers
+const getDirectQualifiers = (): string[] => {
+  const stored = localStorage.getItem('lib_direct_qualifiers');
+  if (stored) return JSON.parse(stored);
+  return ["Flamengo", "Palmeiras", "Fluminense", "Mirassol", "Cruzeiro"];
+};
 
-// Times que jogam a pré-Libertadores na primeira temporada
-const PRE_LIBERTADORES_FIRST_SEASON = [
-  "Botafogo", "Bahia"
-];
+const getPreLibTeams = (): string[] => {
+  const stored = localStorage.getItem('lib_prelib_teams');
+  if (stored) return JSON.parse(stored);
+  return ["Botafogo", "Bahia"];
+};
 
 interface LibertadoresGroup {
   name: string;
@@ -80,7 +83,7 @@ export const useLibertadores = (userTeamName: string, brasileiraoChampionshipId:
   const initLibertadores = async () => {
     setLoading(true);
     try {
-      const isPreLibTeam = PRE_LIBERTADORES_FIRST_SEASON.includes(userTeamName);
+      const isPreLibTeam = getPreLibTeams().includes(userTeamName);
 
       if (isPreLibTeam) {
         await handlePreLibTeam();
@@ -331,7 +334,7 @@ export const useLibertadores = (userTeamName: string, brasileiraoChampionshipId:
     }
 
     // For pre-lib teams, check if qualified
-    const isPreLibTeam = PRE_LIBERTADORES_FIRST_SEASON.includes(userTeamName);
+    const isPreLibTeam = getPreLibTeams().includes(userTeamName);
     if (isPreLibTeam && userQualified !== true) {
       // Check again from DB
       const preLibName = `Pré-Libertadores - ${userTeamName}`;
@@ -368,10 +371,10 @@ export const useLibertadores = (userTeamName: string, brasileiraoChampionshipId:
     const continentalTeams = teams.filter(t => t.league === "continental");
 
     // Determine qualified Brazilian teams
-    const qualifiedBrazilians: string[] = [...DIRECT_QUALIFIERS_FIRST_SEASON];
+    const qualifiedBrazilians: string[] = [...getDirectQualifiers()];
 
     // For pre-lib teams, add qualified ones
-    for (const preLibTeam of PRE_LIBERTADORES_FIRST_SEASON) {
+    for (const preLibTeam of getPreLibTeams()) {
       if (preLibTeam === userTeamName) {
         if (includeUser) qualifiedBrazilians.push(preLibTeam);
       } else {
