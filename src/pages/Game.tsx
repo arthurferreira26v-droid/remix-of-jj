@@ -484,28 +484,23 @@ const Game = () => {
         </div>
       )}
 
-      {/* Match Section - Brasileirão */}
-      <div className="container mx-auto px-4 py-8">
-        {nextMatch && (
-          <>
-            {nextLibertadoresMatch && (
-              <h3 className="text-sm font-bold text-white/60 mb-3">Brasileirão - {nextMatch.round}ª Rodada</h3>
-            )}
-            <MatchCard
-              userTeam={teamName}
-              userLogo={getTeamLogo(teamName, selectedTeam?.logo || "")}
-              userPosition="1º"
-              opponentTeam={opponentName}
-              opponentLogo={getTeamLogo(opponentName, opponentLogo)}
-              opponentPosition="8º"
-              round={`${nextMatch.round}ª Rodada`}
-              userForm={userForm}
-              opponentForm={opponentForm}
-              isHome={isHome}
-            />
-          </>
-        )}
-      </div>
+      {/* Match Section - Brasileirão (only shows when no Libertadores/Pré-Lib match is pending) */}
+      {!nextLibertadoresMatch && nextMatch && (
+        <div className="container mx-auto px-4 py-8">
+          <MatchCard
+            userTeam={teamName}
+            userLogo={getTeamLogo(teamName, selectedTeam?.logo || "")}
+            userPosition="1º"
+            opponentTeam={opponentName}
+            opponentLogo={getTeamLogo(opponentName, opponentLogo)}
+            opponentPosition="8º"
+            round={`${nextMatch.round}ª Rodada`}
+            userForm={userForm}
+            opponentForm={opponentForm}
+            isHome={isHome}
+          />
+        </div>
+      )}
 
       {/* Tactics Manager Section */}
       <div className="container mx-auto px-4 pb-12 pt-8 space-y-6">
