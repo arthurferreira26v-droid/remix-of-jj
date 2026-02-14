@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { teams } from "@/data/teams";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+
 interface CalendarMatch {
   id: string;
   round: number;
@@ -19,6 +20,24 @@ interface CalendarMatch {
   competitionLabel: string;
 }
 
+interface AggregateConfrontoCard {
+  type: "aggregate";
+  opponentName: string;
+  competitionLabel: string;
+  leg1: CalendarMatch | null;
+  leg2: CalendarMatch | null;
+  aggregateUserGoals: number;
+  aggregateOpponentGoals: number;
+  isComplete: boolean;
+}
+
+interface SingleMatchCard {
+  type: "single";
+  match: CalendarMatch;
+}
+
+type CalendarCard = AggregateConfrontoCard | SingleMatchCard;
+
 const Calendar = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -28,8 +47,7 @@ const Calendar = () => {
   const [matches, setMatches] = useState<CalendarMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalRounds, setTotalRounds] = useState(0);
-  
-  // Redirect to auth if not authenticated
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
@@ -46,7 +64,6 @@ const Calendar = () => {
           return;
         }
 
-        // Buscar todos os campeonatos do usuário relacionados ao time
         const championshipNames = [
           userTeam.league === "brasileiro"
             ? `Brasileirão - ${teamName}`
@@ -68,11 +85,9 @@ const Calendar = () => {
           return;
         }
 
-        // Use brasileirão total_rounds for the reset check
         const brasileirao = championships.find(c => c.name.startsWith("Brasileirão"));
         setTotalRounds(brasileirao?.total_rounds || 0);
 
-        // Fetch matches from all championships
         const allChampIds = championships.map(c => c.id);
         const champNameMap = new Map(championships.map(c => [c.id, c.name]));
 
@@ -117,7 +132,6 @@ const Calendar = () => {
 
         setMatches(teamMatches);
       } catch (error) {
-        console.error("Erro ao carregar calendário:", error);
         setMatches([]);
       } finally {
         setLoading(false);
@@ -135,23 +149,18 @@ const Calendar = () => {
 
   const handleResetChampionship = async () => {
     if (!user) return;
-    
     const userTeam = teams.find((t) => t.name === teamName);
     if (!userTeam) return;
-    
     const championshipName =
       userTeam.league === "brasileiro"
         ? `Brasileirão - ${teamName}`
         : `Liga dos Campeões - ${teamName}`;
-    
     try {
-      // Buscar campeonato atual
       const { data: championships } = await supabase
         .from("championships")
         .select("id")
         .eq("name", championshipName)
         .eq("user_id", user.id);
-      
       if (championships && championships.length > 0) {
         for (const champ of championships) {
           await supabase.from("matches").delete().eq("championship_id", champ.id);
@@ -160,15 +169,69 @@ const Calendar = () => {
           await supabase.from("championships").delete().eq("id", champ.id);
         }
       }
-      
       toast.success("Campeonato reiniciado! Redirecionando...");
       setTimeout(() => {
         navigate(`/jogo?time=${teamName}`);
       }, 1000);
     } catch (error) {
-      console.error("Erro ao reiniciar campeonato:", error);
       toast.error("Erro ao reiniciar campeonato");
     }
+  };
+
+  // Build calendar cards: group Pré-Lib into aggregate confrontos
+  const buildCalendarCards = (): CalendarCard[] => {
+    const preLibMatches = matches.filter(m => m.competitionLabel === "Pré-Lib");
+    const otherMatches = matches.filter(m => m.competitionLabel !== "Pré-Lib");
+
+    // Group Pré-Lib by opponent
+    const confrontoMap = new Map<string, CalendarMatch[]>();
+    for (const m of preLibMatches) {
+      const existing = confrontoMap.get(m.opponentName) || [];
+      existing.push(m);
+      confrontoMap.set(m.opponentName, existing);
+    }
+
+    const cards: CalendarCard[] = [];
+
+    // Add aggregate confronto cards
+    confrontoMap.forEach((legs, opponent) => {
+      const sorted = [...legs].sort((a, b) => a.round - b.round);
+      const leg1 = sorted[0] || null;
+      const leg2 = sorted[1] || null;
+
+      let aggregateUserGoals = 0;
+      let aggregateOpponentGoals = 0;
+      let isComplete = true;
+
+      for (const leg of sorted) {
+        if (!leg.is_played || leg.home_score === null || leg.away_score === null) {
+          isComplete = false;
+        } else {
+          const userGoals = leg.isHome ? leg.home_score : leg.away_score;
+          const oppGoals = leg.isHome ? leg.away_score : leg.home_score;
+          aggregateUserGoals += userGoals;
+          aggregateOpponentGoals += oppGoals;
+        }
+      }
+
+      cards.push({
+        type: "aggregate",
+        opponentName: opponent,
+        competitionLabel: "Pré-Libertadores",
+        leg1,
+        leg2,
+        aggregateUserGoals,
+        aggregateOpponentGoals,
+        isComplete,
+      });
+    });
+
+    // Add single match cards for other competitions
+    for (const m of otherMatches) {
+      cards.push({ type: "single", match: m });
+    }
+
+    return cards;
   };
 
   const needsReset = totalRounds > 0 && totalRounds < 38;
@@ -185,9 +248,31 @@ const Calendar = () => {
     return null;
   }
 
+  const calendarCards = buildCalendarCards();
+
+  const renderLegRow = (leg: CalendarMatch | null, label: string) => {
+    if (!leg) return null;
+    const isHome = leg.isHome;
+    let scoreText = "- x -";
+    let scoreColor = "text-muted-foreground";
+
+    if (leg.is_played && leg.home_score !== null && leg.away_score !== null) {
+      const userGoals = isHome ? leg.home_score : leg.away_score;
+      const oppGoals = isHome ? leg.away_score : leg.home_score;
+      scoreText = `${userGoals} x ${oppGoals}`;
+      scoreColor = userGoals > oppGoals ? "text-green-400" : userGoals < oppGoals ? "text-red-400" : "text-yellow-400";
+    }
+
+    return (
+      <div className="flex items-center justify-between text-xs py-1.5">
+        <span className="text-muted-foreground">{label} • {isHome ? "Casa" : "Fora"}</span>
+        <span className={`font-semibold ${scoreColor}`}>{scoreText}</span>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
       <header className="border-b border-border bg-black backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
           <button
@@ -200,9 +285,7 @@ const Calendar = () => {
         </div>
       </header>
 
-      {/* Content */}
       <div className="container mx-auto px-4 py-8">
-        {/* Aviso de campeonato antigo */}
         {needsReset && (
           <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
             <div className="flex items-start gap-3">
@@ -225,7 +308,6 @@ const Calendar = () => {
           </div>
         )}
 
-        {/* Info de rodadas */}
         {!loading && matches.length > 0 && (
           <div className="mb-4 flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
@@ -239,34 +321,76 @@ const Calendar = () => {
 
         {loading ? (
           <p className="text-muted-foreground">Carregando partidas...</p>
-        ) : matches.length === 0 ? (
+        ) : calendarCards.length === 0 ? (
           <p className="text-muted-foreground">
             Nenhuma partida encontrada para este campeonato.
           </p>
         ) : (
           <div className="space-y-3">
-            {matches.map((match) => {
+            {calendarCards.map((card, idx) => {
+              if (card.type === "aggregate") {
+                const { opponentName, competitionLabel, leg1, leg2, aggregateUserGoals, aggregateOpponentGoals, isComplete } = card;
+                let aggregateColor = "text-white";
+                let aggregateText = "- x -";
+                let statusLabel = "Em andamento";
+
+                if (isComplete) {
+                  aggregateText = `${aggregateUserGoals} x ${aggregateOpponentGoals}`;
+                  statusLabel = aggregateUserGoals > aggregateOpponentGoals
+                    ? "Classificado ✓"
+                    : aggregateUserGoals < aggregateOpponentGoals
+                    ? "Eliminado"
+                    : "Pênaltis";
+                  aggregateColor = aggregateUserGoals > aggregateOpponentGoals
+                    ? "text-green-400"
+                    : aggregateUserGoals < aggregateOpponentGoals
+                    ? "text-red-400"
+                    : "text-yellow-400";
+                }
+
+                return (
+                  <div
+                    key={`prelib-${opponentName}`}
+                    className="rounded-lg bg-card border border-border/60 overflow-hidden"
+                  >
+                    <div className="px-4 py-3 flex items-center justify-between border-b border-border/40">
+                      <div>
+                        <span className="text-[10px] uppercase tracking-wider text-[#c8ff00] font-bold">{competitionLabel}</span>
+                        <p className="text-sm font-medium text-white mt-0.5">
+                          {teamName} vs {opponentName}
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className={`text-base font-bold ${aggregateColor}`}>{aggregateText}</span>
+                        <span className={`text-[10px] ${aggregateColor}`}>{statusLabel}</span>
+                      </div>
+                    </div>
+                    <div className="px-4 py-2 divide-y divide-border/30">
+                      {renderLegRow(leg1, "Ida")}
+                      {renderLegRow(leg2, "Volta")}
+                      {isComplete && (
+                        <div className="flex items-center justify-between text-xs pt-1.5 pb-1">
+                          <span className="text-muted-foreground font-medium">Agregado</span>
+                          <span className={`font-bold ${aggregateColor}`}>{aggregateText}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+
+              // Single match card
+              const match = card.match;
               const isHome = match.isHome;
               const homeAwayLabel = isHome ? "Em casa" : "Fora";
-              
-              // Mostrar resultado do ponto de vista do time do usuário
               let resultLabel = "- x -";
               let resultColor = "text-white";
-              
+
               if (match.is_played && match.home_score !== null && match.away_score !== null) {
-                // Gols do time do usuário vs gols do adversário
                 const userGoals = isHome ? match.home_score : match.away_score;
                 const opponentGoals = isHome ? match.away_score : match.home_score;
                 resultLabel = `${userGoals} x ${opponentGoals}`;
-                
-                // Cor baseada no resultado
-                if (userGoals > opponentGoals) {
-                  resultColor = "text-green-400"; // Vitória
-                } else if (userGoals < opponentGoals) {
-                  resultColor = "text-red-400"; // Derrota
-                } else {
-                  resultColor = "text-yellow-400"; // Empate
-                }
+                resultColor = userGoals > opponentGoals ? "text-green-400" : userGoals < opponentGoals ? "text-red-400" : "text-yellow-400";
               }
 
               return (
@@ -282,7 +406,6 @@ const Calendar = () => {
                       {teamName} vs {match.opponentName}
                     </span>
                   </div>
-
                   <div className="flex flex-col items-end">
                     <span className={`text-base font-semibold ${resultColor}`}>{resultLabel}</span>
                     <span className="text-[0.7rem] text-muted-foreground">
