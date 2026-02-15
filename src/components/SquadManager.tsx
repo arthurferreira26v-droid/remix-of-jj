@@ -13,7 +13,7 @@ interface SquadManagerProps {
 
 export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerProps) => {
   const [localPlayers, setLocalPlayers] = useState<Player[]>(players);
-  const [selectedReserve, setSelectedReserve] = useState<Player | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
   const [selectedPlayStyle, setSelectedPlayStyle] = useState("counter");
   const [openDropdown, setOpenDropdown] = useState<"style" | "formation" | null>(null);
@@ -24,27 +24,30 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
   const starters = localPlayers.filter(p => p.isStarter);
   const reserves = localPlayers.filter(p => !p.isStarter);
 
-  const handleReserveClick = (player: Player) => {
-    setSelectedReserve(player);
-  };
+  const handlePlayerClick = (player: Player) => {
+    if (!selectedPlayer) {
+      setSelectedPlayer(player);
+      return;
+    }
 
-  const handleStarterClick = (starter: Player) => {
-    if (!selectedReserve) return;
-    
+    if (selectedPlayer.id === player.id) {
+      setSelectedPlayer(null);
+      return;
+    }
 
-    // Fazer a troca
+    // Swap the two players' isStarter status
     const updatedPlayers = localPlayers.map(p => {
-      if (p.id === starter.id) {
-        return { ...p, isStarter: false };
+      if (p.id === selectedPlayer.id) {
+        return { ...p, isStarter: player.isStarter };
       }
-      if (p.id === selectedReserve.id) {
-        return { ...p, isStarter: true };
+      if (p.id === player.id) {
+        return { ...p, isStarter: selectedPlayer.isStarter };
       }
       return p;
     });
 
     setLocalPlayers(updatedPlayers);
-    setSelectedReserve(null);
+    setSelectedPlayer(null);
   };
 
   const handleSave = () => {
@@ -74,8 +77,9 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
           <FormationField
             formation={formation}
             players={starters}
-            onPlayerClick={handleStarterClick}
-            canSubstitute={!!selectedReserve}
+            onPlayerClick={handlePlayerClick}
+            canSubstitute={!!selectedPlayer}
+            selectedPlayerId={selectedPlayer?.id}
           />
         </div>
 
@@ -150,9 +154,9 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
             {reserves.map(player => (
               <button
                 key={player.id}
-                onClick={() => handleReserveClick(player)}
+                onClick={() => handlePlayerClick(player)}
                 className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
-                  selectedReserve?.id === player.id 
+                  selectedPlayer?.id === player.id 
                     ? 'bg-[#c8ff00] text-black' 
                     : 'bg-zinc-800 text-white hover:bg-zinc-700'
                 }`}
@@ -201,9 +205,9 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
         </div>
 
         {/* Instruções */}
-        {selectedReserve && (
+        {selectedPlayer && (
           <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#c8ff00] text-black px-6 py-3 rounded-lg font-medium">
-            Clique no titular para substituir
+            Clique em outro jogador para trocar
           </div>
         )}
 
