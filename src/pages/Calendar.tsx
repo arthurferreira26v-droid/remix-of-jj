@@ -74,12 +74,21 @@ const Calendar = () => {
           `Libertadores - ${teamName}`,
         ];
 
-        const { data: championships } = await supabase
-          .from("championships")
-          .select("id, name, total_rounds")
-          .eq("user_id", user.id)
-          .in("name", championshipNames)
-          .order("created_at", { ascending: false });
+        // For each championship name, get only the LATEST one to avoid duplicates
+        const allChampionships: any[] = [];
+        for (const cName of championshipNames) {
+          const { data: champs } = await supabase
+            .from("championships")
+            .select("id, name, total_rounds")
+            .eq("user_id", user.id)
+            .eq("name", cName)
+            .order("created_at", { ascending: false })
+            .limit(1);
+          if (champs && champs.length > 0) {
+            allChampionships.push(champs[0]);
+          }
+        }
+        const championships = allChampionships;
 
         if (!championships || championships.length === 0) {
           setMatches([]);
@@ -185,19 +194,67 @@ const Calendar = () => {
     const preLibMatches = matches.filter(m => m.competitionLabel === "Pré-Lib");
     const otherMatches = matches.filter(m => m.competitionLabel !== "Pré-Lib");
 
-    // Group Pré-Lib by opponent
-    const confrontoMap = new Map<string, CalendarMatch[]>();
-    for (const m of preLibMatches) {
-      const existing = confrontoMap.get(m.opponentName) || [];
-      existing.push(m);
-      confrontoMap.set(m.opponentName, existing);
-    }
+    // Group Pré-Lib by opponent into "Fase 1" (rounds 1-2) and "Fase 2" (rounds 3-4)
+    const fase1Matches = preLibMatches.filter(m => m.round <= 2);
+    const fase2Matches = preLibMatches.filter(m => m.round >= 3);
 
     const LIB_ROUND_AFTER_BR = [3, 6, 10, 14, 18, 22];
     const cards: CalendarCard[] = [];
 
-    // Add aggregate confronto cards (Pré-Lib always first)
-    confrontoMap.forEach((legs, opponent) => {
+    const buildAggregate = (legs: CalendarMatch[], faseLabel: string, sortKey: number): AggregateConfrontoCard | null => {
+      if (legs.length === 0) return null;
+      const sorted = [...legs].sort((a, b) => a.round - b.round);
+      const opponent = sorted[0].opponentName;
+      const leg1 = sorted[0] || null;
+      const leg2 = sorted[1] || null;
+
+      let aggregateUserGoals = 0;
+      let aggregateOpponentGoals = 0;
+      let isComplete = true;
+
+      for (const leg of sorted) {
+        if (!leg.is_played || leg.home_score === null || leg.away_score === null) {
+          isComplete = false;
+        } else {
+          const userGoals = leg.isHome ? leg.home_score : leg.away_score;
+          const oppGoals = leg.isHome ? leg.away_score : leg.home_score;
+          aggregateUserGoals += userGoals;
+          aggregateOpponentGoals += oppGoals;
+        }
+      }
+
+      return {
+        type: "aggregate",
+        sortKey,
+        opponentName: opponent,
+        competitionLabel: faseLabel,
+        leg1,
+        leg2,
+        aggregateUserGoals,
+        aggregateOpponentGoals,
+        isComplete,
+      };
+    };
+
+    const fase1Card = buildAggregate(fase1Matches, "Pré-Libertadores • Fase 1", -2);
+    const fase2Card = buildAggregate(fase2Matches, "Pré-Libertadores • Fase 2", -1);
+    if (fase1Card) cards.push(fase1Card);
+    if (fase2Card) cards.push(fase2Card);
+
+    // Add Libertadores group stage as aggregate cards too (ida/volta per opponent)
+    const libMatches = otherMatches.filter(m => m.competitionLabel === "Libertadores");
+    const brMatches = otherMatches.filter(m => m.competitionLabel !== "Libertadores");
+
+    // Group lib matches by opponent
+    const libByOpponent = new Map<string, CalendarMatch[]>();
+    for (const m of libMatches) {
+      const existing = libByOpponent.get(m.opponentName) || [];
+      existing.push(m);
+      libByOpponent.set(m.opponentName, existing);
+    }
+
+    let libGroupIdx = 0;
+    libByOpponent.forEach((legs, opponent) => {
       const sorted = [...legs].sort((a, b) => a.round - b.round);
       const leg1 = sorted[0] || null;
       const leg2 = sorted[1] || null;
@@ -217,26 +274,25 @@ const Calendar = () => {
         }
       }
 
+      // Interleave with BR rounds
+      const brThreshold = LIB_ROUND_AFTER_BR[libGroupIdx] || (libGroupIdx + 1) * 4;
       cards.push({
         type: "aggregate",
-        sortKey: 0,
+        sortKey: brThreshold + 0.5,
         opponentName: opponent,
-        competitionLabel: "Pré-Libertadores",
+        competitionLabel: "Libertadores • Fase de Grupos",
         leg1,
         leg2,
         aggregateUserGoals,
         aggregateOpponentGoals,
         isComplete,
       });
+      libGroupIdx++;
     });
 
-    // Add single match cards for other competitions with interleaved sort keys
-    for (const m of otherMatches) {
-      const isLib = m.competitionLabel === "Libertadores";
-      const sortKey = isLib 
-        ? (LIB_ROUND_AFTER_BR[m.round - 1] || m.round + 22) + 0.5
-        : m.round;
-      cards.push({ type: "single", sortKey, match: m });
+    // Add BR matches
+    for (const m of brMatches) {
+      cards.push({ type: "single", sortKey: m.round, match: m });
     }
 
     // Sort by calendar position (Pre-Lib first, then interleaved BR/Lib)
