@@ -166,7 +166,7 @@ const Auth = () => {
             </Button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-zinc-800/50">
+          <div className="mt-6 pt-6 border-t border-zinc-800/50 space-y-3">
             <button
               type="button"
               onClick={() => {
@@ -178,6 +178,13 @@ const Auth = () => {
               {isLogin
                 ? "Não tem conta? Cadastre-se"
                 : "Já tem conta? Entre"}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/admin-login")}
+              className="w-full text-zinc-600 hover:text-zinc-400 text-xs transition-colors duration-200"
+            >
+              Área de Funcionários
             </button>
           </div>
         </div>
