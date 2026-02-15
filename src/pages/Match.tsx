@@ -45,6 +45,8 @@ const Match = () => {
   const [matchEvents, setMatchEvents] = useState<MatchEvent[]>([]);
   const [showPenaltyModal, setShowPenaltyModal] = useState(false);
   const [pendingPenaltyMinute, setPendingPenaltyMinute] = useState<number | null>(null);
+  const [isHalftime, setIsHalftime] = useState(false);
+  const [halftimeDone, setHalftimeDone] = useState(false);
 
   const selectedTeam = teams.find(t => t.name === teamName);
   const opponent = teams.find(t => t.name === opponentName);
@@ -418,11 +420,28 @@ const Match = () => {
     }
   };
 
-  // Função para escolher jogador aleatório
+  // Função para escolher jogador aleatório com peso por posição
   const getRandomPlayer = (team: 'home' | 'away'): string => {
     const players = team === 'away' ? userStarters : opponentStarters;
     if (players.length === 0) return 'Jogador';
-    return players[Math.floor(Math.random() * players.length)].name;
+
+    // Pesos por posição para chance de marcar gol
+    const getPositionWeight = (position: string): number => {
+      if (position === 'GOL') return 0.03; // 3%
+      if (['ZAG', 'LD', 'LE'].includes(position)) return 0.20; // 20%
+      // Meio-campo para frente: peso normal (1.0)
+      return 1.0;
+    };
+
+    const weights = players.map(p => getPositionWeight(p.position));
+    const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+    let random = Math.random() * totalWeight;
+
+    for (let i = 0; i < players.length; i++) {
+      random -= weights[i];
+      if (random <= 0) return players[i].name;
+    }
+    return players[players.length - 1].name;
   };
 
   // Callback para quando o usuário escolhe o batedor de pênalti
@@ -460,16 +479,32 @@ const Match = () => {
 
   // Timer: 90 minutos em 30 segundos reais (333ms por minuto)
   useEffect(() => {
-    if (!isPlaying || minute >= 90 || showPenaltyModal) return;
+    if (!isPlaying || minute >= 90 || showPenaltyModal || isHalftime) return;
 
     const interval = setInterval(() => {
       setMinute(prev => {
         const next = prev + 1;
+
+        // Intervalo aos 45 minutos
+        if (next === 45 && !halftimeDone) {
+          setIsPlaying(false);
+          setIsHalftime(true);
+          return next;
+        }
         
-        // Simular eventos aleatórios
-        if (Math.random() < 0.05) {
-          // Chance de gol
-          const isHomeGoal = Math.random() < 0.5;
+        // Simular eventos aleatórios — chance de gol baseada em tática e overall adversário
+        // Calcular overall médio do adversário para ajustar dificuldade
+        const opponentAvgOvr = opponentStarters.length > 0
+          ? opponentStarters.reduce((sum, p) => sum + p.overall, 0) / opponentStarters.length
+          : 75;
+        // Fator de dificuldade: adversário forte reduz chance de gol do usuário
+        const difficultyFactor = Math.max(0.5, Math.min(1.5, (150 - opponentAvgOvr) / 75));
+        const baseGoalChance = 0.05;
+        
+        if (Math.random() < baseGoalChance) {
+          // Chance de gol — time com overall maior tem vantagem
+          const homeGoalProb = 1 - (difficultyFactor * 0.5); // adversário forte = mais gols pra ele
+          const isHomeGoal = Math.random() < homeGoalProb;
           
           // Chance de ser pênalti (20% dos gols)
           const isPenalty = Math.random() < 0.2;
@@ -557,7 +592,7 @@ const Match = () => {
     }, 333); // 30000ms / 90 = 333ms
 
     return () => clearInterval(interval);
-  }, [isPlaying, minute, showPenaltyModal]);
+  }, [isPlaying, minute, showPenaltyModal, isHalftime, halftimeDone]);
 
   // Função para renderizar ícone do evento
   const getEventIcon = (type: MatchEvent['type']) => {
@@ -797,6 +832,71 @@ const Match = () => {
 
         {/* Spacer para evitar sobreposição com botão fixo */}
         <div className="h-24" />
+
+        {/* Halftime Overlay */}
+        {isHalftime && (
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 overflow-y-auto">
+            <div className="container mx-auto px-4 py-8">
+              <div className="text-center mb-6">
+                <h2 className="text-3xl font-bold text-white mb-2">INTERVALO</h2>
+                <div className="text-5xl font-bold text-white mb-1">
+                  {homeScore} - {awayScore}
+                </div>
+                <span className="text-muted-foreground text-sm">45'</span>
+              </div>
+
+              <div className="max-w-lg mx-auto space-y-6">
+                <TacticsManager
+                  teamName={teamName}
+                  players={userStarters}
+                  onStarterClick={handleStarterClick}
+                  canSubstitute={!!selectedReserve}
+                />
+
+                <div className="bg-zinc-900 rounded-lg p-4">
+                  <h3 className="text-white text-xl font-bold mb-4">Reservas</h3>
+                  <div className="space-y-2">
+                    {userReserves.map((player) => (
+                      <button
+                        key={player.id}
+                        onClick={() => handleReserveClick(player)}
+                        className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                          selectedReserve?.id === player.id
+                            ? "bg-accent text-black"
+                            : "bg-zinc-800 text-white hover:bg-zinc-700"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className={`font-bold text-lg w-8 ${selectedReserve?.id === player.id ? 'text-black' : 'text-blue-400'}`}>{player.overall}</span>
+                          <div className="text-left">
+                            <div className="font-medium">{player.name}</div>
+                            <div className="text-sm opacity-70">{player.position}</div>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  {selectedReserve && (
+                    <p className="mt-3 text-xs text-accent">
+                      Selecione um titular no campo para substituir.
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => {
+                    setIsHalftime(false);
+                    setHalftimeDone(true);
+                    setIsPlaying(true);
+                  }}
+                  className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-4 px-6 rounded-xl transition-all text-lg"
+                >
+                  INICIAR 2º TEMPO
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* End Match Message */}
         {minute >= 90 && (
