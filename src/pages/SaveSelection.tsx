@@ -162,6 +162,14 @@ const SaveSelection = () => {
                   Você ainda não possui saves salvos
                 </p>
               )}
+
+              <button
+                type="button"
+                onClick={() => navigate("/admin-login")}
+                className="w-full text-muted-foreground/40 hover:text-muted-foreground text-xs transition-colors duration-200 mt-6"
+              >
+                Área de Funcionários
+              </button>
             </div>
           ) : (
             /* Save List */
