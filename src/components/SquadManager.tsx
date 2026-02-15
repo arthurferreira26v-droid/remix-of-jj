@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Player } from "@/data/players";
-import { formations, playStyles } from "@/data/formations";
+import { formations, playStyles, Formation } from "@/data/formations";
 import { X, ChevronDown, TrendingUp, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormationField } from "@/components/FormationField";
@@ -11,18 +11,123 @@ interface SquadManagerProps {
   onSquadChange: (updatedPlayers: Player[]) => void;
 }
 
+/**
+ * Compute slot assignments: maps each formation position index to a player ID.
+ * Uses 3-pass algorithm: primary position → alt positions → fill remaining.
+ */
+const computeSlotAssignments = (starters: Player[], formation: Formation): string[] => {
+  const available = [...starters];
+  const assignments: string[] = new Array(formation.positions.length).fill("");
+
+  // Pass 1: primary position
+  for (let i = 0; i < formation.positions.length; i++) {
+    const role = formation.positions[i].role;
+    const idx = available.findIndex(p => p.position === role);
+    if (idx !== -1) {
+      assignments[i] = available[idx].id;
+      available.splice(idx, 1);
+    }
+  }
+
+  // Pass 2: alt positions
+  for (let i = 0; i < formation.positions.length; i++) {
+    if (assignments[i]) continue;
+    const role = formation.positions[i].role;
+    const idx = available.findIndex(p => p.altPositions?.includes(role));
+    if (idx !== -1) {
+      assignments[i] = available[idx].id;
+      available.splice(idx, 1);
+    }
+  }
+
+  // Pass 3: fill remaining
+  for (let i = 0; i < formation.positions.length; i++) {
+    if (assignments[i]) continue;
+    if (available.length > 0) {
+      assignments[i] = available.shift()!.id;
+    }
+  }
+
+  return assignments;
+};
+
+/**
+ * Ensure exactly N starters match formation size.
+ * Promotes reserves or demotes extras as needed.
+ */
+const ensureStarterCount = (players: Player[], requiredCount: number): Player[] => {
+  const starters = players.filter(p => p.isStarter);
+  const reserves = players.filter(p => !p.isStarter);
+
+  if (starters.length === requiredCount) return players;
+
+  const updated = [...players];
+
+  if (starters.length < requiredCount) {
+    // Promote reserves (highest OVR first)
+    const sorted = [...reserves].sort((a, b) => b.overall - a.overall);
+    let needed = requiredCount - starters.length;
+    for (const r of sorted) {
+      if (needed <= 0) break;
+      const idx = updated.findIndex(p => p.id === r.id);
+      if (idx !== -1) {
+        updated[idx] = { ...updated[idx], isStarter: true };
+        needed--;
+      }
+    }
+  } else {
+    // Demote excess starters (lowest OVR first)
+    const sorted = [...starters].sort((a, b) => a.overall - b.overall);
+    let excess = starters.length - requiredCount;
+    for (const s of sorted) {
+      if (excess <= 0) break;
+      const idx = updated.findIndex(p => p.id === s.id);
+      if (idx !== -1) {
+        updated[idx] = { ...updated[idx], isStarter: false };
+        excess--;
+      }
+    }
+  }
+
+  return updated;
+};
+
 export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerProps) => {
-  const [localPlayers, setLocalPlayers] = useState<Player[]>(players);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
   const [selectedPlayStyle, setSelectedPlayStyle] = useState("counter");
   const [openDropdown, setOpenDropdown] = useState<"style" | "formation" | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
   const formation = formations.find((f) => f.id === selectedFormation) || formations[0];
   const playStyle = playStyles.find((s) => s.id === selectedPlayStyle) || playStyles[0];
 
+  // Ensure correct number of starters on init
+  const [localPlayers, setLocalPlayers] = useState<Player[]>(() =>
+    ensureStarterCount(players, formation.positions.length)
+  );
+
+  // Slot assignments: maps formation position index → player ID
+  const [slotAssignments, setSlotAssignments] = useState<string[]>(() => {
+    const fixed = ensureStarterCount(players, formation.positions.length);
+    const starters = fixed.filter(p => p.isStarter);
+    return computeSlotAssignments(starters, formation);
+  });
+
+  // Recompute when formation changes
+  useEffect(() => {
+    const fixed = ensureStarterCount(localPlayers, formation.positions.length);
+    setLocalPlayers(fixed);
+    const starters = fixed.filter(p => p.isStarter);
+    setSlotAssignments(computeSlotAssignments(starters, formation));
+  }, [selectedFormation]);
+
   const starters = localPlayers.filter(p => p.isStarter);
   const reserves = localPlayers.filter(p => !p.isStarter);
+
+  // Build ordered players array from slot assignments
+  const orderedStarters = slotAssignments.map(id =>
+    localPlayers.find(p => p.id === id) || null
+  );
 
   const handlePlayerClick = (player: Player) => {
     if (!selectedPlayer) {
@@ -35,18 +140,39 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
       return;
     }
 
-    // Swap the two players' isStarter status
-    const updatedPlayers = localPlayers.map(p => {
-      if (p.id === selectedPlayer.id) {
-        return { ...p, isStarter: player.isStarter };
-      }
-      if (p.id === player.id) {
-        return { ...p, isStarter: selectedPlayer.isStarter };
-      }
-      return p;
-    });
+    const bothStarters = selectedPlayer.isStarter && player.isStarter;
+    const bothReserves = !selectedPlayer.isStarter && !player.isStarter;
 
-    setLocalPlayers(updatedPlayers);
+    if (bothStarters) {
+      // Swap their slots in the formation
+      const newSlots = [...slotAssignments];
+      const idx1 = newSlots.indexOf(selectedPlayer.id);
+      const idx2 = newSlots.indexOf(player.id);
+      if (idx1 !== -1 && idx2 !== -1) {
+        newSlots[idx1] = player.id;
+        newSlots[idx2] = selectedPlayer.id;
+        setSlotAssignments(newSlots);
+      }
+    } else if (bothReserves) {
+      // Nothing to swap visually, just deselect
+    } else {
+      // Starter ↔ Reserve swap
+      const starterId = selectedPlayer.isStarter ? selectedPlayer.id : player.id;
+      const reserveId = selectedPlayer.isStarter ? player.id : selectedPlayer.id;
+
+      // Update isStarter flags
+      const updatedPlayers = localPlayers.map(p => {
+        if (p.id === starterId) return { ...p, isStarter: false };
+        if (p.id === reserveId) return { ...p, isStarter: true };
+        return p;
+      });
+      setLocalPlayers(updatedPlayers);
+
+      // Replace starter with reserve in slot assignments
+      const newSlots = slotAssignments.map(id => id === starterId ? reserveId : id);
+      setSlotAssignments(newSlots);
+    }
+
     setSelectedPlayer(null);
   };
 
@@ -58,8 +184,6 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
   const toggleDropdown = (dropdown: "style" | "formation") => {
     setOpenDropdown(openDropdown === dropdown ? null : dropdown);
   };
-
-
 
   return (
     <div className="fixed inset-0 bg-black z-50 overflow-y-auto">
@@ -77,6 +201,7 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
           <FormationField
             formation={formation}
             players={starters}
+            orderedPlayers={orderedStarters}
             onPlayerClick={handlePlayerClick}
             canSubstitute={!!selectedPlayer}
             selectedPlayerId={selectedPlayer?.id}
