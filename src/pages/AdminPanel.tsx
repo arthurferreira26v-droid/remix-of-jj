@@ -21,6 +21,7 @@ import { LogOut, Plus, Pencil, Trash2, Shield, Globe, Search } from "lucide-reac
 import { toast } from "sonner";
 
 const STORAGE_KEY = "admin_players_data";
+const LOGOS_KEY = "admin_team_logos";
 
 const POSITIONS = ["GOL", "LD", "LE", "ZAG", "VOL", "MC", "MD", "ME", "PD", "PE", "ATA", "ALE", "ALD"];
 
@@ -48,6 +49,18 @@ const saveAllPlayers = (data: Record<string, Player[]>) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 };
 
+const loadTeamLogos = (): Record<string, string> => {
+  try {
+    const raw = localStorage.getItem(LOGOS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return {};
+};
+
+const saveTeamLogos = (data: Record<string, string>) => {
+  localStorage.setItem(LOGOS_KEY, JSON.stringify(data));
+};
+
 const emptyPlayer = (): Omit<Player, "id"> & { altPositions: string[] } => ({
   name: "", number: 1, position: "ATA", altPositions: [], overall: 75, age: 22, isStarter: false,
 });
@@ -57,6 +70,9 @@ const AdminPanel = () => {
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [allPlayers, setAllPlayers] = useState<Record<string, Player[]>>(loadAllPlayers);
   const [search, setSearch] = useState("");
+  const [teamLogos, setTeamLogos] = useState<Record<string, string>>(loadTeamLogos);
+  const [showLogoDialog, setShowLogoDialog] = useState(false);
+  const [logoUrl, setLogoUrl] = useState("");
 
   // Modals
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
@@ -132,6 +148,28 @@ const AdminPanel = () => {
     navigate("/auth");
   };
 
+  const getTeamDisplayLogo = (teamId: string) => {
+    return teamLogos[teamId] || teams.find(t => t.id === teamId)?.logo || "/placeholder.svg";
+  };
+
+  const handleLogoClick = () => {
+    if (!selectedTeamId) return;
+    setLogoUrl(teamLogos[selectedTeamId] || "");
+    setShowLogoDialog(true);
+  };
+
+  const confirmLogoChange = () => {
+    if (!selectedTeamId || !logoUrl.trim()) {
+      toast.error("Insira uma URL válida");
+      return;
+    }
+    const updated = { ...teamLogos, [selectedTeamId]: logoUrl.trim() };
+    setTeamLogos(updated);
+    saveTeamLogos(updated);
+    setShowLogoDialog(false);
+    toast.success("Escudo atualizado!");
+  };
+
   const filteredBrazilian = brazilianTeams.filter((t) => t.name.toLowerCase().includes(search.toLowerCase()));
   const filteredContinental = continentalTeams.filter((t) => t.name.toLowerCase().includes(search.toLowerCase()));
 
@@ -185,7 +223,7 @@ const AdminPanel = () => {
                     : "text-zinc-300 hover:bg-zinc-800/60 hover:text-white border border-transparent"
                 }`}
               >
-                <img src={t.logo} alt="" className="w-6 h-6 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }} />
+                <img src={getTeamDisplayLogo(t.id)} alt="" className="w-6 h-6 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }} />
                 <span className="truncate">{t.name}</span>
                 <span className="ml-auto text-xs text-zinc-500">🇧🇷</span>
               </button>
@@ -207,7 +245,7 @@ const AdminPanel = () => {
                     : "text-zinc-300 hover:bg-zinc-800/60 hover:text-white border border-transparent"
                 }`}
               >
-                <img src={t.logo} alt="" className="w-6 h-6 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }} />
+                <img src={getTeamDisplayLogo(t.id)} alt="" className="w-6 h-6 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }} />
                 <span className="truncate">{t.name}</span>
                 <span className="ml-auto text-xs text-zinc-500">{countryFlags[t.country ?? ""] ?? "🌎"}</span>
               </button>
@@ -223,7 +261,12 @@ const AdminPanel = () => {
             {/* Header */}
             <div className="p-6 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/50">
               <div className="flex items-center gap-4">
-                <img src={selectedTeam.logo} alt="" className="w-12 h-12 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }} />
+                <button onClick={handleLogoClick} className="relative group" title="Clique para alterar o escudo">
+                  <img src={getTeamDisplayLogo(selectedTeamId)} alt="" className="w-12 h-12 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }} />
+                  <div className="absolute inset-0 bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Pencil size={16} className="text-white" />
+                  </div>
+                </button>
                 <div>
                   <h2 className="text-2xl font-bold text-white">{selectedTeam.name}</h2>
                   <p className="text-zinc-400 text-sm">
@@ -409,6 +452,40 @@ const AdminPanel = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Logo Change Dialog */}
+      <Dialog open={showLogoDialog} onOpenChange={setShowLogoDialog}>
+        <DialogContent className="bg-zinc-900 border-zinc-700 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle>Alterar Escudo</DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              Cole a URL da imagem do novo escudo
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {logoUrl && (
+              <div className="flex justify-center">
+                <img src={logoUrl} alt="Preview" className="w-20 h-20 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }} />
+              </div>
+            )}
+            <div className="space-y-1.5">
+              <Label className="text-zinc-300 text-sm">URL do Escudo</Label>
+              <Input
+                value={logoUrl}
+                onChange={(e) => setLogoUrl(e.target.value)}
+                placeholder="https://exemplo.com/escudo.png"
+                className="bg-zinc-800 border-zinc-700 text-white"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setShowLogoDialog(false)} className="text-zinc-400">Cancelar</Button>
+            <Button onClick={confirmLogoChange} className="bg-amber-500 hover:bg-amber-400 text-black font-semibold">
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
