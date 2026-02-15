@@ -31,6 +31,7 @@ const Index = () => {
   const handleSignOut = async () => {
     await signOut();
     toast.success("Você saiu da sua conta");
+    navigate("/auth");
   };
 
   if (loading) {
