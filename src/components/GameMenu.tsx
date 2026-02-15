@@ -8,6 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Menu, Users, TrendingUp, Briefcase, Calendar, Trophy, LogOut, Save, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 interface GameMenuProps {
   teamName: string;
@@ -27,6 +29,13 @@ export const GameMenu = ({
   onLoadGame
 }: GameMenuProps) => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Você saiu da sua conta");
+    navigate("/auth");
+  };
 
   return (
     <Sheet>
@@ -111,7 +120,7 @@ export const GameMenu = ({
             <Button
               variant="ghost"
               className="w-full justify-start gap-2 h-11 text-sm text-red-500 hover:text-red-600 hover:bg-red-500/10"
-              onClick={() => navigate("/")}
+              onClick={handleSignOut}
             >
               <LogOut className="h-4 w-4" />
               <span className="font-semibold">Sair</span>
