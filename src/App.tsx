@@ -11,6 +11,8 @@ import Standings from "./pages/Standings";
 import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import AdminLogin from "./pages/AdminLogin";
+import AdminPanel from "./pages/AdminPanel";
 import SaveSelection from "./pages/SaveSelection";
 
 const queryClient = new QueryClient();
@@ -25,6 +27,8 @@ const App = () => (
           <Route path="/" element={<SaveSelection />} />
           <Route path="/selecionar-time" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="/jogo" element={<Game />} />
           <Route path="/partida" element={<Match />} />
           <Route path="/classificacao" element={<Standings />} />
