@@ -484,7 +484,7 @@ const Game = () => {
           <h3 className="text-sm font-bold text-[#c8ff00] mb-3">
             {nextLibertadoresChampionshipId && nextLibertadoresMatch.championship_id ? 
               (nextLibertadoresMatch.round <= 4 && PRE_LIBERTADORES_TEAMS.includes(teamName) && !libertadoresId
-                ? `Pré-Libertadores - Jogo ${nextLibertadoresMatch.round}/4`
+                ? `Pré-Libertadores - Fase ${nextLibertadoresMatch.round <= 2 ? 1 : 2} (${nextLibertadoresMatch.round % 2 === 1 ? "Ida" : "Volta"})`
                 : `Quarta-feira • Libertadores - ${nextLibertadoresMatch.round}ª Rodada`) 
               : "Libertadores"}
           </h3>
@@ -499,7 +499,7 @@ const Game = () => {
             )}
             opponentPosition=""
             round={nextLibertadoresMatch.round <= 4 && PRE_LIBERTADORES_TEAMS.includes(teamName) && !libertadoresId
-              ? `Pré-Libertadores - Jogo ${nextLibertadoresMatch.round}`
+              ? `Pré-Lib Fase ${nextLibertadoresMatch.round <= 2 ? 1 : 2} - ${nextLibertadoresMatch.round % 2 === 1 ? "Ida" : "Volta"}`
               : `Libertadores - ${nextLibertadoresMatch.round}ª Rodada`}
             userForm={[]}
             opponentForm={[]}
