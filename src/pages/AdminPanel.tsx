@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { teams } from "@/data/teams";
 import { botafogoPlayers, flamengoPlayers, generateTeamPlayers, Player } from "@/data/players";
@@ -67,13 +67,13 @@ const emptyPlayer = (): Omit<Player, "id"> & { altPositions: string[] } => ({
 
 const AdminPanel = () => {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [allPlayers, setAllPlayers] = useState<Record<string, Player[]>>(loadAllPlayers);
   const [search, setSearch] = useState("");
   const [teamLogos, setTeamLogos] = useState<Record<string, string>>(loadTeamLogos);
   const [showLogoDialog, setShowLogoDialog] = useState(false);
   const [logoUrl, setLogoUrl] = useState("");
-
   // Modals
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -459,7 +459,7 @@ const AdminPanel = () => {
           <DialogHeader>
             <DialogTitle>Alterar Escudo</DialogTitle>
             <DialogDescription className="text-zinc-400">
-              Cole a URL da imagem do novo escudo
+              Envie uma imagem da galeria ou cole uma URL
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
@@ -468,14 +468,45 @@ const AdminPanel = () => {
                 <img src={logoUrl} alt="Preview" className="w-20 h-20 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }} />
               </div>
             )}
-            <div className="space-y-1.5">
-              <Label className="text-zinc-300 text-sm">URL do Escudo</Label>
-              <Input
-                value={logoUrl}
-                onChange={(e) => setLogoUrl(e.target.value)}
-                placeholder="https://exemplo.com/escudo.png"
-                className="bg-zinc-800 border-zinc-700 text-white"
+            <div className="space-y-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    const dataUrl = ev.target?.result as string;
+                    setLogoUrl(dataUrl);
+                  };
+                  reader.readAsDataURL(file);
+                }}
               />
+              <Button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-600"
+                variant="outline"
+              >
+                📁 Escolher da Galeria
+              </Button>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-px bg-zinc-700" />
+                <span className="text-zinc-500 text-xs">ou</span>
+                <div className="flex-1 h-px bg-zinc-700" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-zinc-300 text-sm">URL do Escudo</Label>
+                <Input
+                  value={logoUrl.startsWith("data:") ? "" : logoUrl}
+                  onChange={(e) => setLogoUrl(e.target.value)}
+                  placeholder="https://exemplo.com/escudo.png"
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>
