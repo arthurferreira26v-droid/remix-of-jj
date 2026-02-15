@@ -54,7 +54,7 @@ const Game = () => {
     }
   }, [user, authLoading, navigate]);
   
-  // Initialize players state - gerar novos ou carregar de save
+  // Initialize players state - admin > save > default
   const getInitialPlayers = () => {
     // Verificar se há jogadores salvos de um save carregado
     const savedPlayers = localStorage.getItem(`players_${teamName}`);
@@ -64,7 +64,23 @@ const Game = () => {
       return JSON.parse(savedPlayers);
     }
     
-    // Sempre gerar novos jogadores se não veio de um save
+    // Verificar se há dados do admin panel
+    const adminData = localStorage.getItem('admin_players_data');
+    if (adminData) {
+      try {
+        const allAdminPlayers: Record<string, Player[]> = JSON.parse(adminData);
+        // Encontrar o time pelo id ou nome
+        const teamEntry = Object.entries(allAdminPlayers).find(([key]) => {
+          const team = teams.find(t => t.id === key);
+          return team?.name === teamName || key === teamName;
+        });
+        if (teamEntry) {
+          return teamEntry[1];
+        }
+      } catch {}
+    }
+    
+    // Default
     return teamName === "Botafogo" 
       ? botafogoPlayers 
       : teamName === "Flamengo"
