@@ -22,7 +22,7 @@ import { toast } from "sonner";
 
 const STORAGE_KEY = "admin_players_data";
 
-const POSITIONS = ["GOL", "LD", "LE", "ZAG", "VOL", "MC", "PD", "PE", "ATA"];
+const POSITIONS = ["GOL", "LD", "LE", "ZAG", "VOL", "MC", "MD", "ME", "PD", "PE", "ATA", "ALE", "ALD"];
 
 const countryFlags: Record<string, string> = {
   brasil: "🇧🇷", argentina: "🇦🇷", uruguai: "🇺🇾", colombia: "🇨🇴",
@@ -48,8 +48,8 @@ const saveAllPlayers = (data: Record<string, Player[]>) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 };
 
-const emptyPlayer = (): Omit<Player, "id"> => ({
-  name: "", number: 1, position: "ATA", overall: 75, age: 22, isStarter: false,
+const emptyPlayer = (): Omit<Player, "id"> & { altPositions: string[] } => ({
+  name: "", number: 1, position: "ATA", altPositions: [], overall: 75, age: 22, isStarter: false,
 });
 
 const AdminPanel = () => {
@@ -62,7 +62,7 @@ const AdminPanel = () => {
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [deletePlayer, setDeletePlayer] = useState<Player | null>(null);
-  const [formData, setFormData] = useState<Omit<Player, "id">>(emptyPlayer());
+  const [formData, setFormData] = useState<Omit<Player, "id"> & { altPositions: string[] }>(emptyPlayer());
 
   // Auth guard
   useEffect(() => {
@@ -107,7 +107,7 @@ const AdminPanel = () => {
 
   // Edit
   const handleEdit = (p: Player) => {
-    setFormData({ name: p.name, number: p.number, position: p.position, overall: p.overall, age: p.age, isStarter: p.isStarter });
+    setFormData({ name: p.name, number: p.number, position: p.position, altPositions: p.altPositions || [], overall: p.overall, age: p.age, isStarter: p.isStarter });
     setEditPlayer(p);
   };
 
@@ -258,9 +258,16 @@ const AdminPanel = () => {
                       <TableCell className="text-zinc-500 font-mono text-xs">{p.number}</TableCell>
                       <TableCell className="text-white font-medium">{p.name}</TableCell>
                       <TableCell>
-                        <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 text-xs font-semibold">
-                          {p.position}
-                        </span>
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 text-xs font-semibold">
+                            {p.position}
+                          </span>
+                          {p.altPositions?.map((alt) => (
+                            <span key={alt} className="px-2 py-0.5 rounded bg-zinc-700/50 text-amber-400 text-xs font-semibold">
+                              {alt}
+                            </span>
+                          ))}
+                        </div>
                       </TableCell>
                       <TableCell className="text-zinc-300">{p.age}</TableCell>
                       <TableCell>
@@ -338,6 +345,34 @@ const AdminPanel = () => {
               <div className="space-y-1.5">
                 <Label className="text-zinc-300 text-sm">Idade</Label>
                 <Input type="number" min={15} max={45} value={formData.age} onChange={(e) => setFormData({ ...formData, age: +e.target.value })} className="bg-zinc-800 border-zinc-700 text-white" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-zinc-300 text-sm">Posições Alternativas</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {POSITIONS.filter((pos) => pos !== formData.position).map((pos) => {
+                  const isSelected = formData.altPositions?.includes(pos);
+                  return (
+                    <button
+                      key={pos}
+                      type="button"
+                      onClick={() => {
+                        const alts = formData.altPositions || [];
+                        setFormData({
+                          ...formData,
+                          altPositions: isSelected ? alts.filter((p) => p !== pos) : [...alts, pos],
+                        });
+                      }}
+                      className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
+                        isSelected
+                          ? "bg-amber-500 text-black"
+                          : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                      }`}
+                    >
+                      {pos}
+                    </button>
+                  );
+                })}
               </div>
             </div>
             <div className="flex items-center gap-2">
