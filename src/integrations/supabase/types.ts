@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_player_overrides: {
+        Row: {
+          id: string
+          players: Json
+          team_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          players?: Json
+          team_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          players?: Json
+          team_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      admin_team_logos: {
+        Row: {
+          id: string
+          logo_url: string
+          team_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          logo_url: string
+          team_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          logo_url?: string
+          team_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       championships: {
         Row: {
           created_at: string
