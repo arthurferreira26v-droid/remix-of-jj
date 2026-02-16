@@ -25,6 +25,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCloudSaveLoad, type CloudSaveData } from "@/hooks/useCloudSaveLoad";
 import { getTeamLogo } from "@/utils/teamLogos";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
+import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { toast } from "sonner";
 
 const Game = () => {
@@ -54,9 +55,8 @@ const Game = () => {
     }
   }, [user, authLoading, navigate]);
   
-  // Initialize players state - admin > save > default
+  // Initialize players state - save > default (admin loaded async)
   const getInitialPlayers = () => {
-    // Verificar se há jogadores salvos de um save carregado
     const savedPlayers = localStorage.getItem(`players_${teamName}`);
     const isLoadedFromSave = sessionStorage.getItem(`loaded_save_${teamName}`) === 'true';
     
@@ -64,23 +64,6 @@ const Game = () => {
       return JSON.parse(savedPlayers);
     }
     
-    // Verificar se há dados do admin panel
-    const adminData = localStorage.getItem('admin_players_data');
-    if (adminData) {
-      try {
-        const allAdminPlayers: Record<string, Player[]> = JSON.parse(adminData);
-        // Encontrar o time pelo id ou nome
-        const teamEntry = Object.entries(allAdminPlayers).find(([key]) => {
-          const team = teams.find(t => t.id === key);
-          return team?.name === teamName || key === teamName;
-        });
-        if (teamEntry) {
-          return teamEntry[1];
-        }
-      } catch {}
-    }
-    
-    // Default
     return teamName === "Botafogo" 
       ? botafogoPlayers 
       : teamName === "Flamengo"
@@ -88,6 +71,22 @@ const Game = () => {
       : generateTeamPlayers(teamName);
   };
   const [players, setPlayers] = useState<Player[]>(getInitialPlayers);
+
+  // Load admin overrides from DB (global, permanent)
+  useEffect(() => {
+    const isLoadedFromSave = sessionStorage.getItem(`loaded_save_${teamName}`) === 'true';
+    if (isLoadedFromSave) return; // don't override save data
+
+    (async () => {
+      const [adminPlayers] = await Promise.all([fetchAdminPlayers(), fetchAdminLogos()]);
+      const team = teams.find(t => t.name === teamName);
+      const teamId = team?.id ?? teamName;
+      if (adminPlayers[teamId]) {
+        setPlayers(adminPlayers[teamId]);
+        localStorage.setItem(`players_${teamName}`, JSON.stringify(adminPlayers[teamId]));
+      }
+    })();
+  }, [teamName]);
 
   // Atualizar jogadores (NÃO salva automaticamente - apenas via save explícito)
   const updatePlayers = (updatedPlayers: Player[]) => {

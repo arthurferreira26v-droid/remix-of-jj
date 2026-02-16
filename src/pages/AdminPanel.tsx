@@ -17,11 +17,9 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LogOut, Plus, Pencil, Trash2, Shield, Globe, Search } from "lucide-react";
+import { LogOut, Plus, Pencil, Trash2, Shield, Globe, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-
-const STORAGE_KEY = "admin_players_data";
-const LOGOS_KEY = "admin_team_logos";
+import { useAdminData } from "@/hooks/useAdminData";
 
 const POSITIONS = ["GOL", "LD", "LE", "ZAG", "VOL", "MC", "MD", "ME", "PD", "PE", "ATA", "ALE", "ALD"];
 
@@ -37,30 +35,6 @@ const getDefaultPlayers = (teamId: string): Player[] => {
   return generateTeamPlayers(teams.find((t) => t.id === teamId)?.name ?? teamId);
 };
 
-const loadAllPlayers = (): Record<string, Player[]> => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return {};
-};
-
-const saveAllPlayers = (data: Record<string, Player[]>) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-};
-
-const loadTeamLogos = (): Record<string, string> => {
-  try {
-    const raw = localStorage.getItem(LOGOS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return {};
-};
-
-const saveTeamLogos = (data: Record<string, string>) => {
-  localStorage.setItem(LOGOS_KEY, JSON.stringify(data));
-};
-
 const emptyPlayer = (): Omit<Player, "id"> & { altPositions: string[] } => ({
   name: "", number: 1, position: "ATA", altPositions: [], overall: 75, age: 22, isStarter: false,
 });
@@ -68,10 +42,10 @@ const emptyPlayer = (): Omit<Player, "id"> & { altPositions: string[] } => ({
 const AdminPanel = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { allPlayers, teamLogos, loading: adminLoading, saveTeamPlayers, saveTeamLogo } = useAdminData();
+
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
-  const [allPlayers, setAllPlayers] = useState<Record<string, Player[]>>(loadAllPlayers);
   const [search, setSearch] = useState("");
-  const [teamLogos, setTeamLogos] = useState<Record<string, string>>(loadTeamLogos);
   const [showLogoDialog, setShowLogoDialog] = useState(false);
   const [logoUrl, setLogoUrl] = useState("");
   // Modals
@@ -99,9 +73,7 @@ const AdminPanel = () => {
   const selectedTeam = teams.find((t) => t.id === selectedTeamId);
 
   const updateTeamPlayers = (teamId: string, players: Player[]) => {
-    const updated = { ...allPlayers, [teamId]: players };
-    setAllPlayers(updated);
-    saveAllPlayers(updated);
+    saveTeamPlayers(teamId, players);
   };
 
   // Add
@@ -163,9 +135,7 @@ const AdminPanel = () => {
       toast.error("Insira uma URL válida");
       return;
     }
-    const updated = { ...teamLogos, [selectedTeamId]: logoUrl.trim() };
-    setTeamLogos(updated);
-    saveTeamLogos(updated);
+    saveTeamLogo(selectedTeamId, logoUrl.trim());
     setShowLogoDialog(false);
     toast.success("Escudo atualizado!");
   };
@@ -175,13 +145,20 @@ const AdminPanel = () => {
 
   const formatCurrency = (v: number) => `R$ ${(v / 1_000_000).toFixed(1)}M`;
 
-  // Simple market value based on overall
   const marketValue = (ovr: number) => {
     if (ovr >= 85) return 50_000_000;
     if (ovr >= 80) return 25_000_000;
     if (ovr >= 75) return 10_000_000;
     return 3_000_000;
   };
+
+  if (adminLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black flex">
