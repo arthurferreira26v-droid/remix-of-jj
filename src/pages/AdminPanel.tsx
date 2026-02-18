@@ -17,9 +17,9 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LogOut, Plus, Pencil, Trash2, Shield, Globe, Search, Loader2 } from "lucide-react";
+import { LogOut, Plus, Pencil, Trash2, Shield, Globe, Search, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { useAdminData } from "@/hooks/useAdminData";
+import { useAdminData, invalidateAdminCache } from "@/hooks/useAdminData";
 
 const POSITIONS = ["GOL", "LD", "LE", "ZAG", "VOL", "MC", "MD", "ME", "PD", "PE", "ATA", "ALE", "ALD"];
 
@@ -252,9 +252,17 @@ const AdminPanel = () => {
                   </p>
                 </div>
               </div>
-              <Button onClick={handleAdd} className="bg-amber-500 hover:bg-amber-400 text-black font-semibold gap-2">
-                <Plus size={18} /> Adicionar Jogador
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button onClick={() => {
+                  invalidateAdminCache();
+                  toast.success("Mudanças aplicadas! Os jogadores serão atualizados ao iniciar um novo jogo.");
+                }} className="bg-green-600 hover:bg-green-500 text-white font-semibold gap-2">
+                  <CheckCircle2 size={18} /> Aplicar Mudanças
+                </Button>
+                <Button onClick={handleAdd} className="bg-amber-500 hover:bg-amber-400 text-black font-semibold gap-2">
+                  <Plus size={18} /> Adicionar Jogador
+                </Button>
+              </div>
             </div>
 
             {/* Table */}

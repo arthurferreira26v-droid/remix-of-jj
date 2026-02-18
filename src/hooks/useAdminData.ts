@@ -39,8 +39,8 @@ export async function fetchAdminLogos(): Promise<Record<string, string>> {
   }
 }
 
-export async function fetchAdminPlayers(): Promise<Record<string, Player[]>> {
-  if (playersFetched && cachedPlayers) return cachedPlayers;
+export async function fetchAdminPlayers(forceRefresh = false): Promise<Record<string, Player[]>> {
+  if (!forceRefresh && playersFetched && cachedPlayers) return cachedPlayers;
   try {
     const { data } = await supabase
       .from('admin_player_overrides')

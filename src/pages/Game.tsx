@@ -78,7 +78,7 @@ const Game = () => {
     if (isLoadedFromSave) return; // don't override save data
 
     (async () => {
-      const [adminPlayers] = await Promise.all([fetchAdminPlayers(), fetchAdminLogos()]);
+      const [adminPlayers] = await Promise.all([fetchAdminPlayers(true), fetchAdminLogos()]);
       const team = teams.find(t => t.name === teamName);
       const teamId = team?.id ?? teamName;
       if (adminPlayers[teamId]) {
