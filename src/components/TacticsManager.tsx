@@ -50,6 +50,7 @@ export const TacticsManager = ({ teamName, players = [], onStarterClick, canSubs
       <FormationField
         formation={formation}
         players={players}
+        orderedPlayers={players.length === formation.positions.length ? players : undefined}
         onPlayerClick={onStarterClick}
         canSubstitute={canSubstitute}
         selectedPlayerId={selectedStarterId}
