@@ -246,23 +246,97 @@ export const useChampionship = (userTeamName: string) => {
           } else {
             setChampionship(existingChampionships[0]);
           }
-        } else {
-          // Deletar campeonato existente se houver (começar do zero)
-          if (existingChampionships && existingChampionships.length > 0) {
-            const oldChampionshipId = existingChampionships[0].id;
-            await supabase.from("matches").delete().eq("championship_id", oldChampionshipId);
-            await supabase.from("standings").delete().eq("championship_id", oldChampionshipId);
-            await supabase.from("team_budgets").delete().eq("championship_id", oldChampionshipId);
-            await supabase.from("championships").delete().eq("id", oldChampionshipId);
-          }
+        } else if (existingChampionships && existingChampionships.length > 0) {
+          // Championship exists - check if it has progress
+          championshipId = existingChampionships[0].id;
+          
+          // Check if any matches have been played
+          const { data: playedMatches } = await supabase
+            .from("matches")
+            .select("id")
+            .eq("championship_id", championshipId)
+            .eq("is_played", true)
+            .limit(1);
+          
+          if (playedMatches && playedMatches.length > 0) {
+            // Championship has progress - keep it and continue
+            setChampionship(existingChampionships[0]);
+            
+            // Check if all matches are done
+            const { data: remainingMatches } = await supabase
+              .from("matches")
+              .select("id")
+              .eq("championship_id", championshipId)
+              .eq("is_played", false)
+              .limit(1);
+            
+            if (!remainingMatches || remainingMatches.length === 0) {
+              setIsChampionComplete(true);
+              const { data: standings } = await supabase
+                .from("standings")
+                .select("team_name, points, played, goal_difference")
+                .eq("championship_id", championshipId)
+                .order("points", { ascending: false })
+                .order("goal_difference", { ascending: false })
+                .limit(1);
+              if (standings && standings.length > 0) {
+                setUserWonChampionship(standings[0].team_name === userTeamName);
+              }
+              setLoading(false);
+              return;
+            }
+          } else {
+            // No progress yet - delete and recreate fresh
+            await supabase.from("matches").delete().eq("championship_id", championshipId);
+            await supabase.from("standings").delete().eq("championship_id", championshipId);
+            await supabase.from("team_budgets").delete().eq("championship_id", championshipId);
+            await supabase.from("championships").delete().eq("id", championshipId);
+            
+            // Create new championship
+            const { data: newChampionship, error: createError } = await supabase
+              .from("championships")
+              .insert({
+                name: championshipName,
+                season: "2024",
+                current_round: 1,
+                total_rounds: (leagueTeams.length - 1) * 2,
+                user_id: user.id,
+              })
+              .select()
+              .maybeSingle();
 
-          // Limpar dados locais do time (sempre começar fresh)
+            if (createError) throw createError;
+            if (!newChampionship) throw new Error("Falha ao criar campeonato");
+            
+            championshipId = newChampionship.id;
+            setChampionship(newChampionship);
+
+            const fixtures = generateChampionshipFixtures(userTeam, leagueTeams);
+            const fixturesWithChampionship = fixtures.map(f => ({
+              ...f,
+              championship_id: championshipId,
+            }));
+
+            await supabase.from("matches").insert(fixturesWithChampionship);
+
+            const standingsData = leagueTeams.map(team => ({
+              championship_id: championshipId,
+              team_id: team.id,
+              team_name: team.name,
+              logo: team.logo,
+              points: 0, played: 0, wins: 0, draws: 0, losses: 0,
+              goals_for: 0, goals_against: 0, goal_difference: 0, position: 1,
+            }));
+
+            await supabase.from("standings").insert(standingsData);
+          }
+        } else {
+          // No championship exists - create new
           localStorage.removeItem(`players_${userTeamName}`);
           localStorage.removeItem(`tactics_formation_${userTeamName}`);
           localStorage.removeItem(`tactics_playstyle_${userTeamName}`);
           localStorage.removeItem(`investment_${userTeamName}`);
 
-          // Criar novo campeonato começando da rodada 1
           const { data: newChampionship, error: createError } = await supabase
             .from("championships")
             .insert({
@@ -287,33 +361,18 @@ export const useChampionship = (userTeamName: string) => {
             championship_id: championshipId,
           }));
 
-          const { error: insertError } = await supabase
-            .from("matches")
-            .insert(fixturesWithChampionship);
-
-          if (insertError) throw insertError;
+          await supabase.from("matches").insert(fixturesWithChampionship);
 
           const standingsData = leagueTeams.map(team => ({
             championship_id: championshipId,
             team_id: team.id,
             team_name: team.name,
             logo: team.logo,
-            points: 0,
-            played: 0,
-            wins: 0,
-            draws: 0,
-            losses: 0,
-            goals_for: 0,
-            goals_against: 0,
-            goal_difference: 0,
-            position: 1,
+            points: 0, played: 0, wins: 0, draws: 0, losses: 0,
+            goals_for: 0, goals_against: 0, goal_difference: 0, position: 1,
           }));
 
-          const { error: standingsError } = await supabase
-            .from("standings")
-            .insert(standingsData);
-
-          if (standingsError) throw standingsError;
+          await supabase.from("standings").insert(standingsData);
         }
 
         const { data: matches, error: matchError } = await supabase
