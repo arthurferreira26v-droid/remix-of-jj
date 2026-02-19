@@ -157,12 +157,17 @@ const Match = () => {
 
       if (!match) throw new Error("Partida não encontrada");
 
+      // Determinar se o usuário é home ou away no registro do banco
+      const userIsHome = match.home_team_name === teamName;
+      const dbHomeScore = userIsHome ? awayScore : homeScore;
+      const dbAwayScore = userIsHome ? homeScore : awayScore;
+
       // Atualizar resultado da partida
       await supabase
         .from("matches")
         .update({
-          home_score: homeScore,
-          away_score: awayScore,
+          home_score: dbHomeScore,
+          away_score: dbAwayScore,
           is_played: true,
         })
         .eq("id", match.id);
@@ -193,11 +198,11 @@ const Match = () => {
             let homeLosses = 0;
             let awayLosses = 0;
 
-            if (homeScore > awayScore) {
+            if (dbHomeScore > dbAwayScore) {
               homePoints = 3;
               homeWins = 1;
               awayLosses = 1;
-            } else if (homeScore < awayScore) {
+            } else if (dbHomeScore < dbAwayScore) {
               awayPoints = 3;
               awayWins = 1;
               homeLosses = 1;
@@ -214,9 +219,9 @@ const Match = () => {
               wins: homeStanding.wins + homeWins,
               draws: homeStanding.draws + homeDraws,
               losses: homeStanding.losses + homeLosses,
-              goals_for: homeStanding.goals_for + homeScore,
-              goals_against: homeStanding.goals_against + awayScore,
-              goal_difference: (homeStanding.goals_for + homeScore) - (homeStanding.goals_against + awayScore),
+              goals_for: homeStanding.goals_for + dbHomeScore,
+              goals_against: homeStanding.goals_against + dbAwayScore,
+              goal_difference: (homeStanding.goals_for + dbHomeScore) - (homeStanding.goals_against + dbAwayScore),
             }).eq("id", homeStanding.id);
 
             await supabase.from("standings").update({
@@ -225,9 +230,9 @@ const Match = () => {
               wins: awayStanding.wins + awayWins,
               draws: awayStanding.draws + awayDraws,
               losses: awayStanding.losses + awayLosses,
-              goals_for: awayStanding.goals_for + awayScore,
-              goals_against: awayStanding.goals_against + homeScore,
-              goal_difference: (awayStanding.goals_for + awayScore) - (awayStanding.goals_against + homeScore),
+              goals_for: awayStanding.goals_for + dbAwayScore,
+              goals_against: awayStanding.goals_against + dbHomeScore,
+              goal_difference: (awayStanding.goals_for + dbAwayScore) - (awayStanding.goals_against + dbHomeScore),
             }).eq("id", awayStanding.id);
           }
         }
