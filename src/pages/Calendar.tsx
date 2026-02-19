@@ -198,7 +198,7 @@ const Calendar = () => {
     const fase1Matches = preLibMatches.filter(m => m.round <= 2);
     const fase2Matches = preLibMatches.filter(m => m.round >= 3);
 
-    const LIB_ROUND_AFTER_BR = [3, 6, 10, 14, 18, 22];
+    const LIB_ROUND_AFTER_BR = [5, 6, 7, 8, 9, 10];
     const cards: CalendarCard[] = [];
 
     const buildAggregate = (legs: CalendarMatch[], faseLabel: string, sortKey: number): AggregateConfrontoCard | null => {

@@ -118,7 +118,8 @@ const Game = () => {
   } = useLibertadores(teamName, championship?.id);
 
   // Alternation logic: Lib group stage rounds map to BR round thresholds
-  const LIB_ROUND_AFTER_BR = [3, 6, 10, 14, 18, 22];
+  // Fase de grupos começa a partir da rodada 5: BR5, Lib1, BR6, Lib2, ..., BR10, Lib6
+  const LIB_ROUND_AFTER_BR = [5, 6, 7, 8, 9, 10];
 
   const shouldShowLibertadoresMatch = (): boolean => {
     if (!nextLibertadoresMatch) return false;
