@@ -77,30 +77,79 @@ const Match = () => {
   const userReserves = userPlayers.filter((p) => !p.isStarter);
   const opponentStarters = opponentPlayers.filter((p) => p.isStarter);
 
+  // Ordenar titulares respeitando a ordem salva no localStorage
+  const getOrderedStarters = () => {
+    const savedOrder = localStorage.getItem(`starter_order_${teamName}`);
+    if (savedOrder) {
+      const orderIds = JSON.parse(savedOrder) as string[];
+      return [...userStarters].sort((a, b) => {
+        const indexA = orderIds.indexOf(a.id);
+        const indexB = orderIds.indexOf(b.id);
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+        return indexA - indexB;
+      });
+    }
+    return userStarters;
+  };
+  const orderedStarters = getOrderedStarters();
+
   const [selectedReserve, setSelectedReserve] = useState<Player | null>(null);
+  const [selectedStarter, setSelectedStarter] = useState<Player | null>(null);
 
   const handleReserveClick = (player: Player) => {
+    setSelectedStarter(null);
     setSelectedReserve(player);
   };
 
+  const saveStarterOrder = (newOrder: Player[]) => {
+    const orderIds = newOrder.map(p => p.id);
+    localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(orderIds));
+  };
+
   const handleStarterClick = (starter: Player) => {
-    if (!selectedReserve) return;
+    // Se tem reserva selecionado, troca reserva <-> titular
+    if (selectedReserve) {
+      const updatedPlayers = userPlayers.map((p) => {
+        if (p.id === starter.id) return { ...p, isStarter: false };
+        if (p.id === selectedReserve.id) return { ...p, isStarter: true };
+        return p;
+      });
 
+      // Atualizar ordem: colocar o novo titular na posição do antigo
+      const newOrder = orderedStarters.map(p =>
+        p.id === starter.id ? { ...selectedReserve, isStarter: true } : p
+      );
+      saveStarterOrder(newOrder);
 
-    const updatedPlayers = userPlayers.map((p) => {
-      if (p.id === starter.id) {
-        return { ...p, isStarter: false };
+      setUserPlayers(updatedPlayers);
+      localStorage.setItem(`players_${teamName}`, JSON.stringify(updatedPlayers));
+      setSelectedReserve(null);
+      return;
+    }
+
+    // Se já tem um titular selecionado, troca posições entre eles
+    if (selectedStarter) {
+      if (selectedStarter.id === starter.id) {
+        setSelectedStarter(null);
+        return;
       }
-      if (p.id === selectedReserve.id) {
-        return { ...p, isStarter: true };
-      }
-      return p;
-    });
 
-    setUserPlayers(updatedPlayers);
-    // Salvar no localStorage também
-    localStorage.setItem(`players_${teamName}`, JSON.stringify(updatedPlayers));
-    setSelectedReserve(null);
+      // Swap na ordem do campo
+      const newOrder = orderedStarters.map(p => {
+        if (p.id === selectedStarter.id) return starter;
+        if (p.id === starter.id) return selectedStarter;
+        return p;
+      });
+      saveStarterOrder(newOrder);
+
+      setSelectedStarter(null);
+      setUserPlayers([...userPlayers]); // force re-render
+      return;
+    }
+
+    // Nenhum selecionado - selecionar este titular
+    setSelectedStarter(starter);
   };
 
   const saveMatchResult = async () => {
@@ -797,8 +846,10 @@ const Match = () => {
                 <TacticsManager
                   teamName={teamName}
                   players={userStarters}
+                  orderedPlayers={orderedStarters}
                   onStarterClick={handleStarterClick}
-                  canSubstitute={!!selectedReserve}
+                  canSubstitute={!!selectedReserve || !!selectedStarter}
+                  selectedStarterId={selectedReserve?.id || selectedStarter?.id}
                 />
 
                 <div className="bg-zinc-900 rounded-lg p-4">
@@ -854,8 +905,10 @@ const Match = () => {
                 <TacticsManager
                   teamName={teamName}
                   players={userStarters}
+                  orderedPlayers={orderedStarters}
                   onStarterClick={handleStarterClick}
-                  canSubstitute={!!selectedReserve}
+                  canSubstitute={!!selectedReserve || !!selectedStarter}
+                  selectedStarterId={selectedReserve?.id || selectedStarter?.id}
                 />
 
                 <div className="bg-zinc-900 rounded-lg p-4">

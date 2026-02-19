@@ -7,12 +7,13 @@ import { ChevronDown } from "lucide-react";
 interface TacticsManagerProps {
   teamName: string;
   players?: Player[];
+  orderedPlayers?: (Player | null)[];
   onStarterClick?: (player: Player) => void;
   canSubstitute?: boolean;
   selectedStarterId?: string;
 }
 
-export const TacticsManager = ({ teamName, players = [], onStarterClick, canSubstitute = false, selectedStarterId }: TacticsManagerProps) => {
+export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStarterClick, canSubstitute = false, selectedStarterId }: TacticsManagerProps) => {
   // Carregar táticas do localStorage
   const getInitialFormation = () => {
     const saved = localStorage.getItem(`tactics_formation_${teamName}`);
@@ -50,7 +51,7 @@ export const TacticsManager = ({ teamName, players = [], onStarterClick, canSubs
       <FormationField
         formation={formation}
         players={players}
-        orderedPlayers={players.length === formation.positions.length ? players : undefined}
+        orderedPlayers={orderedPlayers || (players.length === formation.positions.length ? players : undefined)}
         onPlayerClick={onStarterClick}
         canSubstitute={canSubstitute}
         selectedPlayerId={selectedStarterId}
