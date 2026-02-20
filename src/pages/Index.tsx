@@ -9,8 +9,9 @@ import { Loader2, LogOut } from "lucide-react";
 
 const Index = () => {
   const { user, loading, signOut } = useAuth();
-  
   const navigate = useNavigate();
+
+  useEffect(() => { document.title = "Selecionar Time | Gerenciador"; }, []);
 
   // Redirect to auth if not authenticated
   useEffect(() => {

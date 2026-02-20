@@ -26,6 +26,8 @@ const Match = () => {
   const navigate = useNavigate();
   const teamName = searchParams.get("time") || "Seu Time";
   const opponentName = searchParams.get("adversario") || "Adversário";
+
+  useEffect(() => { document.title = `${teamName} vs ${opponentName} | Partida`; }, [teamName, opponentName]);
   
   // Redirect to auth if not authenticated
   useEffect(() => {

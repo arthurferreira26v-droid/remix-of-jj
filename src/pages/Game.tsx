@@ -36,6 +36,8 @@ const Game = () => {
   const teamName = searchParams.get("time") || "Seu Time";
   const loadSlotParam = searchParams.get("loadSlot");
 
+  useEffect(() => { document.title = `${teamName} - Painel | Gerenciador`; }, [teamName]);
+
   const [showSquadManager, setShowSquadManager] = useState(false);
   const [showTransferMarket, setShowTransferMarket] = useState(false);
   const [showFinances, setShowFinances] = useState(false);
@@ -472,7 +474,7 @@ const Game = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-bold text-white">{teamName}</span>
-              <span className="text-xs text-muted-foreground">Jj</span>
+              <span className="text-xs text-muted-foreground">Painel do Time</span>
             </div>
           </div>
 
