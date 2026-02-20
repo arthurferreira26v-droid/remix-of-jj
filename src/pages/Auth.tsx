@@ -16,6 +16,8 @@ const authSchema = z.object({
 const Auth = () => {
   const navigate = useNavigate();
   const { user, loading, signIn, signUp } = useAuth();
+
+  useEffect(() => { document.title = "Login | Gerenciador"; }, []);
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

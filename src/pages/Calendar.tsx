@@ -50,6 +50,8 @@ const Calendar = () => {
   const [loading, setLoading] = useState(true);
   const [totalRounds, setTotalRounds] = useState(0);
 
+  useEffect(() => { document.title = "Calendário | Gerenciador"; }, []);
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");

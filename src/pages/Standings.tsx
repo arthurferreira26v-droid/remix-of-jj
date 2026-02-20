@@ -25,6 +25,8 @@ const Standings = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { championship } = useChampionship(teamName);
+
+  useEffect(() => { document.title = "Classificação | Gerenciador"; }, []);
   const { groups, loading: libertLoading, preLibertadoresResults } = useLibertadores(teamName, championship?.id);
 
   // Close dropdown on outside click

@@ -19,6 +19,8 @@ interface GameSave {
 const SaveSelection = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading, signOut } = useAuth();
+
+  useEffect(() => { document.title = "Início | Gerenciador"; }, []);
   const [saves, setSaves] = useState<GameSave[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSaves, setShowSaves] = useState(false);
