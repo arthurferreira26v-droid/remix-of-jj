@@ -10,10 +10,9 @@ import Match from "./pages/Match";
 import Standings from "./pages/Standings";
 import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
-import Auth from "./pages/Auth";
 import AdminLogin from "./pages/AdminLogin";
 import AdminPanel from "./pages/AdminPanel";
-import SaveSelection from "./pages/SaveSelection";
+import ModeSelection from "./pages/ModeSelection";
 
 const queryClient = new QueryClient();
 
@@ -24,9 +23,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<SaveSelection />} />
+          <Route path="/" element={<ModeSelection />} />
           <Route path="/selecionar-time" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="/jogo" element={<Game />} />

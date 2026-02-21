@@ -2,23 +2,14 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TeamCard } from "@/components/TeamCard";
 import { teams } from "@/data/teams";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useAuth } from "@/hooks/useAuth";
-import { Loader2, LogOut } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
-  const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => { document.title = "Selecionar Time | Gerenciador"; }, []);
-
-  // Redirect to auth if not authenticated
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate("/auth");
-    }
-  }, [user, loading, navigate]);
 
   const filteredTeams = teams;
 
@@ -29,39 +20,20 @@ const Index = () => {
     navigate(`/jogo?time=${teamName}`);
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    toast.success("Você saiu da sua conta");
-    navigate("/auth");
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#c8ff00]" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with logout */}
+      {/* Header */}
       <header className="border-b border-border bg-black">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-white">Gerenciador</h1>
+        <div className="container mx-auto px-4 py-3 flex items-center gap-3">
           <Button
             variant="ghost"
-            size="sm"
-            onClick={handleSignOut}
+            size="icon"
+            onClick={() => navigate("/")}
             className="text-muted-foreground hover:text-white"
           >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair
+            <ArrowLeft className="w-5 h-5" />
           </Button>
+          <h1 className="text-xl font-bold text-white">Gerenciador</h1>
         </div>
       </header>
 
