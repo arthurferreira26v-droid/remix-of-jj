@@ -13,6 +13,9 @@ import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
 import AdminPanel from "./pages/AdminPanel";
 import ModeSelection from "./pages/ModeSelection";
+import QuickMatchMenu from "./pages/QuickMatchMenu";
+import QuickMatchTeamSelect from "./pages/QuickMatchTeamSelect";
+import QuickMatchRoom from "./pages/QuickMatchRoom";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +28,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<ModeSelection />} />
           <Route path="/selecionar-time" element={<Index />} />
+          <Route path="/jogo-rapido" element={<QuickMatchMenu />} />
+          <Route path="/jogo-rapido/criar" element={<QuickMatchTeamSelect />} />
+          <Route path="/jogo-rapido/sala" element={<QuickMatchRoom />} />
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="/jogo" element={<Game />} />

@@ -24,7 +24,7 @@ const ModeSelection = () => {
           </button>
 
           <button
-            onClick={() => navigate("/selecionar-time?modo=rapido")}
+            onClick={() => navigate("/jogo-rapido")}
             className="aspect-square bg-[#e8e8e8] hover:bg-[#ddd] rounded-2xl flex items-end p-5 transition-colors active:scale-[0.98]"
           >
             <span className="text-[22px] font-bold text-black leading-tight text-left">
