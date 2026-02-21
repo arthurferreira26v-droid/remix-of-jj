@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { ArrowLeft, Star } from "lucide-react";
 import { teams } from "@/data/teams";
 
 const QuickMatchTeamSelect = () => {
@@ -62,7 +62,7 @@ const QuickMatchTeamSelect = () => {
               onClick={prev}
               className="p-2 text-black/70 hover:text-black transition-colors"
             >
-              <ChevronLeft className="w-10 h-10" strokeWidth={2.5} />
+              <span className="text-[40px] font-light leading-none">←</span>
             </button>
 
             <div className="w-36 h-36 flex items-center justify-center">
@@ -70,6 +70,7 @@ const QuickMatchTeamSelect = () => {
                 src={team.logo}
                 alt={team.name}
                 className="max-w-full max-h-full object-contain"
+                loading="eager"
               />
             </div>
 
@@ -77,7 +78,7 @@ const QuickMatchTeamSelect = () => {
               onClick={next}
               className="p-2 text-black/70 hover:text-black transition-colors"
             >
-              <ChevronRight className="w-10 h-10" strokeWidth={2.5} />
+              <span className="text-[40px] font-light leading-none">→</span>
             </button>
           </div>
 
