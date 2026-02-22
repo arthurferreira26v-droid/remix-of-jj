@@ -1,7 +1,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Star } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { teams } from "@/data/teams";
+
+// SVG pointed star component
+const PointedStar = ({ filled }: { filled: boolean }) => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M12 2L14.9 8.6L22 9.3L16.8 14L18.2 21L12 17.3L5.8 21L7.2 14L2 9.3L9.1 8.6L12 2Z"
+      fill={filled ? "#facc15" : "rgba(120, 80, 20, 0.4)"}
+      stroke={filled ? "#facc15" : "rgba(120, 80, 20, 0.4)"}
+      strokeWidth="0.5"
+    />
+  </svg>
+);
 
 const QuickMatchTeamSelect = () => {
   const navigate = useNavigate();
@@ -45,6 +57,11 @@ const QuickMatchTeamSelect = () => {
         {/* League banner */}
         <div className="bg-[#e8e8e8] rounded-2xl px-6 py-4 flex items-center justify-between mb-10">
           <span className="text-[20px] font-bold text-black tracking-wide">BRASILEIRÃO</span>
+          <img
+            src="https://upload.wikimedia.org/wikipedia/pt/4/42/Brasileir%C3%A3o_S%C3%A9rie_A_logo.png"
+            alt="Brasileirão"
+            className="w-10 h-10 object-contain"
+          />
         </div>
 
         {/* Team carousel */}
@@ -82,17 +99,10 @@ const QuickMatchTeamSelect = () => {
             </button>
           </div>
 
-          {/* Stars */}
+          {/* Stars - pointed */}
           <div className="flex gap-1.5 mt-4">
             {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`w-8 h-8 ${
-                  i < team.rating
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "fill-yellow-900/40 text-yellow-900/40"
-                }`}
-              />
+              <PointedStar key={i} filled={i < team.rating} />
             ))}
           </div>
         </div>
