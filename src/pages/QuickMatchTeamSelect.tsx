@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { teams } from "@/data/teams";
+import brasileiraoLogo from "@/assets/brasileirao-logo.svg";
 
 // SVG pointed star component
 const PointedStar = ({ filled }: { filled: boolean }) => (
@@ -58,7 +59,7 @@ const QuickMatchTeamSelect = () => {
         <div className="bg-[#e8e8e8] rounded-2xl px-6 py-4 flex items-center justify-between mb-10">
           <span className="text-[20px] font-bold text-black tracking-wide">BRASILEIRÃO</span>
           <img
-            src="https://upload.wikimedia.org/wikipedia/pt/4/42/Brasileir%C3%A3o_S%C3%A9rie_A_logo.png"
+            src={brasileiraoLogo}
             alt="Brasileirão"
             className="w-10 h-10 object-contain"
           />
