@@ -1,18 +1,63 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, ChevronDown } from "lucide-react";
+import { ArrowLeft, ChevronDown, TrendingUp, TrendingDown } from "lucide-react";
 import { teams } from "@/data/teams";
-import { formations, playStyles } from "@/data/formations";
+import { formations, playStyles, Formation } from "@/data/formations";
 import { botafogoPlayers, flamengoPlayers, generateTeamPlayers, Player } from "@/data/players";
 import { FormationField } from "@/components/FormationField";
 import { fetchAdminPlayers } from "@/hooks/useAdminData";
-import { TrendingUp, TrendingDown } from "lucide-react";
 
 const generateRoomCode = () => {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
   let code = "";
   for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
   return code;
+};
+
+const computeSlotAssignments = (starters: Player[], formation: Formation): string[] => {
+  const available = [...starters];
+  const assignments: string[] = new Array(formation.positions.length).fill("");
+  for (let i = 0; i < formation.positions.length; i++) {
+    const role = formation.positions[i].role;
+    const idx = available.findIndex(p => p.position === role);
+    if (idx !== -1) { assignments[i] = available[idx].id; available.splice(idx, 1); }
+  }
+  for (let i = 0; i < formation.positions.length; i++) {
+    if (assignments[i]) continue;
+    const role = formation.positions[i].role;
+    const idx = available.findIndex(p => p.altPositions?.includes(role));
+    if (idx !== -1) { assignments[i] = available[idx].id; available.splice(idx, 1); }
+  }
+  for (let i = 0; i < formation.positions.length; i++) {
+    if (assignments[i]) continue;
+    if (available.length > 0) assignments[i] = available.shift()!.id;
+  }
+  return assignments;
+};
+
+const ensureStarterCount = (players: Player[], requiredCount: number): Player[] => {
+  const starters = players.filter(p => p.isStarter);
+  const reserves = players.filter(p => !p.isStarter);
+  if (starters.length === requiredCount) return players;
+  const updated = [...players];
+  if (starters.length < requiredCount) {
+    const sorted = [...reserves].sort((a, b) => b.overall - a.overall);
+    let needed = requiredCount - starters.length;
+    for (const r of sorted) {
+      if (needed <= 0) break;
+      const idx = updated.findIndex(p => p.id === r.id);
+      if (idx !== -1) { updated[idx] = { ...updated[idx], isStarter: true }; needed--; }
+    }
+  } else {
+    const sorted = [...starters].sort((a, b) => a.overall - b.overall);
+    let excess = starters.length - requiredCount;
+    for (const s of sorted) {
+      if (excess <= 0) break;
+      const idx = updated.findIndex(p => p.id === s.id);
+      if (idx !== -1) { updated[idx] = { ...updated[idx], isStarter: false }; excess--; }
+    }
+  }
+  return updated;
 };
 
 const QuickMatchRoom = () => {
@@ -26,36 +71,86 @@ const QuickMatchRoom = () => {
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
   const [selectedPlayStyle, setSelectedPlayStyle] = useState("balanced");
   const [openDropdown, setOpenDropdown] = useState<"style" | "formation" | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
   const formation = formations.find((f) => f.id === selectedFormation) || formations[1];
   const playStyle = playStyles.find((s) => s.id === selectedPlayStyle) || playStyles[0];
 
   useEffect(() => { document.title = "Sala | Jogo Rápido"; }, []);
 
-  // Get players for the selected team (with admin overrides)
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [localPlayers, setLocalPlayers] = useState<Player[]>([]);
+  const [slotAssignments, setSlotAssignments] = useState<string[]>([]);
 
   useEffect(() => {
     if (!team) return;
-    // Default players
     let defaultPlayers: Player[];
     if (team.id === "botafogo") defaultPlayers = botafogoPlayers;
     else if (team.id === "flamengo") defaultPlayers = flamengoPlayers;
     else defaultPlayers = generateTeamPlayers(team.name);
 
-    // Try admin overrides
     (async () => {
       const adminPlayers = await fetchAdminPlayers(true);
-      if (adminPlayers[team.id]) {
-        setPlayers(adminPlayers[team.id]);
-      } else {
-        setPlayers(defaultPlayers);
-      }
+      const pl = adminPlayers[team.id] || defaultPlayers;
+      const fixed = ensureStarterCount(pl, formation.positions.length);
+      setLocalPlayers(fixed);
+      const starters = fixed.filter(p => p.isStarter);
+      setSlotAssignments(computeSlotAssignments(starters, formation));
     })();
   }, [team]);
 
-  const starters = players.filter(p => p.isStarter);
-  const reserves = players.filter(p => !p.isStarter);
+  // Recompute on formation change
+  useEffect(() => {
+    if (localPlayers.length === 0) return;
+    const fixed = ensureStarterCount(localPlayers, formation.positions.length);
+    setLocalPlayers(fixed);
+    const starters = fixed.filter(p => p.isStarter);
+    setSlotAssignments(computeSlotAssignments(starters, formation));
+  }, [selectedFormation]);
+
+  const starters = localPlayers.filter(p => p.isStarter);
+  const reserves = localPlayers.filter(p => !p.isStarter);
+
+  const orderedStarters = slotAssignments.map(id =>
+    localPlayers.find(p => p.id === id) || null
+  );
+
+  const handlePlayerClick = useCallback((player: Player) => {
+    if (!selectedPlayer) {
+      setSelectedPlayer(player);
+      return;
+    }
+    if (selectedPlayer.id === player.id) {
+      setSelectedPlayer(null);
+      return;
+    }
+
+    const bothStarters = selectedPlayer.isStarter && player.isStarter;
+
+    if (bothStarters) {
+      const newSlots = [...slotAssignments];
+      const idx1 = newSlots.indexOf(selectedPlayer.id);
+      const idx2 = newSlots.indexOf(player.id);
+      if (idx1 !== -1 && idx2 !== -1) {
+        newSlots[idx1] = player.id;
+        newSlots[idx2] = selectedPlayer.id;
+        setSlotAssignments(newSlots);
+      }
+    } else if (!selectedPlayer.isStarter && !player.isStarter) {
+      // both reserves - noop
+    } else {
+      const starterId = selectedPlayer.isStarter ? selectedPlayer.id : player.id;
+      const reserveId = selectedPlayer.isStarter ? player.id : selectedPlayer.id;
+      const updatedPlayers = localPlayers.map(p => {
+        if (p.id === starterId) return { ...p, isStarter: false };
+        if (p.id === reserveId) return { ...p, isStarter: true };
+        return p;
+      });
+      setLocalPlayers(updatedPlayers);
+      const newSlots = slotAssignments.map(id => id === starterId ? reserveId : id);
+      setSlotAssignments(newSlots);
+    }
+    setSelectedPlayer(null);
+  }, [selectedPlayer, slotAssignments, localPlayers]);
 
   const toggleDropdown = (dropdown: "style" | "formation") => {
     setOpenDropdown(openDropdown === dropdown ? null : dropdown);
@@ -82,7 +177,7 @@ const QuickMatchRoom = () => {
 
         {/* Room code card */}
         <div className="bg-[#e8e8e8] rounded-2xl px-6 py-5 flex flex-col items-center mb-8">
-          <span className="text-[#f28b82] text-sm font-bold tracking-widest uppercase">CODE</span>
+          <span className="text-black text-sm font-bold tracking-widest uppercase">CODE</span>
           <span className="text-black text-[32px] font-bold tracking-[0.15em] mt-1">{roomCode}</span>
         </div>
 
@@ -106,6 +201,10 @@ const QuickMatchRoom = () => {
             <FormationField
               formation={formation}
               players={starters}
+              orderedPlayers={orderedStarters}
+              onPlayerClick={handlePlayerClick}
+              canSubstitute={!!selectedPlayer}
+              selectedPlayerId={selectedPlayer?.id}
             />
           </div>
         )}
@@ -127,10 +226,7 @@ const QuickMatchRoom = () => {
                 {playStyles.map((style) => (
                   <button
                     key={style.id}
-                    onClick={() => {
-                      setSelectedPlayStyle(style.id);
-                      setOpenDropdown(null);
-                    }}
+                    onClick={() => { setSelectedPlayStyle(style.id); setOpenDropdown(null); }}
                     className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
                       selectedPlayStyle === style.id ? "bg-[#c8ff00]/20" : ""
                     }`}
@@ -158,10 +254,7 @@ const QuickMatchRoom = () => {
                 {formations.map((form) => (
                   <button
                     key={form.id}
-                    onClick={() => {
-                      setSelectedFormation(form.id);
-                      setOpenDropdown(null);
-                    }}
+                    onClick={() => { setSelectedFormation(form.id); setOpenDropdown(null); }}
                     className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
                       selectedFormation === form.id ? "bg-[#c8ff00]/20" : ""
                     }`}
@@ -180,15 +273,20 @@ const QuickMatchRoom = () => {
             <h3 className="text-black text-lg font-bold mb-3">Reservas</h3>
             <div className="space-y-2">
               {reserves.map(player => (
-                <div
+                <button
                   key={player.id}
-                  className="flex items-center justify-between p-3 bg-white rounded-xl"
+                  onClick={() => handlePlayerClick(player)}
+                  className={`w-full flex items-center justify-between p-3 rounded-xl transition-colors ${
+                    selectedPlayer?.id === player.id
+                      ? 'bg-[#c8ff00] text-black'
+                      : 'bg-white text-black hover:bg-gray-50'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="font-bold text-lg text-black w-8 text-center">{player.number}</span>
-                    <div>
+                    <span className="font-bold text-lg w-8 text-center">{player.number}</span>
+                    <div className="text-left">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-black text-sm">{player.name}</span>
+                        <span className="font-medium text-sm">{player.name}</span>
                         {player.ovrChange && player.ovrChange > 0 && (
                           <span className="flex items-center text-green-600 text-xs font-bold">
                             <TrendingUp className="w-3 h-3 mr-0.5" />+{player.ovrChange}
@@ -206,10 +304,17 @@ const QuickMatchRoom = () => {
                       </div>
                     </div>
                   </div>
-                  <span className="font-bold text-black">{player.overall}</span>
-                </div>
+                  <span className="font-bold">{player.overall}</span>
+                </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Substitution hint */}
+        {selectedPlayer && (
+          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#c8ff00] text-black px-6 py-3 rounded-lg font-medium z-50 shadow-lg">
+            Clique em outro jogador para trocar
           </div>
         )}
       </div>

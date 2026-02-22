@@ -16,6 +16,8 @@ import ModeSelection from "./pages/ModeSelection";
 import QuickMatchMenu from "./pages/QuickMatchMenu";
 import QuickMatchTeamSelect from "./pages/QuickMatchTeamSelect";
 import QuickMatchRoom from "./pages/QuickMatchRoom";
+import QuickMatchJoinRoom from "./pages/QuickMatchJoinRoom";
+import QuickMatchJoinTeamSelect from "./pages/QuickMatchJoinTeamSelect";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,8 @@ const App = () => (
           <Route path="/jogo-rapido" element={<QuickMatchMenu />} />
           <Route path="/jogo-rapido/criar" element={<QuickMatchTeamSelect />} />
           <Route path="/jogo-rapido/sala" element={<QuickMatchRoom />} />
+          <Route path="/jogo-rapido/entrar" element={<QuickMatchJoinRoom />} />
+          <Route path="/jogo-rapido/entrar/time" element={<QuickMatchJoinTeamSelect />} />
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="/jogo" element={<Game />} />
