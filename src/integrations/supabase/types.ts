@@ -209,18 +209,39 @@ export type Database = {
         Row: {
           code: string
           created_at: string
+          guest_formation: string
+          guest_play_style: string
+          guest_ready: boolean
+          guest_team_name: string | null
+          host_formation: string
+          host_play_style: string
+          host_ready: boolean
           id: string
           team_name: string
         }
         Insert: {
           code: string
           created_at?: string
+          guest_formation?: string
+          guest_play_style?: string
+          guest_ready?: boolean
+          guest_team_name?: string | null
+          host_formation?: string
+          host_play_style?: string
+          host_ready?: boolean
           id?: string
           team_name: string
         }
         Update: {
           code?: string
           created_at?: string
+          guest_formation?: string
+          guest_play_style?: string
+          guest_ready?: boolean
+          guest_team_name?: string | null
+          host_formation?: string
+          host_play_style?: string
+          host_ready?: boolean
           id?: string
           team_name?: string
         }
