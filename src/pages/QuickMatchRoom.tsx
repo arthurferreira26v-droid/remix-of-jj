@@ -6,6 +6,7 @@ import { formations, playStyles, Formation } from "@/data/formations";
 import { botafogoPlayers, flamengoPlayers, generateTeamPlayers, Player } from "@/data/players";
 import { FormationField } from "@/components/FormationField";
 import { fetchAdminPlayers } from "@/hooks/useAdminData";
+import { supabase } from "@/integrations/supabase/client";
 
 const generateRoomCode = () => {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
@@ -67,6 +68,15 @@ const QuickMatchRoom = () => {
   const team = teams.find((t) => t.name === teamName);
 
   const roomCode = useMemo(() => generateRoomCode(), []);
+
+  // Save room code to database on mount
+  useEffect(() => {
+    if (!team) return;
+    const saveRoom = async () => {
+      await supabase.from("quick_match_rooms" as any).insert({ code: roomCode, team_name: team.name } as any);
+    };
+    saveRoom();
+  }, [roomCode, team]);
 
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
   const [selectedPlayStyle, setSelectedPlayStyle] = useState("balanced");
