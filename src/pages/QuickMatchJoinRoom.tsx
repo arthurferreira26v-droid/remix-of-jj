@@ -1,45 +1,44 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Delete } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const QuickMatchJoinRoom = () => {
   const navigate = useNavigate();
   const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+  const [checking, setChecking] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const maxLength = 6;
 
   useEffect(() => { document.title = "Entrar em Sala | Jogo Rápido"; }, []);
 
-  const handleKey = (char: string) => {
-    if (code.length < maxLength) setCode(prev => prev + char);
+  const handleChange = (value: string) => {
+    const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, maxLength);
+    setCode(cleaned);
+    setError("");
   };
 
-  const handleDelete = () => {
-    setCode(prev => prev.slice(0, -1));
-  };
+  const handleConfirm = async () => {
+    if (code.length < maxLength || checking) return;
+    setChecking(true);
+    setError("");
 
-  const handleConfirm = () => {
-    if (code.length === maxLength) {
-      navigate(`/jogo-rapido/entrar/time?code=${code}`);
+    const { data, error: dbError } = await supabase
+      .from("quick_match_rooms" as any)
+      .select("code")
+      .eq("code", code)
+      .maybeSingle();
+
+    setChecking(false);
+
+    if (dbError || !data) {
+      setError("Senha errada, tente novamente");
+      return;
     }
+
+    navigate(`/jogo-rapido/entrar/time?code=${code}`);
   };
-
-  const keys = [
-    ["1", "2", "3"],
-    ["4", "5", "6"],
-    ["7", "8", "9"],
-    ["A", "0", "B"],
-    ["C", "D", "E"],
-    ["F", "G", "H"],
-    ["J", "K", "L"],
-    ["M", "N", "P"],
-    ["Q", "R", "S"],
-    ["T", "U", "V"],
-    ["W", "X", "Y"],
-    ["Z"],
-  ];
-
-  // Flatten keys for a grid
-  const allKeys = keys.flat();
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -57,7 +56,7 @@ const QuickMatchJoinRoom = () => {
         </h1>
 
         {/* Code display */}
-        <div className="flex justify-center gap-2 mb-8">
+        <div className="flex justify-center gap-2 mb-4">
           {Array.from({ length: maxLength }).map((_, i) => (
             <div
               key={i}
@@ -74,32 +73,41 @@ const QuickMatchJoinRoom = () => {
           ))}
         </div>
 
-        {/* Keyboard */}
-        <div className="grid grid-cols-3 gap-2 max-w-xs mx-auto mb-6">
-          {allKeys.map((char) => (
-            <button
-              key={char}
-              onClick={() => handleKey(char)}
-              className="h-12 bg-[#e8e8e8] hover:bg-[#ddd] rounded-xl flex items-center justify-center text-black font-bold text-lg transition-colors active:scale-95"
-            >
-              {char}
-            </button>
-          ))}
-          {/* Delete button */}
-          <button
-            onClick={handleDelete}
-            className="h-12 bg-[#e8e8e8] hover:bg-[#ddd] rounded-xl flex items-center justify-center text-black transition-colors active:scale-95 col-span-2"
-          >
-            <Delete className="w-5 h-5" />
-          </button>
-        </div>
+        {/* Error message */}
+        {error && (
+          <p className="text-red-500 text-sm font-semibold text-center mb-4">{error}</p>
+        )}
+
+        {/* Hidden native input - opens device keyboard */}
+        <input
+          ref={inputRef}
+          type="text"
+          inputMode="text"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="characters"
+          spellCheck={false}
+          value={code}
+          onChange={(e) => handleChange(e.target.value)}
+          maxLength={maxLength}
+          className="opacity-0 absolute h-0 w-0"
+          autoFocus
+        />
+
+        {/* Tap area to focus input */}
+        <button
+          onClick={() => inputRef.current?.focus()}
+          className="w-full py-4 text-center text-gray-400 text-sm font-medium"
+        >
+          Toque aqui para digitar o código
+        </button>
       </div>
 
       {/* Confirm button */}
       <div className="px-6 pb-8 pt-4">
         <button
           onClick={handleConfirm}
-          disabled={code.length < maxLength}
+          disabled={code.length < maxLength || checking}
           className={`w-full h-16 rounded-2xl flex items-center justify-center transition-colors active:scale-[0.98] ${
             code.length === maxLength
               ? "bg-[#c8ff00] hover:bg-[#b8ef00]"
@@ -107,7 +115,7 @@ const QuickMatchJoinRoom = () => {
           }`}
         >
           <span className={`text-[20px] font-bold ${code.length === maxLength ? "text-black" : "text-gray-400"}`}>
-            Entrar
+            {checking ? "Verificando..." : "Entrar"}
           </span>
         </button>
       </div>

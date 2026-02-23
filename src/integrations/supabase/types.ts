@@ -205,6 +205,27 @@ export type Database = {
           },
         ]
       }
+      quick_match_rooms: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          team_name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          team_name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          team_name?: string
+        }
+        Relationships: []
+      }
       standings: {
         Row: {
           championship_id: string
