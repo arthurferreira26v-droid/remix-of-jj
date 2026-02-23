@@ -41,6 +41,7 @@ const QuickMatchJoinTeamSelect = () => {
   };
 
   const handleConfirm = () => {
+    // Navigate to room as guest (with code param)
     navigate(`/jogo-rapido/sala?time=${team.name}&code=${roomCode}`);
   };
 

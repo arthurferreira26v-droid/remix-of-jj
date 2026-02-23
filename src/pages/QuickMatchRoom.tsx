@@ -65,18 +65,113 @@ const QuickMatchRoom = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const teamName = params.get("time") || "";
+  const roomCodeParam = params.get("code") || "";
   const team = teams.find((t) => t.name === teamName);
 
-  const roomCode = useMemo(() => generateRoomCode(), []);
+  // Determine role: if code param exists, we're a guest joining an existing room
+  const isHost = !roomCodeParam;
+  const roomCode = useMemo(() => isHost ? generateRoomCode() : roomCodeParam, []);
 
-  // Save room code to database on mount
+  // Room state from DB
+  const [roomData, setRoomData] = useState<any>(null);
+  const [myReady, setMyReady] = useState(false);
+  const [opponentReady, setOpponentReady] = useState(false);
+  const [opponentTeamName, setOpponentTeamName] = useState<string | null>(null);
+
+  // Save room to DB on mount (host only)
   useEffect(() => {
-    if (!team) return;
+    if (!team || !isHost) return;
     const saveRoom = async () => {
-      await supabase.from("quick_match_rooms" as any).insert({ code: roomCode, team_name: team.name } as any);
+      await supabase.from("quick_match_rooms" as any).insert({
+        code: roomCode,
+        team_name: team.name,
+        host_ready: false,
+        guest_ready: false,
+      } as any);
     };
     saveRoom();
-  }, [roomCode, team]);
+  }, [roomCode, team, isHost]);
+
+  // Guest: update guest_team_name on mount
+  useEffect(() => {
+    if (!team || isHost) return;
+    const joinRoom = async () => {
+      await supabase.from("quick_match_rooms" as any)
+        .update({ guest_team_name: team.name } as any)
+        .eq("code", roomCode);
+    };
+    joinRoom();
+  }, [roomCode, team, isHost]);
+
+  // Fetch initial room data and subscribe to realtime
+  useEffect(() => {
+    const fetchRoom = async () => {
+      const { data } = await supabase
+        .from("quick_match_rooms" as any)
+        .select("*")
+        .eq("code", roomCode)
+        .maybeSingle();
+      if (data) {
+        setRoomData(data);
+        updateFromRoomData(data);
+      }
+    };
+    fetchRoom();
+
+    const channel = supabase
+      .channel(`room-${roomCode}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'quick_match_rooms',
+          filter: `code=eq.${roomCode}`,
+        },
+        (payload: any) => {
+          const newData = payload.new;
+          if (newData) {
+            setRoomData(newData);
+            updateFromRoomData(newData);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [roomCode]);
+
+  const updateFromRoomData = (data: any) => {
+    if (isHost) {
+      setOpponentTeamName(data.guest_team_name || null);
+      setOpponentReady(data.guest_ready || false);
+      setMyReady(data.host_ready || false);
+    } else {
+      setOpponentTeamName(data.team_name || null);
+      setOpponentReady(data.host_ready || false);
+      setMyReady(data.guest_ready || false);
+    }
+  };
+
+  // Check if both ready → navigate to match
+  useEffect(() => {
+    if (myReady && opponentReady && opponentTeamName) {
+      const hostTeam = isHost ? teamName : opponentTeamName;
+      const guestTeam = isHost ? opponentTeamName : teamName;
+      navigate(`/partida?home=${hostTeam}&away=${guestTeam}&quick=true`);
+    }
+  }, [myReady, opponentReady, opponentTeamName]);
+
+  const handleReady = async () => {
+    const newReady = !myReady;
+    setMyReady(newReady);
+    const updateField = isHost ? { host_ready: newReady } : { guest_ready: newReady };
+    await supabase.from("quick_match_rooms" as any)
+      .update(updateField as any)
+      .eq("code", roomCode);
+  };
+
+  const opponentTeam = opponentTeamName ? teams.find(t => t.name === opponentTeamName) : null;
 
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
   const [selectedPlayStyle, setSelectedPlayStyle] = useState("balanced");
@@ -108,7 +203,6 @@ const QuickMatchRoom = () => {
     })();
   }, [team]);
 
-  // Recompute on formation change
   useEffect(() => {
     if (localPlayers.length === 0) return;
     const fixed = ensureStarterCount(localPlayers, formation.positions.length);
@@ -175,11 +269,11 @@ const QuickMatchRoom = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col pb-24">
       <div className="flex-1 flex flex-col px-6 pt-8 pb-8">
         {/* Back */}
         <button
-          onClick={() => navigate("/jogo-rapido/criar")}
+          onClick={() => navigate(isHost ? "/jogo-rapido/criar" : "/jogo-rapido/entrar")}
           className="self-start mb-6 p-2 -ml-2 text-black/60 hover:text-black transition-colors"
         >
           <ArrowLeft className="w-6 h-6" />
@@ -195,14 +289,55 @@ const QuickMatchRoom = () => {
         <div className="bg-[#0a1744] rounded-2xl px-6 py-6 flex flex-col items-center mb-8">
           <span className="text-white text-sm font-bold tracking-widest uppercase mb-4">AMISTOSO</span>
           <div className="flex items-center justify-center gap-6 w-full">
-            <div className="w-24 h-24 flex items-center justify-center">
-              <img src={team.logo} alt={team.name} className="max-w-full max-h-full object-contain" />
+            {/* Host team */}
+            <div className="flex flex-col items-center gap-1">
+              {isHost ? (
+                <div className="w-24 h-24 flex items-center justify-center">
+                  <img src={team.logo} alt={team.name} className="max-w-full max-h-full object-contain" />
+                </div>
+              ) : opponentTeam ? (
+                <div className="w-24 h-24 flex items-center justify-center">
+                  <img src={opponentTeam.logo} alt={opponentTeam.name} className="max-w-full max-h-full object-contain" />
+                </div>
+              ) : (
+                <div className="w-24 h-24 flex items-center justify-center opacity-30">
+                  <span className="text-white text-4xl font-bold">?</span>
+                </div>
+              )}
+              {isHost && opponentReady && (
+                <span className="text-xs text-green-400 font-bold">PRONTO</span>
+              )}
             </div>
+
             <span className="text-white text-[28px] font-bold">X</span>
-            <div className="w-24 h-24 flex items-center justify-center opacity-30">
-              <span className="text-white text-4xl font-bold">?</span>
+
+            {/* Guest/Opponent team */}
+            <div className="flex flex-col items-center gap-1">
+              {isHost ? (
+                opponentTeam ? (
+                  <div className="w-24 h-24 flex items-center justify-center">
+                    <img src={opponentTeam.logo} alt={opponentTeam.name} className="max-w-full max-h-full object-contain" />
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 flex items-center justify-center opacity-30">
+                    <span className="text-white text-4xl font-bold">?</span>
+                  </div>
+                )
+              ) : (
+                <div className="w-24 h-24 flex items-center justify-center">
+                  <img src={team.logo} alt={team.name} className="max-w-full max-h-full object-contain" />
+                </div>
+              )}
+              {!isHost && opponentReady && (
+                <span className="text-xs text-green-400 font-bold">PRONTO</span>
+              )}
             </div>
           </div>
+          
+          {/* Waiting message */}
+          {isHost && !opponentTeamName && (
+            <p className="text-white/50 text-sm mt-4 animate-pulse">Aguardando oponente...</p>
+          )}
         </div>
 
         {/* Formation field */}
@@ -323,10 +458,24 @@ const QuickMatchRoom = () => {
 
         {/* Substitution hint */}
         {selectedPlayer && (
-          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#c8ff00] text-black px-6 py-3 rounded-lg font-medium z-50 shadow-lg">
+          <div className="fixed bottom-28 left-1/2 transform -translate-x-1/2 bg-[#c8ff00] text-black px-6 py-3 rounded-lg font-medium z-50 shadow-lg">
             Clique em outro jogador para trocar
           </div>
         )}
+      </div>
+
+      {/* Floating PRONTO button */}
+      <div className="fixed bottom-0 left-0 right-0 px-6 pb-6 pt-3 bg-gradient-to-t from-white via-white to-transparent z-40">
+        <button
+          onClick={handleReady}
+          className={`w-full h-16 rounded-2xl flex items-center justify-center transition-all active:scale-[0.98] font-bold text-[20px] ${
+            myReady
+              ? "bg-green-500 text-white"
+              : "bg-[#c8ff00] text-black hover:bg-[#b8ef00]"
+          }`}
+        >
+          {myReady ? "✓ PRONTO" : "PRONTO"}
+        </button>
       </div>
     </div>
   );
