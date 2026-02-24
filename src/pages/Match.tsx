@@ -30,12 +30,6 @@ const Match = () => {
 
   useEffect(() => { document.title = `${teamName} vs ${opponentName} | Partida`; }, [teamName, opponentName]);
   
-  // Redirect to auth if not authenticated (skip for quick match)
-  useEffect(() => {
-    if (!isQuickMatch && !authLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, authLoading, navigate, isQuickMatch]);
 
   const [minute, setMinute] = useState(1);
   const [homeScore, setHomeScore] = useState(0);
@@ -681,16 +675,12 @@ const Match = () => {
     return event.playerName;
   };
 
-  if (!isQuickMatch && authLoading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#c8ff00]" />
       </div>
     );
-  }
-
-  if (!isQuickMatch && !user) {
-    return null;
   }
 
   return (

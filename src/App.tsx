@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
 import Game from "./pages/Game";
 import Match from "./pages/Match";
 import Standings from "./pages/Standings";
@@ -31,7 +30,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<ModeSelection />} />
           <Route path="/selecionar-time" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
+          
           <Route path="/jogo-rapido" element={<QuickMatchMenu />} />
           <Route path="/jogo-rapido/criar" element={<QuickMatchTeamSelect />} />
           <Route path="/jogo-rapido/sala" element={<QuickMatchRoom />} />

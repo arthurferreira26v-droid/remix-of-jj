@@ -50,12 +50,6 @@ const Game = () => {
   const [totalPurchases, setTotalPurchases] = useState(0);
   const [selectedPlayerForValue, setSelectedPlayerForValue] = useState<Player | null>(null);
   
-  // Redirect to auth if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, authLoading, navigate]);
   
   // Initialize players state - save > default (admin loaded async)
   const getInitialPlayers = () => {
@@ -394,9 +388,6 @@ const Game = () => {
     );
   }
 
-  if (!user) {
-    return null;
-  }
 
   // Tela de fim de campeonato
   if (isChampionComplete && !loading) {
