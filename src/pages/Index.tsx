@@ -11,7 +11,7 @@ const Index = () => {
 
   useEffect(() => { document.title = "Selecionar Time | Gerenciador"; }, []);
 
-  const filteredTeams = teams;
+  const filteredTeams = teams.filter(t => t.league === "brasileiro");
 
   const handleTeamSelect = (teamName: string) => {
     toast.success(`Time ${teamName} selecionado!`, {
