@@ -158,7 +158,8 @@ const QuickMatchRoom = () => {
     if (myReady && opponentReady && opponentTeamName) {
       const hostTeam = isHost ? teamName : opponentTeamName;
       const guestTeam = isHost ? opponentTeamName : teamName;
-      navigate(`/partida?home=${hostTeam}&away=${guestTeam}&quick=true`);
+      // For quick match: each user sees their own team as "away" (user team) and opponent as "home"
+      navigate(`/partida?time=${teamName}&adversario=${opponentTeamName}&quick=true`);
     }
   }, [myReady, opponentReady, opponentTeamName]);
 

@@ -26,15 +26,16 @@ const Match = () => {
   const navigate = useNavigate();
   const teamName = searchParams.get("time") || "Seu Time";
   const opponentName = searchParams.get("adversario") || "Adversário";
+  const isQuickMatch = searchParams.get("quick") === "true";
 
   useEffect(() => { document.title = `${teamName} vs ${opponentName} | Partida`; }, [teamName, opponentName]);
   
-  // Redirect to auth if not authenticated
+  // Redirect to auth if not authenticated (skip for quick match)
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!isQuickMatch && !authLoading && !user) {
       navigate("/auth");
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, isQuickMatch]);
 
   const [minute, setMinute] = useState(1);
   const [homeScore, setHomeScore] = useState(0);
@@ -155,7 +156,15 @@ const Match = () => {
   };
 
   const saveMatchResult = async () => {
-    if (isSavingMatch || !user) return;
+    if (isSavingMatch) return;
+    
+    // Quick match: just navigate back, no DB save
+    if (isQuickMatch) {
+      navigate("/jogo-rapido");
+      return;
+    }
+    
+    if (!user) return;
     setIsSavingMatch(true);
 
     try {
@@ -672,7 +681,7 @@ const Match = () => {
     return event.playerName;
   };
 
-  if (authLoading) {
+  if (!isQuickMatch && authLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#c8ff00]" />
@@ -680,7 +689,7 @@ const Match = () => {
     );
   }
 
-  if (!user) {
+  if (!isQuickMatch && !user) {
     return null;
   }
 
