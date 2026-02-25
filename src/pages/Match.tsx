@@ -27,6 +27,11 @@ const Match = () => {
   const teamName = searchParams.get("time") || "Seu Time";
   const opponentName = searchParams.get("adversario") || "Adversário";
   const isQuickMatch = searchParams.get("quick") === "true";
+  const quickMatchCode = searchParams.get("code");
+  const quickMatchRole = searchParams.get("role");
+  const isQMHost = isQuickMatch && quickMatchRole === "host";
+  const isQMGuest = isQuickMatch && quickMatchRole === "guest";
+  const channelRef = useRef<any>(null);
 
   useEffect(() => { document.title = `${teamName} vs ${opponentName} | Partida`; }, [teamName, opponentName]);
   
@@ -44,6 +49,42 @@ const Match = () => {
   const [pendingPenaltyMinute, setPendingPenaltyMinute] = useState<number | null>(null);
   const [isHalftime, setIsHalftime] = useState(false);
   const [halftimeDone, setHalftimeDone] = useState(false);
+
+  // Quick match: channel setup for realtime sync
+  useEffect(() => {
+    if (!isQuickMatch || !quickMatchCode) return;
+    const channel = supabase.channel(`qm-match-${quickMatchCode}`);
+    if (isQMGuest) {
+      channel.on('broadcast', { event: 'tick' }, ({ payload }: any) => {
+        setMinute(payload.minute);
+        setHomeScore(payload.awayScore);
+        setAwayScore(payload.homeScore);
+        setPossession({ home: payload.possession.away, away: payload.possession.home });
+        setShots({ home: payload.shots.away, away: payload.shots.home });
+        setFouls({ home: payload.fouls.away, away: payload.fouls.home });
+        setIsPlaying(payload.isPlaying);
+        setIsHalftime(payload.isHalftime);
+        setHalftimeDone(payload.halftimeDone);
+        setMatchEvents((payload.matchEvents || []).map((e: MatchEvent) => ({
+          ...e,
+          team: e.team === 'home' ? 'away' as const : 'home' as const
+        })));
+      });
+    }
+    channel.subscribe();
+    channelRef.current = channel;
+    return () => { supabase.removeChannel(channel); };
+  }, [isQuickMatch, quickMatchCode, isQMGuest]);
+
+  // Quick match host: broadcast state on every change
+  useEffect(() => {
+    if (!isQMHost || !channelRef.current) return;
+    channelRef.current.send({
+      type: 'broadcast',
+      event: 'tick',
+      payload: { minute, homeScore, awayScore, possession, shots, fouls, matchEvents, isPlaying, isHalftime, halftimeDone }
+    });
+  }, [minute, homeScore, awayScore, isHalftime, halftimeDone, isQMHost, matchEvents]);
 
   const selectedTeam = teams.find(t => t.name === teamName);
   const opponent = teams.find(t => t.name === opponentName);
@@ -538,7 +579,7 @@ const Match = () => {
 
   // Timer: 90 minutos em 30 segundos reais (333ms por minuto)
   useEffect(() => {
-    if (!isPlaying || minute >= 90 || showPenaltyModal || isHalftime) return;
+    if (!isPlaying || minute >= 90 || showPenaltyModal || isHalftime || isQMGuest) return;
 
     const interval = setInterval(() => {
       setMinute(prev => {
@@ -552,29 +593,72 @@ const Match = () => {
         }
         
         // Simular eventos aleatórios — chance de gol baseada em tática e overall adversário
-        // Calcular overall médio do adversário para ajustar dificuldade
         const opponentAvgOvr = opponentStarters.length > 0
           ? opponentStarters.reduce((sum, p) => sum + p.overall, 0) / opponentStarters.length
           : 75;
-        // Fator de dificuldade: adversário forte reduz chance de gol do usuário
+        const userAvgOvr = userStarters.length > 0
+          ? userStarters.reduce((sum, p) => sum + p.overall, 0) / userStarters.length
+          : 75;
         const difficultyFactor = Math.max(0.5, Math.min(1.5, (150 - opponentAvgOvr) / 75));
+
+        // Red cards reduce team strength
+        const homeRedCards = matchEvents.filter(e => e.type === 'red_card' && e.team === 'home').length;
+        const awayRedCards = matchEvents.filter(e => e.type === 'red_card' && e.team === 'away').length;
+        const homeStrength = Math.max(0.6, 1 - homeRedCards * 0.12);
+        const awayStrength = Math.max(0.6, 1 - awayRedCards * 0.12);
+
+        // Play style bonuses
+        let styleAttackBonus = 0;
+        let styleDefenseBonus = 0;
+        if (isQuickMatch) {
+          const myStyleId = searchParams.get("myStyle") || "balanced";
+          const oppStyleId = searchParams.get("oppStyle") || "balanced";
+          const styleMap: Record<string, { attack: number; defense: number }> = {
+            balanced: { attack: 0, defense: 0 },
+            counter: { attack: -10, defense: 15 },
+            possession: { attack: 5, defense: 5 },
+            pressing: { attack: 10, defense: 5 },
+            defensive: { attack: -20, defense: 25 },
+            attacking: { attack: 25, defense: -15 },
+          };
+          const myPS = styleMap[myStyleId] || styleMap.balanced;
+          const oppPS = styleMap[oppStyleId] || styleMap.balanced;
+          styleAttackBonus = (myPS.attack - oppPS.defense) / 200;
+          styleDefenseBonus = (oppPS.attack - myPS.defense) / 200;
+        }
+
         const baseGoalChance = 0.05;
         
         if (Math.random() < baseGoalChance) {
-          // Chance de gol — time com overall maior tem vantagem
-          const homeGoalProb = 1 - (difficultyFactor * 0.5); // adversário forte = mais gols pra ele
-          const isHomeGoal = Math.random() < homeGoalProb;
+          // Chance de gol — overall, tactics, red cards affect probability
+          const homeGoalProb = (1 - (difficultyFactor * 0.5) + styleDefenseBonus) * homeStrength;
+          const awayGoalProb = (difficultyFactor * 0.5 + styleAttackBonus) * awayStrength;
+          const totalProb = homeGoalProb + awayGoalProb;
+          const isHomeGoal = Math.random() < (homeGoalProb / totalProb);
           
           // Chance de ser pênalti (20% dos gols)
           const isPenalty = Math.random() < 0.2;
           
           if (isPenalty) {
             if (!isHomeGoal) {
-              // Pênalti para o time do usuário - pausar e mostrar modal
-              setIsPlaying(false);
-              setPendingPenaltyMinute(next);
-              setShowPenaltyModal(true);
-              return next;
+              if (isQuickMatch) {
+                // Auto-resolve penalty in quick match
+                const kicker = userStarters.find(p => ['ATA', 'PE', 'PD'].includes(p.position)) || userStarters[0];
+                const kickerName = kicker?.name || 'Jogador';
+                const isGoal = Math.random() < 0.75;
+                if (isGoal) {
+                  setAwayScore(s => s + 1);
+                  setMatchEvents(events => [...events, { minute: next, type: 'penalty' as const, team: 'away' as const, playerName: kickerName }]);
+                } else {
+                  setMatchEvents(events => [...events, { minute: next, type: 'penalty_missed' as const, team: 'away' as const, playerName: kickerName }]);
+                }
+              } else {
+                // Pênalti para o time do usuário - pausar e mostrar modal
+                setIsPlaying(false);
+                setPendingPenaltyMinute(next);
+                setShowPenaltyModal(true);
+                return next;
+              }
             } else {
               // Pênalti para o adversário
               const scorer = getRandomPlayer('home');
@@ -689,7 +773,7 @@ const Match = () => {
       <header className="border-b border-border bg-black backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <button 
-            onClick={() => navigate(`/jogo?time=${teamName}`)}
+            onClick={() => navigate(isQuickMatch ? '/jogo-rapido' : `/jogo?time=${teamName}`)}
             className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors"
           >
             <ChevronLeft className="w-6 h-6 text-white" />
@@ -942,16 +1026,20 @@ const Match = () => {
                   )}
                 </div>
 
-                <button
-                  onClick={() => {
-                    setIsHalftime(false);
-                    setHalftimeDone(true);
-                    setIsPlaying(true);
-                  }}
-                  className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-4 px-6 rounded-xl transition-all text-lg"
-                >
-                  INICIAR 2º TEMPO
-                </button>
+                {isQMGuest ? (
+                  <p className="text-center text-muted-foreground animate-pulse text-lg py-4">Aguardando o anfitrião iniciar o 2º tempo...</p>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setIsHalftime(false);
+                      setHalftimeDone(true);
+                      setIsPlaying(true);
+                    }}
+                    className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-4 px-6 rounded-xl transition-all text-lg"
+                  >
+                    INICIAR 2º TEMPO
+                  </button>
+                )}
               </div>
             </div>
           </div>
