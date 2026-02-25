@@ -73,7 +73,12 @@ export const useLibertadores = (userTeamName: string, brasileiraoChampionshipId:
   const [userQualified, setUserQualified] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!user || !brasileiraoChampionshipId) {
+    if (!brasileiraoChampionshipId) {
+      setLoading(false);
+      return;
+    }
+    // Libertadores requires auth for now - skip if no user
+    if (!user) {
       setLoading(false);
       return;
     }

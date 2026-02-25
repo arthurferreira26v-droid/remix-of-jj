@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { getLocalBudget, saveLocalBudget } from "@/utils/localChampionship";
 
-// Orçamentos iniciais por time (em reais/dólares)
 const TEAM_INITIAL_BUDGETS: Record<string, number> = {
   "Flamengo": 18000000,
   "Palmeiras": 17000000,
@@ -15,81 +13,21 @@ const TEAM_INITIAL_BUDGETS: Record<string, number> = {
   "Santos": 7000000,
   "Grêmio": 7000000,
   "Atlético Mineiro": 7000000,
-  "Vasco": 5000000,
-};
-
-const getInitialBudget = (teamName: string): number => {
-  return TEAM_INITIAL_BUDGETS[teamName] || 5000000;
+  "Vasco da Gama": 5000000,
 };
 
 export const useTeamBudget = (teamName: string, championshipId: string | undefined) => {
-  const { user } = useAuth();
-  const initialBudget = getInitialBudget(teamName);
-  const [budget, setBudget] = useState<number>(initialBudget);
-  const [loading, setLoading] = useState(true);
+  const [budget, setBudgetState] = useState<number>(() => getLocalBudget(teamName));
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchBudget = async () => {
-      if (!championshipId || !user) {
-        setLoading(false);
-        return;
-      }
+    setBudgetState(getLocalBudget(teamName));
+  }, [teamName]);
 
-      try {
-        // Buscar budget do time
-        const { data, error } = await supabase
-          .from("team_budgets")
-          .select("budget")
-          .eq("championship_id", championshipId)
-          .eq("team_name", teamName)
-          .maybeSingle();
-
-        if (error) throw error;
-
-        if (data) {
-          setBudget(data.budget);
-        } else {
-          // Se não existir, criar um novo registro com o budget inicial do time
-          const { data: newBudget, error: insertError } = await supabase
-            .from("team_budgets")
-            .insert({
-              championship_id: championshipId,
-              team_id: teamName.toLowerCase().replace(/\s+/g, "-"),
-              team_name: teamName,
-              budget: initialBudget,
-              user_id: user.id,
-            })
-            .select("budget")
-            .single();
-
-          if (insertError) throw insertError;
-          if (newBudget) setBudget(newBudget.budget);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar budget do time:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBudget();
-  }, [teamName, championshipId, initialBudget, user]);
-
-  const updateBudget = async (newBudget: number) => {
-    if (!championshipId) return;
-    
-    setBudget(newBudget);
-    
-    try {
-      await supabase
-        .from("team_budgets")
-        .update({ budget: newBudget })
-        .eq("championship_id", championshipId)
-        .eq("team_name", teamName);
-    } catch (error) {
-      console.error("Erro ao atualizar budget:", error);
-    }
+  const setBudget = (newBudget: number) => {
+    setBudgetState(newBudget);
+    saveLocalBudget(teamName, newBudget);
   };
 
-  return { budget, setBudget: updateBudget, loading };
+  return { budget, setBudget, loading };
 };

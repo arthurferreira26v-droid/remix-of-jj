@@ -2,8 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { StandingsTable } from "@/components/StandingsTable";
 import { LibertadoresGroups } from "@/components/LibertadoresGroups";
-import { ChevronLeft, ChevronDown, ChevronUp, Check, Loader2 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { ChevronLeft, ChevronDown, ChevronUp, Check } from "lucide-react";
 import { useLibertadores } from "@/hooks/useLibertadores";
 import { useChampionship } from "@/hooks/useChampionship";
 
@@ -15,7 +14,6 @@ const competitions = [
 ];
 
 const Standings = () => {
-  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const teamName = searchParams.get("time") || "Botafogo";
@@ -29,7 +27,6 @@ const Standings = () => {
   useEffect(() => { document.title = "Classificação | Gerenciador"; }, []);
   const { groups, loading: libertLoading, preLibertadoresResults } = useLibertadores(teamName, championship?.id);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -40,31 +37,14 @@ const Standings = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, authLoading, navigate]);
-
   const handleBack = () => {
     navigate(`/jogo?time=${teamName}`);
   };
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#c8ff00]" />
-      </div>
-    );
-  }
-
-  if (!user) return null;
 
   const currentLabel = competitions.find((c) => c.id === selected)!.label;
 
   return (
     <div className="h-screen bg-black flex flex-col overflow-hidden">
-      {/* Header */}
       <header className="border-b border-border bg-black flex-shrink-0">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
           <button
@@ -74,7 +54,6 @@ const Standings = () => {
             <ChevronLeft className="w-6 h-6 text-white" />
           </button>
 
-          {/* Dropdown */}
           <div ref={dropdownRef} className="relative">
             <button
               onClick={() => setDropdownOpen((o) => !o)}
@@ -115,7 +94,6 @@ const Standings = () => {
         </div>
       </header>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="container mx-auto px-4 py-4">
           {selected === "brasileirao" ? (

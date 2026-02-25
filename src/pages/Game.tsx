@@ -29,7 +29,7 @@ import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { toast } from "sonner";
 
 const Game = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const { loadGame: loadCloudGame } = useCloudSaveLoad();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -380,7 +380,7 @@ const Game = () => {
     };
   }, [user, loadSlotParam, loadCloudGame, navigate, handleLoadComplete]);
 
-  if (loading || userFormLoading || opponentFormLoading || budgetLoading || authLoading || libertadoresLoading) {
+  if (loading || userFormLoading || opponentFormLoading || budgetLoading || libertadoresLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#c8ff00]" />
