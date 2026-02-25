@@ -155,13 +155,11 @@ const QuickMatchRoom = () => {
 
   // Check if both ready → navigate to match
   useEffect(() => {
-    if (myReady && opponentReady && opponentTeamName) {
-      const hostTeam = isHost ? teamName : opponentTeamName;
-      const guestTeam = isHost ? opponentTeamName : teamName;
-      // For quick match: each user sees their own team as "away" (user team) and opponent as "home"
-      navigate(`/partida?time=${teamName}&adversario=${opponentTeamName}&quick=true`);
+    if (myReady && opponentReady && opponentTeamName && roomData) {
+      const oppStyle = isHost ? (roomData.guest_play_style || 'balanced') : (roomData.host_play_style || 'balanced');
+      navigate(`/partida?time=${teamName}&adversario=${opponentTeamName}&quick=true&code=${roomCode}&role=${isHost ? 'host' : 'guest'}&myStyle=${selectedPlayStyle}&oppStyle=${oppStyle}`);
     }
-  }, [myReady, opponentReady, opponentTeamName]);
+  }, [myReady, opponentReady, opponentTeamName, roomData]);
 
   const handleReady = async () => {
     const newReady = !myReady;
@@ -211,6 +209,17 @@ const QuickMatchRoom = () => {
     const starters = fixed.filter(p => p.isStarter);
     setSlotAssignments(computeSlotAssignments(starters, formation));
   }, [selectedFormation]);
+
+  // Sync formation/playStyle to DB for opponent visibility
+  useEffect(() => {
+    const field = isHost ? { host_formation: selectedFormation } : { guest_formation: selectedFormation };
+    supabase.from("quick_match_rooms" as any).update(field as any).eq("code", roomCode);
+  }, [selectedFormation, roomCode, isHost]);
+
+  useEffect(() => {
+    const field = isHost ? { host_play_style: selectedPlayStyle } : { guest_play_style: selectedPlayStyle };
+    supabase.from("quick_match_rooms" as any).update(field as any).eq("code", roomCode);
+  }, [selectedPlayStyle, roomCode, isHost]);
 
   const starters = localPlayers.filter(p => p.isStarter);
   const reserves = localPlayers.filter(p => !p.isStarter);
