@@ -1,57 +1,24 @@
-// @ts-nocheck
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { getLocalStandings, type LocalStanding } from "@/utils/localChampionship";
 import { getTeamLogo } from "@/utils/teamLogos";
 import { Loader2 } from "lucide-react";
 
 export const StandingsTable = () => {
-  const { user, loading: authLoading } = useAuth();
   const [searchParams] = useSearchParams();
   const teamName = searchParams.get("time") || "Botafogo";
 
-  const [standings, setStandings] = useState<any[]>([]);
+  const [standings, setStandings] = useState<(LocalStanding & { position: number })[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStandings = async () => {
-      if (!user) return;
+    const data = getLocalStandings(teamName);
+    const sorted = [...data].sort((a, b) => b.points - a.points || b.goal_difference - a.goal_difference || b.goals_for - a.goals_for);
+    setStandings(sorted.map((t, i) => ({ ...t, position: i + 1 })));
+    setLoading(false);
+  }, [teamName]);
 
-      const { data: championships } = await supabase
-        .from("championships")
-        .select("id")
-        .eq("name", `Brasileirão - ${teamName}`)
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1);
-
-      if (!championships?.[0]) {
-        setStandings([]);
-        setLoading(false);
-        return;
-      }
-
-      const { data } = await supabase
-        .from("standings")
-        .select("*")
-        .eq("championship_id", championships[0].id)
-        .order("points", { ascending: false })
-        .order("goal_difference", { ascending: false });
-
-      setStandings(
-        Array.isArray(data)
-          ? data.map((t, i) => ({ ...t, position: i + 1 }))
-          : []
-      );
-
-      setLoading(false);
-    };
-
-    fetchStandings();
-  }, [user, teamName]);
-
-  if (loading || authLoading) {
+  if (loading) {
     return (
       <div className="flex justify-center py-10">
         <Loader2 className="w-8 h-8 animate-spin text-[#c8ff00]" />
@@ -67,7 +34,6 @@ export const StandingsTable = () => {
         </h2>
       </div>
 
-      {/* HEADER DA TABELA */}
       <div className="overflow-x-auto">
         <div className="min-w-[500px]">
           <div className="grid grid-cols-[32px_1fr_40px_32px_32px_32px_32px_40px] px-4 py-2 text-xs text-muted-foreground border-b border-border">
@@ -81,7 +47,6 @@ export const StandingsTable = () => {
             <span className="text-center">SG</span>
           </div>
 
-          {/* LISTA DE TIMES */}
           {standings.map((team) => (
             <div
               key={team.id}

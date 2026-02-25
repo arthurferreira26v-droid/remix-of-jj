@@ -21,7 +21,7 @@ interface MatchEvent {
 }
 
 const Match = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const teamName = searchParams.get("time") || "Seu Time";
@@ -199,303 +199,40 @@ const Match = () => {
       return;
     }
     
-    if (!user) return;
     setIsSavingMatch(true);
 
     try {
-      const campeonatoId = searchParams.get("campeonatoId");
-      let championshipId: string;
-      let championshipName: string = "";
+      // Import local championship utilities
+      const { getNextUserMatch, saveMatchResultLocal, getLocalMatches } = await import("@/utils/localChampionship");
+      
+      // Find the current match from local storage
+      const nextMatch = getNextUserMatch(teamName);
+      if (!nextMatch) throw new Error("Partida não encontrada");
 
-      if (campeonatoId) {
-        // Use the championship ID from URL (for Libertadores/pre-lib)
-        championshipId = campeonatoId;
-        const { data: champData } = await supabase
-          .from("championships")
-          .select("name")
-          .eq("id", campeonatoId)
-          .eq("user_id", user.id)
-          .single();
-        championshipName = champData?.name || "";
-      } else {
-        // Determinar o nome do campeonato baseado na liga do time
-        const userTeam = teams.find(t => t.name === teamName);
-        championshipName = userTeam?.league === "brasileiro" 
-          ? `Brasileirão - ${teamName}`
-          : `Liga dos Campeões - ${teamName}`;
-
-        const { data: championships } = await supabase
-          .from("championships")
-          .select("id")
-          .eq("name", championshipName)
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(1);
-
-        const championship = championships?.[0];
-        if (!championship) throw new Error("Campeonato não encontrado");
-        championshipId = championship.id;
-      }
-
-      const isPreLib = championshipName.startsWith("Pré-Libertadores");
-      const isLibertadores = championshipName.startsWith("Libertadores");
-
-      const { data: match } = await supabase
-        .from("matches")
-        .select("*")
-        .eq("championship_id", championshipId)
-        .eq("is_played", false)
-        .or(`home_team_name.eq.${teamName},away_team_name.eq.${teamName}`)
-        .order("round", { ascending: true })
-        .limit(1)
-        .maybeSingle();
-
-      if (!match) throw new Error("Partida não encontrada");
-
-      // Determinar se o usuário é home ou away no registro do banco
-      const userIsHome = match.home_team_name === teamName;
+      // Determine scores: in Match.tsx, "home" = opponent, "away" = user
+      const userIsHome = nextMatch.home_team_name === teamName;
       const dbHomeScore = userIsHome ? awayScore : homeScore;
       const dbAwayScore = userIsHome ? homeScore : awayScore;
 
-      // Atualizar resultado da partida
-      await supabase
-        .from("matches")
-        .update({
-          home_score: dbHomeScore,
-          away_score: dbAwayScore,
-          is_played: true,
-        })
-        .eq("id", match.id);
+      // Save match result locally (also simulates other matches and updates standings)
+      saveMatchResultLocal(teamName, nextMatch.id, dbHomeScore, dbAwayScore);
 
-      // Para Pré-Libertadores: apenas salvar resultado, sem classificação
-      if (!isPreLib) {
-        // Atualizar classificação - sistema de pontos: vitória=3, empate=1, derrota=0
-        const homeTeamName = match.home_team_name;
-        const awayTeamName = match.away_team_name;
-
-        const { data: standings } = await supabase
-          .from("standings")
-          .select("*")
-          .eq("championship_id", championshipId)
-          .in("team_name", [homeTeamName, awayTeamName]);
-
-        if (standings && standings.length === 2) {
-          const homeStanding = standings.find(s => s.team_name === homeTeamName);
-          const awayStanding = standings.find(s => s.team_name === awayTeamName);
-
-          if (homeStanding && awayStanding) {
-            let homePoints = 0;
-            let awayPoints = 0;
-            let homeWins = 0;
-            let awayWins = 0;
-            let homeDraws = 0;
-            let awayDraws = 0;
-            let homeLosses = 0;
-            let awayLosses = 0;
-
-            if (dbHomeScore > dbAwayScore) {
-              homePoints = 3;
-              homeWins = 1;
-              awayLosses = 1;
-            } else if (dbHomeScore < dbAwayScore) {
-              awayPoints = 3;
-              awayWins = 1;
-              homeLosses = 1;
-            } else {
-              homePoints = 1;
-              awayPoints = 1;
-              homeDraws = 1;
-              awayDraws = 1;
-            }
-
-            await supabase.from("standings").update({
-              points: homeStanding.points + homePoints,
-              played: homeStanding.played + 1,
-              wins: homeStanding.wins + homeWins,
-              draws: homeStanding.draws + homeDraws,
-              losses: homeStanding.losses + homeLosses,
-              goals_for: homeStanding.goals_for + dbHomeScore,
-              goals_against: homeStanding.goals_against + dbAwayScore,
-              goal_difference: (homeStanding.goals_for + dbHomeScore) - (homeStanding.goals_against + dbAwayScore),
-            }).eq("id", homeStanding.id);
-
-            await supabase.from("standings").update({
-              points: awayStanding.points + awayPoints,
-              played: awayStanding.played + 1,
-              wins: awayStanding.wins + awayWins,
-              draws: awayStanding.draws + awayDraws,
-              losses: awayStanding.losses + awayLosses,
-              goals_for: awayStanding.goals_for + dbAwayScore,
-              goals_against: awayStanding.goals_against + dbHomeScore,
-              goal_difference: (awayStanding.goals_for + dbAwayScore) - (awayStanding.goals_against + dbHomeScore),
-            }).eq("id", awayStanding.id);
-          }
-        }
-
-        // Simular jogos dos outros times na mesma rodada
-        const currentRound = match.round;
-        const { data: otherMatches } = await supabase
-          .from("matches")
-          .select("*")
-          .eq("championship_id", championshipId)
-          .eq("round", currentRound)
-          .eq("is_played", false)
-          .neq("id", match.id);
-
-        if (otherMatches && otherMatches.length > 0) {
-          for (const otherMatch of otherMatches) {
-            const homeGoals = Math.floor(Math.random() * 4);
-            const awayGoals = Math.floor(Math.random() * 4);
-
-            await supabase
-              .from("matches")
-              .update({
-                home_score: homeGoals,
-                away_score: awayGoals,
-                is_played: true,
-              })
-              .eq("id", otherMatch.id);
-
-            const { data: otherStandings } = await supabase
-              .from("standings")
-              .select("*")
-              .eq("championship_id", championshipId)
-              .in("team_name", [otherMatch.home_team_name, otherMatch.away_team_name]);
-
-            if (otherStandings && otherStandings.length === 2) {
-              const homeStanding = otherStandings.find(s => s.team_name === otherMatch.home_team_name);
-              const awayStanding = otherStandings.find(s => s.team_name === otherMatch.away_team_name);
-
-              if (homeStanding && awayStanding) {
-                let homePoints = 0;
-                let awayPoints = 0;
-                let homeWins = 0;
-                let awayWins = 0;
-                let homeDraws = 0;
-                let awayDraws = 0;
-                let homeLosses = 0;
-                let awayLosses = 0;
-
-                if (homeGoals > awayGoals) {
-                  homePoints = 3;
-                  homeWins = 1;
-                  awayLosses = 1;
-                } else if (homeGoals < awayGoals) {
-                  awayPoints = 3;
-                  awayWins = 1;
-                  homeLosses = 1;
-                } else {
-                  homePoints = 1;
-                  awayPoints = 1;
-                  homeDraws = 1;
-                  awayDraws = 1;
-                }
-
-                await supabase.from("standings").update({
-                  points: homeStanding.points + homePoints,
-                  played: homeStanding.played + 1,
-                  wins: homeStanding.wins + homeWins,
-                  draws: homeStanding.draws + homeDraws,
-                  losses: homeStanding.losses + homeLosses,
-                  goals_for: homeStanding.goals_for + homeGoals,
-                  goals_against: homeStanding.goals_against + awayGoals,
-                  goal_difference: (homeStanding.goals_for + homeGoals) - (homeStanding.goals_against + awayGoals),
-                }).eq("id", homeStanding.id);
-
-                await supabase.from("standings").update({
-                  points: awayStanding.points + awayPoints,
-                  played: awayStanding.played + 1,
-                  wins: awayStanding.wins + awayWins,
-                  draws: awayStanding.draws + awayDraws,
-                  losses: awayStanding.losses + awayLosses,
-                  goals_for: awayStanding.goals_for + awayGoals,
-                  goals_against: awayStanding.goals_against + homeGoals,
-                  goal_difference: (awayStanding.goals_for + awayGoals) - (awayStanding.goals_against + homeGoals),
-                }).eq("id", awayStanding.id);
-              }
-            }
-          }
-        }
-
-        // Reordenar classificação
-        const { data: finalStandings } = await supabase
-          .from("standings")
-          .select("*")
-          .eq("championship_id", championshipId)
-          .order("points", { ascending: false })
-          .order("goal_difference", { ascending: false })
-          .order("goals_for", { ascending: false });
-
-        if (finalStandings) {
-          if (isLibertadores) {
-            // Reordenar dentro de cada grupo
-            const groupMap = new Map<string, any[]>();
-            for (const s of finalStandings) {
-              const g = s.group_name || "Grupo A";
-              if (!groupMap.has(g)) groupMap.set(g, []);
-              groupMap.get(g)!.push(s);
-            }
-            for (const [, groupStandings] of groupMap) {
-              groupStandings.sort((a: any, b: any) => b.points - a.points || b.goal_difference - a.goal_difference || b.goals_for - a.goals_for);
-              for (let i = 0; i < groupStandings.length; i++) {
-                await supabase
-                  .from("standings")
-                  .update({ position: i + 1 })
-                  .eq("id", groupStandings[i].id);
-              }
-            }
-          } else {
-            for (let i = 0; i < finalStandings.length; i++) {
-              await supabase
-                .from("standings")
-                .update({ position: i + 1 })
-                .eq("id", finalStandings[i].id);
-            }
-          }
-        }
-      }
-
-      // Atualizar rodada atual do campeonato
-      const currentRoundForUpdate = match.round;
-      await supabase
-        .from("championships")
-        .update({ current_round: currentRoundForUpdate + 1 })
-        .eq("id", championshipId);
-
-      // Verificar se há investimento ativo e adicionar $200k ao budget
+      // Handle investment earnings
       const hasInvestment = localStorage.getItem(`investment_${teamName}`) === 'true';
       if (hasInvestment) {
-        const investmentEarnings = 200000; // $200 mil por jogo
-        
-        // Buscar budget atual do time
-        const { data: budgetData } = await supabase
-          .from("team_budgets")
-          .select("budget")
-          .eq("championship_id", championshipId)
-          .eq("team_name", teamName)
-          .maybeSingle();
-
-        if (budgetData) {
-          await supabase
-            .from("team_budgets")
-            .update({ budget: budgetData.budget + investmentEarnings })
-            .eq("championship_id", championshipId)
-            .eq("team_name", teamName);
-          
-          toast.success("Investimento: +$200 mil recebidos!");
-        }
+        const { getLocalBudget, saveLocalBudget } = await import("@/utils/localChampionship");
+        const currentBudget = getLocalBudget(teamName);
+        saveLocalBudget(teamName, currentBudget + 200000);
+        toast.success("Investimento: +$200 mil recebidos!");
       }
 
-      // Evoluir jogadores após o jogo
+      // Evolve players after match
       const savedPlayers = localStorage.getItem(`players_${teamName}`);
       if (savedPlayers) {
         const currentPlayers = JSON.parse(savedPlayers);
         const { evolvedPlayers, improvements, declines, improvedNames, declinedNames } = evolveTeamPlayers(currentPlayers);
-        
-        // Salvar jogadores evoluídos
         localStorage.setItem(`players_${teamName}`, JSON.stringify(evolvedPlayers));
         
-        // Mostrar notificações de evolução
         if (improvements > 0) {
           toast.success(`📈 ${improvements} jogador(es) evoluíram!`, {
             description: improvedNames.join(", "),
@@ -759,13 +496,7 @@ const Match = () => {
     return event.playerName;
   };
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#c8ff00]" />
-      </div>
-    );
-  }
+  // No auth loading check needed
 
   return (
     <div className="min-h-screen bg-black">
