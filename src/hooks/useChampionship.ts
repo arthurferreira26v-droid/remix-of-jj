@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { teams } from "@/data/teams";
 import {
   getOrCreateLocalChampionship,
@@ -16,45 +16,42 @@ export const useChampionship = (userTeamName: string) => {
   const [loading, setLoading] = useState(true);
   const [isChampionComplete, setIsChampionComplete] = useState(false);
   const [userWonChampionship, setUserWonChampionship] = useState(false);
+  const initRef = useRef(false);
 
   useEffect(() => {
-    const init = () => {
-      setLoading(true);
+    // Anti-loop: only init once per team name
+    if (initRef.current) return;
+    initRef.current = true;
 
-      const userTeam = teams.find(t => t.name === userTeamName);
-      if (!userTeam) {
+    const userTeam = teams.find(t => t.name === userTeamName);
+    if (!userTeam) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { championship: champ } = getOrCreateLocalChampionship(userTeamName);
+      setChampionship(champ);
+
+      const { complete, winner } = isChampionshipComplete(userTeamName);
+      if (complete) {
+        setIsChampionComplete(true);
+        setUserWonChampionship(winner === userTeamName);
         setLoading(false);
         return;
       }
 
-      try {
-        const { championship: champ } = getOrCreateLocalChampionship(userTeamName);
-        setChampionship(champ);
+      setNextMatch(getNextUserMatch(userTeamName));
+    } catch (error) {
+      console.error("Erro ao inicializar campeonato:", error);
+    } finally {
+      setLoading(false);
+    }
 
-        // Check completion
-        const { complete, winner } = isChampionshipComplete(userTeamName);
-        if (complete) {
-          setIsChampionComplete(true);
-          setUserWonChampionship(winner === userTeamName);
-          setLoading(false);
-          return;
-        }
-
-        // Get next match
-        const next = getNextUserMatch(userTeamName);
-        setNextMatch(next);
-      } catch (error) {
-        console.error("Erro ao inicializar campeonato:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    init();
+    return () => { initRef.current = false; };
   }, [userTeamName]);
 
   const resetChampionship = () => {
-    // Get final standings for Libertadores qualifiers
     const standings = getLocalStandings(userTeamName);
     if (standings.length >= 6) {
       const sorted = [...standings].sort((a, b) => b.points - a.points || b.goal_difference - a.goal_difference);
@@ -65,7 +62,6 @@ export const useChampionship = (userTeamName: string) => {
     }
 
     deleteLocalChampionship(userTeamName);
-
     setIsChampionComplete(false);
     setUserWonChampionship(false);
     window.location.href = `/jogo?time=${encodeURIComponent(userTeamName)}`;

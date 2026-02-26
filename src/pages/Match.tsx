@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { evolveTeamPlayers } from "@/utils/playerEvolution";
 import { PenaltyKickerModal } from "@/components/PenaltyKickerModal";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
+import { flushPendingWrites } from "@/utils/localChampionship";
 
 interface MatchEvent {
   minute: number;
@@ -282,10 +283,13 @@ const Match = () => {
         }
       }
 
+      // Flush all pending async writes before navigating
+      flushPendingWrites();
+
       toast.success("Resultado salvo com sucesso!");
       setTimeout(() => {
         navigate(`/jogo?time=${teamName}`);
-      }, 1000);
+      }, 800);
     } catch (error) {
       console.error("Erro ao salvar resultado:", error);
       toast.error("Erro ao salvar resultado");
