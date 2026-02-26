@@ -12,6 +12,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useAuth } from "@/hooks/useAuth";
 import { evolveTeamPlayers } from "@/utils/playerEvolution";
 import { PenaltyKickerModal } from "@/components/PenaltyKickerModal";
+import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 
 interface MatchEvent {
   minute: number;
@@ -49,6 +50,8 @@ const Match = () => {
   const [pendingPenaltyMinute, setPendingPenaltyMinute] = useState<number | null>(null);
   const [isHalftime, setIsHalftime] = useState(false);
   const [halftimeDone, setHalftimeDone] = useState(false);
+  const [isPausedBySquad, setIsPausedBySquad] = useState(false);
+  const [pausedByRole, setPausedByRole] = useState<string | null>(null);
 
   // Quick match: channel setup for realtime sync
   useEffect(() => {
@@ -71,6 +74,16 @@ const Match = () => {
         })));
       });
     }
+    // Both host and guest listen for pause/resume events
+    channel.on('broadcast', { event: 'squad_pause' }, ({ payload }: any) => {
+      setIsPausedBySquad(payload.paused);
+      setPausedByRole(payload.paused ? payload.role : null);
+      if (payload.paused) {
+        setIsPlaying(false);
+      } else {
+        setIsPlaying(true);
+      }
+    });
     channel.subscribe();
     channelRef.current = channel;
     return () => { supabase.removeChannel(channel); };
@@ -86,6 +99,24 @@ const Match = () => {
     });
   }, [minute, homeScore, awayScore, isHalftime, halftimeDone, isQMHost, matchEvents]);
 
+  // Handle squad sheet open/close in quick match → pause/resume for both players
+  const handleSquadSheetChange = (open: boolean) => {
+    if (!isQuickMatch || !channelRef.current) return;
+    const myRole = quickMatchRole || 'host';
+    channelRef.current.send({
+      type: 'broadcast',
+      event: 'squad_pause',
+      payload: { paused: open, role: myRole }
+    });
+    setIsPausedBySquad(open);
+    setPausedByRole(open ? myRole : null);
+    if (open) {
+      setIsPlaying(false);
+    } else {
+      setIsPlaying(true);
+    }
+  };
+
   const selectedTeam = teams.find(t => t.name === teamName);
   const opponent = teams.find(t => t.name === opponentName);
 
@@ -95,11 +126,15 @@ const Match = () => {
     if (savedPlayers) {
       return JSON.parse(savedPlayers);
     }
-    return teamName === "Botafogo" 
+    const raw = teamName === "Botafogo" 
       ? botafogoPlayers 
       : teamName === "Flamengo"
       ? flamengoPlayers
       : generateTeamPlayers(teamName);
+    const { players: optimized, starterOrder } = optimizeStartersDefault(raw);
+    localStorage.setItem(`players_${teamName}`, JSON.stringify(optimized));
+    localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
+    return optimized;
   };
 
   const [userPlayers, setUserPlayers] = useState<Player[]>(getInitialUserPlayers);
@@ -648,7 +683,7 @@ const Match = () => {
 
         {/* Botão fixo de Gerenciar Time */}
         <div className="fixed bottom-6 left-4 right-4 z-40 max-w-2xl mx-auto">
-          <Sheet>
+          <Sheet onOpenChange={(open) => handleSquadSheetChange(open)}>
             <SheetTrigger asChild>
               <button className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center justify-center backdrop-blur-sm">
                 <span className="text-lg font-bold">GERENCIAR TIME</span>
@@ -704,6 +739,18 @@ const Match = () => {
 
         {/* Spacer para evitar sobreposição com botão fixo */}
         <div className="h-24" />
+
+        {/* Pause overlay when other player is managing squad (Quick Match) */}
+        {isPausedBySquad && pausedByRole !== quickMatchRole && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="text-center">
+              <div className="text-4xl mb-4">⏸️</div>
+              <h2 className="text-2xl font-bold text-white mb-2">JOGO PAUSADO</h2>
+              <p className="text-muted-foreground">O adversário está gerenciando o elenco...</p>
+              <p className="text-muted-foreground text-sm mt-2">Minuto {minute}'</p>
+            </div>
+          </div>
+        )}
 
         {/* Halftime Overlay */}
         {isHalftime && (

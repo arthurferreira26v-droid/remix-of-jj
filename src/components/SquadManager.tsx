@@ -4,6 +4,7 @@ import { formations, playStyles, Formation } from "@/data/formations";
 import { X, ChevronDown, TrendingUp, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormationField } from "@/components/FormationField";
+import { optimizeStartersForFormation } from "@/utils/formationOptimizer";
 
 interface SquadManagerProps {
   players: Player[];
@@ -115,10 +116,9 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
 
   // Recompute when formation changes
   useEffect(() => {
-    const fixed = ensureStarterCount(localPlayers, formation.positions.length);
-    setLocalPlayers(fixed);
-    const starters = fixed.filter(p => p.isStarter);
-    setSlotAssignments(computeSlotAssignments(starters, formation));
+    const { players: optimized, starterOrder } = optimizeStartersForFormation(localPlayers, formation);
+    setLocalPlayers(optimized);
+    setSlotAssignments(starterOrder);
   }, [selectedFormation]);
 
   const starters = localPlayers.filter(p => p.isStarter);

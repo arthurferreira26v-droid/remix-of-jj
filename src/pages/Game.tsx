@@ -26,6 +26,7 @@ import { useCloudSaveLoad, type CloudSaveData } from "@/hooks/useCloudSaveLoad";
 import { getTeamLogo } from "@/utils/teamLogos";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
+import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { toast } from "sonner";
 
 const Game = () => {
@@ -60,11 +61,17 @@ const Game = () => {
       return JSON.parse(savedPlayers);
     }
     
-    return teamName === "Botafogo" 
+    const raw = teamName === "Botafogo" 
       ? botafogoPlayers 
       : teamName === "Flamengo"
       ? flamengoPlayers
       : generateTeamPlayers(teamName);
+    
+    // Optimize starters to fit the default formation (4-3-3)
+    const { players: optimized, starterOrder } = optimizeStartersDefault(raw);
+    localStorage.setItem(`players_${teamName}`, JSON.stringify(optimized));
+    localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
+    return optimized;
   };
   const [players, setPlayers] = useState<Player[]>(getInitialPlayers);
 
