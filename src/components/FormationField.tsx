@@ -99,17 +99,13 @@ export const FormationField = ({
             }}
             onClick={onPlayerClick ? () => onPlayerClick(player) : undefined}
           >
-            <div className="relative">
-              <div className={`w-9 h-9 border-2 rounded-full flex items-center justify-center shadow-lg ${
+          <div className="relative">
+              <div className={`w-10 h-10 border-2 rounded-full flex items-center justify-center shadow-lg ${
                 isSelected 
                   ? "bg-[#c8ff00] border-[#c8ff00]" 
-                  : "bg-black border-white"
+                  : "bg-black/90 border-white/80"
               }`}>
-                <span className={`text-xs font-bold ${isSelected ? "text-black" : "text-white"}`}>{player.number}</span>
-              </div>
-
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center shadow-md border border-white">
-                <span className="text-white text-[8px] font-bold">{player.overall}</span>
+                <span className={`text-sm font-bold ${isSelected ? "text-black" : "text-white"}`}>{player.overall}</span>
               </div>
 
               {!isInPosition && (
@@ -119,15 +115,7 @@ export const FormationField = ({
               )}
             </div>
 
-            {pos.role !== "GOL" && (
-              <div className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${
-                isInPosition ? "bg-black/80 text-white" : "bg-yellow-500/90 text-black"
-              }`}>
-                {pos.role}
-              </div>
-            )}
-
-            <div className="bg-black/60 px-1.5 py-0.5 rounded text-white text-[8px] font-medium whitespace-nowrap">
+            <div className="bg-black/70 px-1.5 py-0.5 rounded text-white text-[8px] font-medium whitespace-nowrap">
               {player.name}
             </div>
           </div>

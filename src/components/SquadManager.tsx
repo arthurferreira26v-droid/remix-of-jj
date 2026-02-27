@@ -287,7 +287,7 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="font-bold text-lg">{player.number}</span>
+                  <span className={`font-bold text-lg w-8 ${selectedPlayer?.id === player.id ? 'text-black' : 'text-blue-800'}`}>{player.overall}</span>
                   <div className="text-left">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{player.name}</span>
@@ -317,11 +317,8 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-sm font-bold ${
-                    player.ovrChange && player.ovrChange > 0 ? 'text-green-400' : 
-                    player.ovrChange && player.ovrChange < 0 ? 'text-red-400' : ''
-                  }`}>
-                    {player.overall}
+                  <span className={`text-xs font-medium ${selectedPlayer?.id === player.id ? 'text-black/60' : 'text-white/50'}`}>
+                    {player.position}
                   </span>
                 </div>
               </button>

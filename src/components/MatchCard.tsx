@@ -141,7 +141,7 @@ export const MatchCard = ({
 
       <Button 
         onClick={handlePlayMatch}
-        className="w-full h-12 sm:h-14 text-base sm:text-lg font-bold bg-[#c8ff00] hover:bg-[#b3e600] text-black"
+        className="w-full h-12 sm:h-14 text-base sm:text-lg font-bold bg-white hover:bg-white/90 text-black rounded-xl"
       >
         JOGAR
       </Button>

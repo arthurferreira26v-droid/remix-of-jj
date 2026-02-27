@@ -571,14 +571,14 @@ const Game = () => {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className={`font-bold text-lg w-8 ${selectedReserve?.id === player.id ? 'text-black' : 'text-blue-400'}`}>{player.overall}</span>
+                  <span className={`font-bold text-lg w-8 ${selectedReserve?.id === player.id ? 'text-black' : 'text-blue-800'}`}>{player.overall}</span>
                   <div className="text-left">
                     <div className="font-medium">{player.name}</div>
                     <div className="text-sm opacity-70">{player.position}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-sm font-bold ${selectedReserve?.id === player.id ? 'text-black' : 'text-green-400'}`}>
+                  <span className={`text-sm font-bold ${selectedReserve?.id === player.id ? 'text-black' : 'text-white/70'}`}>
                     {formatMarketValue(calculateMarketValue(player.overall))}
                   </span>
                 </div>

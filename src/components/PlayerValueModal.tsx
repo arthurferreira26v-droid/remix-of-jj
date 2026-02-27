@@ -30,14 +30,14 @@ export const PlayerValueModal = ({ player, onClose, canSell = false, onSell }: P
         {/* Player Info */}
         <div className="p-6">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 bg-black border-2 border-white rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 bg-black border-2 border-white/60 rounded-full flex items-center justify-center">
               <span className="text-white text-2xl font-bold">{player.number}</span>
             </div>
             <div className="flex-1">
               <h4 className="text-xl font-bold text-white">{player.name}</h4>
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-sm text-zinc-400">{player.position}</span>
-                <span className="px-2 py-0.5 bg-blue-600 rounded text-xs font-bold text-white">
+                <span className="px-2 py-0.5 bg-blue-800 rounded text-xs font-bold text-white">
                   {player.overall} OVR
                 </span>
               </div>
@@ -45,12 +45,12 @@ export const PlayerValueModal = ({ player, onClose, canSell = false, onSell }: P
           </div>
 
           {/* Market Value */}
-          <div className="bg-gradient-to-r from-green-900/40 via-green-800/40 to-green-900/40 border border-green-700/50 rounded-lg p-4 mb-4">
+          <div className="bg-zinc-800/80 border border-zinc-600/50 rounded-lg p-4 mb-4">
             <div className="flex items-center gap-2 mb-2">
-              <DollarSign className="w-5 h-5 text-green-400" />
-              <span className="text-sm text-green-300/80 font-medium">Valor de Mercado</span>
+              <DollarSign className="w-5 h-5 text-white/70" />
+              <span className="text-sm text-white/60 font-medium">Valor de Mercado</span>
             </div>
-            <span className="text-3xl font-bold text-green-400">
+            <span className="text-3xl font-bold text-white">
               {formatMarketValue(marketValue)}
             </span>
           </div>
@@ -63,7 +63,7 @@ export const PlayerValueModal = ({ player, onClose, canSell = false, onSell }: P
                   <TrendingDown className="w-4 h-4 text-red-400" />
                   <span className="text-sm text-zinc-400">Valor de Venda</span>
                 </div>
-                <span className="text-lg font-bold text-yellow-400">
+                <span className="text-lg font-bold text-white">
                   {formatMarketValue(sellValue)}
                 </span>
               </div>
