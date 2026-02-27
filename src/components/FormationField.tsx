@@ -118,6 +118,11 @@ export const FormationField = ({
             <div className="bg-black/70 px-1.5 py-0.5 rounded text-white text-[8px] font-medium whitespace-nowrap">
               {player.name}
             </div>
+            <div className={`px-1.5 py-0 rounded text-[7px] font-bold whitespace-nowrap ${
+              isInPosition ? 'bg-white/20 text-white/80' : 'bg-yellow-500/30 text-yellow-300'
+            }`}>
+              {pos.role}
+            </div>
           </div>
         );
       })}
