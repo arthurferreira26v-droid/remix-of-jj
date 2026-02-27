@@ -272,57 +272,92 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
           </div>
         </div>
 
-        {/* Reservas */}
-        <div className="bg-zinc-900 rounded-lg p-4 max-w-md mx-auto">
-          <h3 className="text-white text-xl font-bold mb-4">Reservas</h3>
-          <div className="space-y-2">
-            {reserves.map(player => (
-              <button
-                key={player.id}
-                onClick={() => handlePlayerClick(player)}
-                className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
-                  selectedPlayer?.id === player.id 
-                    ? 'bg-[#c8ff00] text-black' 
-                    : 'bg-zinc-800 text-white hover:bg-zinc-700'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className={`font-bold text-lg w-8 ${selectedPlayer?.id === player.id ? 'text-black' : 'text-blue-800'}`}>{player.overall}</span>
-                  <div className="text-left">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{player.name}</span>
+        {/* Reservas - Modern Dark UI */}
+        <div className="rounded-2xl p-4 max-w-md mx-auto relative overflow-hidden" style={{
+          background: 'radial-gradient(ellipse at 50% 0%, hsl(0 0% 14%) 0%, hsl(0 0% 6%) 70%, hsl(0 0% 4%) 100%)'
+        }}>
+          <h3 className="text-white/90 text-lg font-semibold tracking-wide mb-4 uppercase">Banco de Reservas</h3>
+          <div className="space-y-2.5">
+            {reserves.map(player => {
+              const isElite = player.overall >= 80;
+              const isSelected = selectedPlayer?.id === player.id;
+              const rarityColor = isElite ? 'hsl(270 100% 65%)' : 'hsl(142 70% 50%)';
+              const rarityGlow = isElite ? 'hsl(270 100% 65% / 0.4)' : 'hsl(142 70% 50% / 0.3)';
+
+              return (
+                <button
+                  key={player.id}
+                  onClick={() => handlePlayerClick(player)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 ${
+                    isSelected
+                      ? 'scale-[1.02] ring-2 ring-[#c8ff00]'
+                      : 'hover:scale-[1.01] hover:brightness-110'
+                  }`}
+                  style={{
+                    background: isSelected
+                      ? 'hsl(68 100% 50% / 0.15)'
+                      : 'hsl(0 0% 100% / 0.06)',
+                    backdropFilter: 'blur(12px)',
+                    border: isSelected
+                      ? '1px solid hsl(68 100% 50% / 0.5)'
+                      : `1px solid ${isElite ? 'hsl(270 100% 65% / 0.25)' : 'hsl(142 70% 50% / 0.2)'}`,
+                    boxShadow: isSelected
+                      ? '0 0 20px hsl(68 100% 50% / 0.2)'
+                      : `0 0 12px ${rarityGlow}`
+                  }}
+                >
+                  {/* OVR com glow */}
+                  <div className="relative flex-shrink-0">
+                    <span
+                      className="font-black text-2xl w-10 text-center block tracking-tight"
+                      style={{
+                        color: rarityColor,
+                        textShadow: `0 0 12px ${rarityGlow}, 0 0 4px ${rarityGlow}`
+                      }}
+                    >
+                      {player.overall}
+                    </span>
+                  </div>
+
+                  {/* Info */}
+                  <div className="text-left flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`font-semibold text-sm truncate ${isSelected ? 'text-[#c8ff00]' : 'text-white/95'}`}>
+                        {player.name}
+                      </span>
                       {player.ovrChange && player.ovrChange > 0 && (
-                        <span className="flex items-center text-green-400 text-xs font-bold">
-                          <TrendingUp className="w-3 h-3 mr-0.5" />
-                          +{player.ovrChange}
-                        </span>
+                        <TrendingUp className="w-3 h-3 text-emerald-400 flex-shrink-0" />
                       )}
                       {player.ovrChange && player.ovrChange < 0 && (
-                        <span className="flex items-center text-red-400 text-xs font-bold">
-                          <TrendingDown className="w-3 h-3 mr-0.5" />
-                          {player.ovrChange}
-                        </span>
+                        <TrendingDown className="w-3 h-3 text-red-400 flex-shrink-0" />
                       )}
                     </div>
-                    <div className="flex items-center gap-2 text-sm opacity-70">
-                      <span>{player.position}</span>
-                      <span className="text-xs">• {player.age} anos</span>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[11px] font-medium" style={{ color: rarityColor }}>
+                        {player.position}
+                      </span>
+                      <span className="text-white/30 text-[10px]">•</span>
+                      <span className="text-white/40 text-[11px]">{player.age} anos</span>
                       {player.age < 24 && (
-                        <span className="text-green-400 text-xs">↑</span>
-                      )}
-                      {player.age > 30 && (
-                        <span className="text-red-400 text-xs">↓</span>
+                        <span className="text-emerald-400 text-[10px]">⚡</span>
                       )}
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs font-medium ${selectedPlayer?.id === player.id ? 'text-black/60' : 'text-white/50'}`}>
-                    {player.position}
-                  </span>
-                </div>
-              </button>
-            ))}
+
+                  {/* Badge de raridade */}
+                  <div
+                    className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider"
+                    style={{
+                      background: `${rarityColor.replace(')', ' / 0.15)')}`,
+                      color: rarityColor,
+                      border: `1px solid ${rarityColor.replace(')', ' / 0.3)')}`
+                    }}
+                  >
+                    {isElite ? 'Elite' : 'Bom'}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
