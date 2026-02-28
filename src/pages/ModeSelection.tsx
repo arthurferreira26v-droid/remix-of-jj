@@ -31,10 +31,26 @@ const ModeSelection = () => {
               Jogo<br />Rápido
             </span>
           </button>
+
+          <button
+            onClick={() => navigate("/loja")}
+            className="aspect-square bg-[#e8e8e8] hover:bg-[#ddd] rounded-2xl flex items-end p-5 transition-colors active:scale-[0.98]"
+          >
+            <span className="text-[22px] font-bold text-black leading-tight text-left">
+              Loja
+            </span>
+          </button>
         </div>
       </div>
 
-      <div className="pb-8 text-center">
+      <div className="pb-8 flex flex-col items-center gap-3">
+        <button
+          type="button"
+          onClick={() => navigate("/auth")}
+          className="text-[#888] hover:text-[#444] text-sm font-medium transition-colors duration-200"
+        >
+          Fazer login ou cadastro
+        </button>
         <button
           type="button"
           onClick={() => navigate("/admin-login")}
