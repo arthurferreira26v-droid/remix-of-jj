@@ -7,54 +7,54 @@ const ModeSelection = () => {
   useEffect(() => { document.title = "Gerenciador de Futebol"; }, []);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <div className="flex-1 flex flex-col px-6 pt-24">
-        <h1 className="text-[28px] font-bold text-black mb-16">
+    <div className="min-h-screen bg-white flex flex-col justify-between">
+      <div className="flex-1 flex flex-col justify-center px-6">
+        <h1 className="text-[32px] font-bold text-black tracking-tight mb-10">
           Selecione um modo.
         </h1>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => navigate("/selecionar-time")}
-            className="aspect-square bg-[#e8e8e8] hover:bg-[#ddd] rounded-2xl flex items-end p-5 transition-colors active:scale-[0.98]"
+            className="aspect-[1/1.05] bg-[#f2f2f7] hover:bg-[#e5e5ea] rounded-2xl flex items-end p-5 transition-all duration-200 active:scale-[0.97]"
           >
-            <span className="text-[22px] font-bold text-black leading-tight text-left">
+            <span className="text-[20px] font-semibold text-black leading-tight text-left">
               Modo<br />Campanha
             </span>
           </button>
 
           <button
             onClick={() => navigate("/jogo-rapido")}
-            className="aspect-square bg-[#e8e8e8] hover:bg-[#ddd] rounded-2xl flex items-end p-5 transition-colors active:scale-[0.98]"
+            className="aspect-[1/1.05] bg-[#f2f2f7] hover:bg-[#e5e5ea] rounded-2xl flex items-end p-5 transition-all duration-200 active:scale-[0.97]"
           >
-            <span className="text-[22px] font-bold text-black leading-tight text-left">
+            <span className="text-[20px] font-semibold text-black leading-tight text-left">
               Jogo<br />Rápido
             </span>
           </button>
 
           <button
             onClick={() => navigate("/loja")}
-            className="aspect-square bg-[#e8e8e8] hover:bg-[#ddd] rounded-2xl flex items-end p-5 transition-colors active:scale-[0.98]"
+            className="aspect-[1/1.05] bg-[#f2f2f7] hover:bg-[#e5e5ea] rounded-2xl flex items-end p-5 transition-all duration-200 active:scale-[0.97]"
           >
-            <span className="text-[22px] font-bold text-black leading-tight text-left">
+            <span className="text-[20px] font-semibold text-black leading-tight text-left">
               Loja
             </span>
           </button>
         </div>
       </div>
 
-      <div className="pb-8 flex flex-col items-center gap-3">
+      <div className="pb-10 pt-6 flex flex-col items-center gap-4">
         <button
           type="button"
           onClick={() => navigate("/auth")}
-          className="text-[#888] hover:text-[#444] text-sm font-medium transition-colors duration-200"
+          className="text-[#8e8e93] hover:text-[#3a3a3c] text-[15px] font-medium transition-colors duration-200"
         >
           Fazer login ou cadastro
         </button>
         <button
           type="button"
           onClick={() => navigate("/admin-login")}
-          className="text-[#aaa] hover:text-[#666] text-xs transition-colors duration-200"
+          className="text-[#aeaeb2] hover:text-[#636366] text-[13px] transition-colors duration-200"
         >
           Área de Funcionários
         </button>
