@@ -102,19 +102,23 @@ const Match = () => {
 
   // Handle squad sheet open/close in quick match → pause/resume for both players
   const handleSquadSheetChange = (open: boolean) => {
-    if (!isQuickMatch || !channelRef.current) return;
-    const myRole = quickMatchRole || 'host';
-    channelRef.current.send({
-      type: 'broadcast',
-      event: 'squad_pause',
-      payload: { paused: open, role: myRole }
-    });
-    setIsPausedBySquad(open);
-    setPausedByRole(open ? myRole : null);
+    // Always pause/resume for squad management
     if (open) {
       setIsPlaying(false);
     } else {
       setIsPlaying(true);
+    }
+
+    // Quick match: also broadcast pause to opponent
+    if (isQuickMatch && channelRef.current) {
+      const myRole = quickMatchRole || 'host';
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'squad_pause',
+        payload: { paused: open, role: myRole }
+      });
+      setIsPausedBySquad(open);
+      setPausedByRole(open ? myRole : null);
     }
   };
 
@@ -539,35 +543,18 @@ const Match = () => {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="border-b border-border bg-black backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <button 
-            onClick={() => navigate(isQuickMatch ? '/jogo-rapido' : `/jogo?time=${teamName}`)}
-            className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors"
-          >
-            <ChevronLeft className="w-6 h-6 text-white" />
-          </button>
-          
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">CAMPEONATO CARIOCA - 2025</span>
-            <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
-              <span className="text-sm font-bold text-white">{Math.floor(minute / 90 * 100)}%</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Header - only timer */}
 
       {/* Match Info */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <div className="inline-block bg-accent px-6 py-2 rounded-full mb-6">
+      <div className="container mx-auto px-4 py-4">
+        <div className="text-center mb-4">
+          <div className="inline-block bg-accent px-6 py-2 rounded-full mb-4">
             <span className="text-2xl font-bold text-black">{minute}'</span>
           </div>
         </div>
 
         {/* Score Board */}
-        <div className="flex items-center justify-center gap-8 mb-8">
+        <div className="flex items-center justify-center gap-8 mb-4">
           {/* Home Team */}
           <Sheet>
             <SheetTrigger asChild>
@@ -616,10 +603,10 @@ const Match = () => {
           </Sheet>
         </div>
 
-        {/* Match Events */}
-        {matchEvents.length > 0 && (
-          <div className="max-w-2xl mx-auto mb-8">
-            <div className="bg-zinc-900 rounded-lg p-4 max-h-40 overflow-y-auto">
+        {/* Match Events - fixed height to prevent pushing stats */}
+        <div className="max-w-2xl mx-auto mb-4" style={{ minHeight: 0, maxHeight: '120px' }}>
+          {matchEvents.length > 0 && (
+            <div className="bg-zinc-900 rounded-lg p-3 max-h-[120px] overflow-y-auto">
               <div className="space-y-2">
                 {matchEvents.slice().reverse().map((event, index) => (
                   <div 
@@ -646,8 +633,8 @@ const Match = () => {
                 ))}
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Stats */}
         <div className="max-w-2xl mx-auto space-y-6 mt-8">
