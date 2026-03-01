@@ -52,7 +52,7 @@ const Store = () => {
                   </span>
                   {/* Dark shine on circle */}
                   <div
-                    className="absolute inset-0 pointer-events-none"
+                    className="absolute inset-0 rounded-full pointer-events-none"
                     style={{
                       background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.06) 40%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 60%, transparent 70%)',
                       backgroundSize: '250% 100%',
@@ -74,7 +74,7 @@ const Store = () => {
 
           {/* Name + Price row */}
           <div className="mt-3 flex items-center justify-between">
-            <span className="text-white text-[17px] font-bold">
+            <span className="text-white text-[17px] font-bold" style={{ width: 100, textAlign: 'center' }}>
               {featuredPlayer.name}
             </span>
             <div className="flex items-center gap-3">
