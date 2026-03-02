@@ -55,8 +55,11 @@ const QuickMatchJoinRoom = () => {
           Digitar Código da Sala
         </h1>
 
-        {/* Code display */}
-        <div className="flex justify-center gap-2 mb-4">
+        {/* Code display - tap to open keyboard */}
+        <div
+          className="flex justify-center gap-2 mb-4 cursor-pointer"
+          onClick={() => inputRef.current?.focus()}
+        >
           {Array.from({ length: maxLength }).map((_, i) => (
             <div
               key={i}
@@ -64,7 +67,7 @@ const QuickMatchJoinRoom = () => {
                 code[i]
                   ? "bg-white border-black text-black"
                   : i === code.length
-                  ? "bg-white border-gray-400"
+                  ? "bg-white border-gray-400 animate-pulse"
                   : "bg-[#e8e8e8] border-transparent text-gray-400"
               }`}
             >
@@ -93,14 +96,6 @@ const QuickMatchJoinRoom = () => {
           className="opacity-0 absolute h-0 w-0"
           autoFocus
         />
-
-        {/* Tap area to focus input */}
-        <button
-          onClick={() => inputRef.current?.focus()}
-          className="w-full py-4 text-center text-gray-400 text-sm font-medium"
-        >
-          Toque aqui para digitar o código
-        </button>
       </div>
 
       {/* Confirm button */}
