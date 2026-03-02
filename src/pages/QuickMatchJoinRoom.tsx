@@ -55,11 +55,27 @@ const QuickMatchJoinRoom = () => {
           Digitar Código da Sala
         </h1>
 
-        {/* Code display - tap to open keyboard */}
-        <div
-          className="flex justify-center gap-2 mb-4 cursor-pointer"
-          onClick={() => inputRef.current?.focus()}
-        >
+        {/* Code display + hidden input overlay */}
+        <div className="relative flex justify-center gap-2 mb-4">
+          {/* Invisible input covering the squares area */}
+          <input
+            ref={inputRef}
+            type="text"
+            inputMode="text"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="characters"
+            spellCheck={false}
+            value={code}
+            onChange={(e) => handleChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleConfirm();
+            }}
+            maxLength={maxLength}
+            className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
+            style={{ fontSize: '16px', caretColor: 'transparent' }}
+            autoFocus
+          />
           {Array.from({ length: maxLength }).map((_, i) => (
             <div
               key={i}
@@ -75,27 +91,6 @@ const QuickMatchJoinRoom = () => {
             </div>
           ))}
         </div>
-
-        {/* Error message */}
-        {error && (
-          <p className="text-red-500 text-sm font-semibold text-center mb-4">{error}</p>
-        )}
-
-        {/* Hidden native input - opens device keyboard */}
-        <input
-          ref={inputRef}
-          type="text"
-          inputMode="text"
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="characters"
-          spellCheck={false}
-          value={code}
-          onChange={(e) => handleChange(e.target.value)}
-          maxLength={maxLength}
-          className="opacity-0 absolute h-0 w-0"
-          autoFocus
-        />
       </div>
 
       {/* Confirm button */}
