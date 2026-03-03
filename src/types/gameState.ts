@@ -104,7 +104,7 @@ export function validateSaveData(data: unknown): data is GameSaveData {
 
     if (
       player.energy !== undefined &&
-      typeof player.energy !== "number"
+     typeof player.energy !== "number"
     ) {
       return false;
     }
