@@ -118,12 +118,8 @@ export const MatchCard = ({
 
       flushPendingWrites();
 
-      const resultText = `${userTeam} ${userScore} x ${oppScore} ${opponentTeam}`;
-      toast.success(`Simulado: ${resultText}`);
-
-      setTimeout(() => {
-        navigate(`/jogo?time=${encodeURIComponent(userTeam)}`);
-      }, 300);
+      toast.success(`${userTeam} ${userScore} x ${oppScore} ${opponentTeam}`);
+      window.location.reload();
     } catch (error) {
       console.error("Erro ao simular:", error);
       toast.error("Erro ao simular partida");
