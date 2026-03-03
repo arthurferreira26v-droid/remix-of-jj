@@ -10,8 +10,8 @@ export interface Player {
   ovrChange?: number; // +1, -1, or 0 from last evolution
 
   // 🔥 SISTEMA DE ENERGIA
-  energy: number;
-  consecutiveMatches: number;
+  energy?: number;
+  consecutiveMatches?: number;
 }
 
 // ================= BOTAFGO =================
