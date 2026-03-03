@@ -81,7 +81,9 @@ export function generateSaveId(): string {
 }
 
 export function validateSaveData(data: unknown): data is GameSaveData {
-  if (!data || typeof data !== "object") return false;
+  if (!data || typeof data !== "object") {
+    return false;
+  }
 
   const save = data as GameSaveData;
 
@@ -103,14 +105,16 @@ export function validateSaveData(data: unknown): data is GameSaveData {
     if (
       player.energy !== undefined &&
       typeof player.energy !== "number"
-    )
+    ) {
       return false;
+    }
 
     if (
       player.consecutiveMatches !== undefined &&
       typeof player.consecutiveMatches !== "number"
-    )
+    ) {
       return false;
+    }
   }
 
   return true;
