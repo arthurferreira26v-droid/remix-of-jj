@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { getTeamLogo } from "@/utils/teamLogos";
 import { MatchResult } from "@/hooks/useTeamForm";
+import { instantaneo } from "@/config/gameSettings";
+import { toast } from "sonner";
 
 interface MatchCardProps {
   userTeam: string;
@@ -32,9 +35,9 @@ export const MatchCard = ({
   championshipId,
 }: MatchCardProps) => {
   const navigate = useNavigate();
+  const [isSimulating, setIsSimulating] = useState(false);
 
   const handlePlayMatch = () => {
-    // Salvar jogadores no localStorage antes de navegar
     const savedPlayers = localStorage.getItem(`players_${userTeam}`);
     if (savedPlayers) {
       localStorage.setItem('match_players', savedPlayers);
@@ -44,6 +47,88 @@ export const MatchCard = ({
       url += `&campeonatoId=${championshipId}`;
     }
     navigate(url);
+  };
+
+  const handleSimulateMatch = async () => {
+    if (isSimulating) return;
+    setIsSimulating(true);
+
+    try {
+      const {
+        getNextUserMatch,
+        saveMatchResultLocal,
+        flushPendingWrites,
+        getLocalBudget,
+        saveLocalBudget,
+      } = await import("@/utils/localChampionship");
+      const { evolveTeamPlayers } = await import("@/utils/playerEvolution");
+      const { generateTeamPlayers, botafogoPlayers, flamengoPlayers } = await import("@/data/players");
+
+      const nextMatch = getNextUserMatch(userTeam);
+      if (!nextMatch) {
+        toast.error("Partida não encontrada");
+        setIsSimulating(false);
+        return;
+      }
+
+      // Load players for simulation
+      const savedPlayers = localStorage.getItem(`players_${userTeam}`);
+      const userPlayers = savedPlayers ? JSON.parse(savedPlayers) : [];
+      const userStarters = userPlayers.filter((p: any) => p.isStarter);
+
+      const oppPlayers =
+        opponentTeam === "Botafogo" ? botafogoPlayers
+        : opponentTeam === "Flamengo" ? flamengoPlayers
+        : generateTeamPlayers(opponentTeam);
+      const oppStarters = oppPlayers.filter((p: any) => p.isStarter);
+
+      // Calculate result based on OVR difference
+      const userAvg = userStarters.length > 0
+        ? userStarters.reduce((s: number, p: any) => s + p.overall, 0) / userStarters.length : 75;
+      const oppAvg = oppStarters.length > 0
+        ? oppStarters.reduce((s: number, p: any) => s + p.overall, 0) / oppStarters.length : 75;
+
+      const diff = userAvg - oppAvg;
+      const userGoalBase = 1.2 + diff * 0.03;
+      const oppGoalBase = 1.2 - diff * 0.03;
+
+      const userScore = Math.max(0, Math.round(userGoalBase + (Math.random() - 0.4) * 2));
+      const oppScore = Math.max(0, Math.round(oppGoalBase + (Math.random() - 0.4) * 2));
+
+      // Map to home/away based on match data
+      const userIsHome = nextMatch.home_team_name === userTeam;
+      const dbHomeScore = userIsHome ? userScore : oppScore;
+      const dbAwayScore = userIsHome ? oppScore : userScore;
+
+      saveMatchResultLocal(userTeam, nextMatch.id, dbHomeScore, dbAwayScore);
+
+      // Investment earnings
+      const hasInvestment = localStorage.getItem(`investment_${userTeam}`) === 'true';
+      if (hasInvestment) {
+        const currentBudget = getLocalBudget(userTeam);
+        saveLocalBudget(userTeam, currentBudget + 200000);
+      }
+
+      // Evolve players
+      if (savedPlayers) {
+        const currentPlayers = JSON.parse(savedPlayers);
+        const { evolvedPlayers } = evolveTeamPlayers(currentPlayers);
+        localStorage.setItem(`players_${userTeam}`, JSON.stringify(evolvedPlayers));
+      }
+
+      flushPendingWrites();
+
+      const resultText = `${userTeam} ${userScore} x ${oppScore} ${opponentTeam}`;
+      toast.success(`Simulado: ${resultText}`);
+
+      setTimeout(() => {
+        navigate(`/jogo?time=${encodeURIComponent(userTeam)}`);
+      }, 300);
+    } catch (error) {
+      console.error("Erro ao simular:", error);
+      toast.error("Erro ao simular partida");
+      setIsSimulating(false);
+    }
   };
 
   // Define which team goes on left and right based on home/away
@@ -145,6 +230,16 @@ export const MatchCard = ({
       >
         JOGAR
       </Button>
+
+      {instantaneo && (
+        <Button
+          onClick={handleSimulateMatch}
+          disabled={isSimulating}
+          className="w-full h-10 sm:h-12 text-sm sm:text-base font-bold bg-[#c8ff00] hover:bg-[#b8ef00] text-black rounded-xl mt-2"
+        >
+          {isSimulating ? "SIMULANDO..." : "SIMULAR AGORA"}
+        </Button>
+      )}
     </Card>
   );
 };
