@@ -32,7 +32,11 @@ export interface GameSaveData {
 
 export interface SavedPlayer extends Player {
   status: 'titular' | 'reserva' | 'lesionado' | 'vendido';
-  evolutionHistory?: number[]; // Track OVR changes over time
+  evolutionHistory?: number[];
+
+  // 🔥 NOVO SISTEMA DE ENERGIA
+  energy: number;
+  consecutiveMatches: number;
 }
 
 export interface SeasonStats {
@@ -59,7 +63,7 @@ export interface SaveSlot {
   lastModified?: string;
 }
 
-export const CURRENT_SAVE_VERSION = "1.0.0";
+export const CURRENT_SAVE_VERSION = "1.1.0"; // 🔥 Atualizamos versão
 export const MAX_SAVE_SLOTS = 5;
 
 export function generateSaveId(): string {
@@ -71,7 +75,6 @@ export function validateSaveData(data: unknown): data is GameSaveData {
   
   const save = data as GameSaveData;
   
-  // Check required fields
   if (!save.id || typeof save.id !== 'string') return false;
   if (!save.version || typeof save.version !== 'string') return false;
   if (!save.savedAt || typeof save.savedAt !== 'string') return false;
@@ -82,23 +85,33 @@ export function validateSaveData(data: unknown): data is GameSaveData {
   if (!save.seasonStats || typeof save.seasonStats !== 'object') return false;
   if (!save.settings || typeof save.settings !== 'object') return false;
   
-  // Validate players array
   for (const player of save.players) {
     if (!player.id || !player.name || !player.position) return false;
     if (typeof player.overall !== 'number') return false;
     if (typeof player.age !== 'number') return false;
+
+    // 🔥 Validar energia
+    if (typeof player.energy !== 'number') return false;
+    if (typeof player.consecutiveMatches !== 'number') return false;
   }
   
   return true;
 }
 
 export function migrateSaveData(data: GameSaveData): GameSaveData {
-  // Future migrations can be handled here
-  // For now, just ensure the version is current
+
+  const migratedPlayers = data.players.map(player => ({
+    energy: 100,
+    consecutiveMatches: 0,
+    ...player,
+    energy: player.energy ?? 100,
+    consecutiveMatches: player.consecutiveMatches ?? 0
+  }));
+
   return {
     ...data,
     version: CURRENT_SAVE_VERSION,
-    // Add any missing fields with defaults for backwards compatibility
+    players: migratedPlayers,
     settings: {
       autoSave: true,
       ...data.settings
