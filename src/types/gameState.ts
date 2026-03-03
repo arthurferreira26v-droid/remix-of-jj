@@ -1,5 +1,9 @@
 import { Player } from "@/data/players";
 
+/* ============================= */
+/*            TYPES              */
+/* ============================= */
+
 export interface GameSaveData {
   id: string;
   version: string;
@@ -31,7 +35,7 @@ export interface GameSaveData {
 }
 
 export interface SavedPlayer extends Player {
-  status: 'titular' | 'reserva' | 'lesionado' | 'vendido';
+  status: "titular" | "reserva" | "lesionado" | "vendido";
   evolutionHistory?: number[];
 }
 
@@ -48,7 +52,7 @@ export interface SeasonStats {
 
 export interface UserSettings {
   autoSave: boolean;
-  difficulty?: 'easy' | 'normal' | 'hard';
+  difficulty?: "easy" | "normal" | "hard";
 }
 
 export interface SaveSlot {
@@ -59,13 +63,21 @@ export interface SaveSlot {
   lastModified?: string;
 }
 
+/* ============================= */
+/*          CONSTANTS            */
+/* ============================= */
+
 export const CURRENT_SAVE_VERSION = "1.0.0";
 export const MAX_SAVE_SLOTS = 5;
+
+/* ============================= */
+/*          FUNCTIONS            */
+/* ============================= */
 
 export function generateSaveId(): string {
   return `save_${Date.now()}_${Math.random()
     .toString(36)
-    .substr(2, 9)}`;
+    .substring(2, 9)}`;
 }
 
 export function validateSaveData(data: unknown): data is GameSaveData {
@@ -88,8 +100,10 @@ export function validateSaveData(data: unknown): data is GameSaveData {
     if (typeof player.overall !== "number") return false;
     if (typeof player.age !== "number") return false;
 
-    // Energia segura
-    if (player.energy !== undefined && typeof player.energy !== "number")
+    if (
+      player.energy !== undefined &&
+      typeof player.energy !== "number"
+    )
       return false;
 
     if (
@@ -123,9 +137,9 @@ export function migrateSaveData(data: GameSaveData): GameSaveData {
     },
 
     players: data.players.map((player) => ({
-      energy: 100,
-      consecutiveMatches: 0,
       ...player,
+      energy: player.energy ?? 100,
+      consecutiveMatches: player.consecutiveMatches ?? 0,
     })),
   };
 }
