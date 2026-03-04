@@ -1,5 +1,5 @@
 import { Player } from "@/data/players";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Zap } from "lucide-react";
 
 interface PlayerBubbleProps {
   player: Player;
@@ -19,7 +19,7 @@ const getEnergyColor = (energy: number) => {
   return "hsl(0 80% 55%)";
 };
 
-/** Field variant: small circle with OVR + name label */
+/** Field variant: small circle with OVR + name label + horizontal energy bar */
 const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, showEnergyBar = true }: PlayerBubbleProps) => {
   const energy = player.energy ?? 100;
 
@@ -28,6 +28,7 @@ const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, s
       className={`flex flex-col items-center gap-0.5 ${onClick ? "cursor-pointer" : ""} ${isSelected ? "scale-110 z-10" : ""}`}
       onClick={onClick}
     >
+      {/* OVR circle */}
       <div className="relative">
         <div className={`w-10 h-10 border-2 rounded-full flex items-center justify-center shadow-lg ${
           isSelected 
@@ -42,31 +43,29 @@ const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, s
             <span className="text-black text-[9px] font-bold">!</span>
           </div>
         )}
-
-        {/* Energy ring indicator */}
-        {showEnergyBar && (
-          <svg className="absolute inset-0 w-10 h-10 -rotate-90" viewBox="0 0 40 40">
-            <circle cx="20" cy="20" r="18" fill="none" stroke="hsl(0 0% 100% / 0.1)" strokeWidth="2" />
-            <circle
-              cx="20" cy="20" r="18"
-              fill="none"
-              stroke={getEnergyColor(energy)}
-              strokeWidth="2"
-              strokeDasharray={`${(energy / 100) * 113} 113`}
-              strokeLinecap="round"
-            />
-          </svg>
-        )}
       </div>
 
+      {/* Name */}
       <div className="bg-black/70 px-1.5 py-0.5 rounded text-white text-[8px] font-medium whitespace-nowrap">
         {player.name}
       </div>
+
+      {/* Position role tag */}
       {role && (
         <div className={`px-1.5 py-0 rounded text-[7px] font-bold whitespace-nowrap ${
           isInPosition ? 'bg-white/20 text-white/80' : 'bg-yellow-500/30 text-yellow-300'
         }`}>
           {role}
+        </div>
+      )}
+
+      {/* Horizontal energy bar below position */}
+      {showEnergyBar && (
+        <div className="w-10 h-[5px] rounded-sm bg-white/15 overflow-hidden mt-0.5">
+          <div
+            className="h-full rounded-sm"
+            style={{ width: `${energy}%`, background: getEnergyColor(energy) }}
+          />
         </div>
       )}
     </div>
@@ -133,20 +132,12 @@ const ReserveBubble = ({ player, isSelected, onClick }: PlayerBubbleProps) => {
           </span>
           <span className="text-white/30 text-[10px]">•</span>
           <span className="text-white/40 text-[11px]">{player.age} anos</span>
-          {player.age < 24 && (
-            <span className="text-emerald-400 text-[10px]">⚡</span>
-          )}
-        </div>
-        {/* Energy bar */}
-        <div className="mt-1 flex items-center gap-1.5">
-          <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-300"
-              style={{ width: `${energy}%`, background: getEnergyColor(energy) }}
-            />
-          </div>
-          <span className="text-[9px] font-bold" style={{ color: getEnergyColor(energy) }}>
-            {energy}%
+          {/* Energy as icon + percentage */}
+          <span className="flex items-center gap-0.5">
+            <Zap className="w-3 h-3" style={{ color: getEnergyColor(energy) }} />
+            <span className="text-[11px] font-bold" style={{ color: getEnergyColor(energy) }}>
+              {energy}%
+            </span>
           </span>
         </div>
       </div>

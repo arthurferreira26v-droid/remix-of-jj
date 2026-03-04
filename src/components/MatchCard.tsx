@@ -111,8 +111,10 @@ export const MatchCard = ({
 
       // Evolve players
       if (savedPlayers) {
+        const { applyEnergyChanges } = await import("@/utils/energySystem");
         const currentPlayers = JSON.parse(savedPlayers);
-        const { evolvedPlayers } = evolveTeamPlayers(currentPlayers);
+        const withEnergy = applyEnergyChanges(currentPlayers);
+        const { evolvedPlayers } = evolveTeamPlayers(withEnergy);
         localStorage.setItem(`players_${userTeam}`, JSON.stringify(evolvedPlayers));
       }
 
