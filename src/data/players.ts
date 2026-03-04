@@ -56,6 +56,43 @@ export const botafogoPlayers: Player[] = [
   { id: "9", name: "Chris Ramos", number: 9, position: "ATA", overall: 74, age: 23, isStarter: false, energy: 100, consecutiveMatches: 0 },
 ];
 
+// ================= FLAMENGO =================
+
+export const flamengoPlayers: Player[] = [
+  // Goleiros
+  { id: "fla_1", name: "Rossi", number: 1, position: "GOL", overall: 80, age: 28, isStarter: true, energy: 100, consecutiveMatches: 0 },
+  { id: "fla_12", name: "Matheus Cunha", number: 12, position: "GOL", overall: 75, age: 24, isStarter: false, energy: 100, consecutiveMatches: 0 },
+
+  // Laterais
+  { id: "fla_2", name: "Wesley", number: 2, position: "LD", overall: 78, age: 25, isStarter: true, energy: 100, consecutiveMatches: 0 },
+  { id: "fla_22", name: "Varela", number: 22, position: "LD", overall: 76, age: 30, isStarter: false, energy: 100, consecutiveMatches: 0 },
+  { id: "fla_6", name: "Ayrton Lucas", number: 6, position: "LE", overall: 79, age: 26, isStarter: true, energy: 100, consecutiveMatches: 0 },
+
+  // Zagueiros
+  { id: "fla_3", name: "Léo Pereira", number: 3, position: "ZAG", overall: 82, age: 27, isStarter: true, energy: 100, consecutiveMatches: 0 },
+  { id: "fla_4", name: "Fabrício Bruno", number: 4, position: "ZAG", overall: 79, age: 27, isStarter: true, energy: 100, consecutiveMatches: 0 },
+  { id: "fla_44", name: "David Luiz", number: 44, position: "ZAG", overall: 77, age: 37, isStarter: false, energy: 100, consecutiveMatches: 0 },
+
+  // Volantes
+  { id: "fla_5", name: "Pulgar", number: 5, position: "VOL", overall: 80, age: 30, isStarter: true, energy: 100, consecutiveMatches: 0 },
+  { id: "fla_15", name: "De la Cruz", number: 15, position: "VOL", overall: 81, age: 26, isStarter: true, energy: 100, consecutiveMatches: 0 },
+  { id: "fla_25", name: "Allan", number: 25, position: "VOL", overall: 76, age: 31, isStarter: false, energy: 100, consecutiveMatches: 0 },
+
+  // Meias
+  { id: "fla_8", name: "Gerson", number: 8, position: "MC", overall: 83, age: 26, isStarter: true, energy: 100, consecutiveMatches: 0 },
+  { id: "fla_18", name: "Lorran", number: 18, position: "MC", overall: 74, age: 18, isStarter: false, energy: 100, consecutiveMatches: 0 },
+
+  // Pontas
+  { id: "fla_7", name: "Luiz Araújo", number: 7, position: "PD", overall: 79, age: 27, isStarter: true, energy: 100, consecutiveMatches: 0 },
+  { id: "fla_17", name: "Bruno Henrique", number: 17, position: "PD", overall: 77, age: 33, isStarter: false, energy: 100, consecutiveMatches: 0 },
+  { id: "fla_11", name: "Everton Cebolinha", number: 11, position: "PE", overall: 80, age: 27, isStarter: true, energy: 100, consecutiveMatches: 0 },
+  { id: "fla_27", name: "Matheus Gonçalves", number: 27, position: "PE", overall: 73, age: 19, isStarter: false, energy: 100, consecutiveMatches: 0 },
+
+  // Atacantes
+  { id: "fla_9", name: "Pedro", number: 9, position: "ATA", overall: 84, age: 26, isStarter: true, energy: 100, consecutiveMatches: 0 },
+  { id: "fla_19", name: "Carlinhos", number: 19, position: "ATA", overall: 74, age: 27, isStarter: false, energy: 100, consecutiveMatches: 0 },
+];
+
 // ================= GERADOR DE TIMES =================
 
 export const generateTeamPlayers = (teamName: string): Player[] => {
