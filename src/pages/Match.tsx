@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useAuth } from "@/hooks/useAuth";
 import { evolveTeamPlayers } from "@/utils/playerEvolution";
+import { applyEnergyChanges } from "@/utils/energySystem";
 import { PenaltyKickerModal } from "@/components/PenaltyKickerModal";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { flushPendingWrites } from "@/utils/localChampionship";
@@ -270,7 +271,8 @@ const Match = () => {
       const savedPlayers = localStorage.getItem(`players_${teamName}`);
       if (savedPlayers) {
         const currentPlayers = JSON.parse(savedPlayers);
-        const { evolvedPlayers, improvements, declines, improvedNames, declinedNames } = evolveTeamPlayers(currentPlayers);
+        const withEnergy = applyEnergyChanges(currentPlayers);
+        const { evolvedPlayers, improvements, declines, improvedNames, declinedNames } = evolveTeamPlayers(withEnergy);
         localStorage.setItem(`players_${teamName}`, JSON.stringify(evolvedPlayers));
         
         if (improvements > 0) {
