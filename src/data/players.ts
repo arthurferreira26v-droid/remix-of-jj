@@ -11,6 +11,7 @@ export interface Player {
 
   // 🔥 SISTEMA DE ENERGIA
   energy?: number;
+  matchEnergy?: number;
   consecutiveMatches?: number;
 }
 
