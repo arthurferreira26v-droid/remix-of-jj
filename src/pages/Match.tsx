@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useAuth } from "@/hooks/useAuth";
 import { evolveTeamPlayers } from "@/utils/playerEvolution";
-import { applyEnergyChanges } from "@/utils/energySystem";
+import { applyEnergyChanges, drainEnergyPerMinute, getEffectiveOverall } from "@/utils/energySystem";
 import { PenaltyKickerModal } from "@/components/PenaltyKickerModal";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { flushPendingWrites } from "@/utils/localChampionship";
@@ -267,12 +267,20 @@ const Match = () => {
         toast.success("Investimento: +$200 mil recebidos!");
       }
 
-      // Evolve players after match
+      // Save current in-match energy to players before evolution
+      // Use the latest userPlayers state which has been drained during the match
+      const currentPlayers = [...userPlayers];
+      // Increment consecutiveMatches for starters
+      const withMatchData = currentPlayers.map(p => ({
+        ...p,
+        consecutiveMatches: p.isStarter ? (p.consecutiveMatches ?? 0) + 1 : p.consecutiveMatches ?? 0,
+      }));
+      localStorage.setItem(`players_${teamName}`, JSON.stringify(withMatchData));
+      
       const savedPlayers = localStorage.getItem(`players_${teamName}`);
       if (savedPlayers) {
-        const currentPlayers = JSON.parse(savedPlayers);
-        const withEnergy = applyEnergyChanges(currentPlayers);
-        const { evolvedPlayers, improvements, declines, improvedNames, declinedNames } = evolveTeamPlayers(withEnergy);
+        const playersForEvolution = JSON.parse(savedPlayers);
+        const { evolvedPlayers, improvements, declines, improvedNames, declinedNames } = evolveTeamPlayers(playersForEvolution);
         localStorage.setItem(`players_${teamName}`, JSON.stringify(evolvedPlayers));
         
         if (improvements > 0) {
@@ -364,6 +372,15 @@ const Match = () => {
     if (!isPlaying || minute >= 90 || showPenaltyModal || isHalftime || isQMGuest) return;
 
     const interval = setInterval(() => {
+      // Drain energy for all user starters each minute
+      setUserPlayers(prev => {
+        const updated = prev.map(p => {
+          if (!p.isStarter) return p;
+          return { ...p, energy: drainEnergyPerMinute(p) };
+        });
+        return updated;
+      });
+
       setMinute(prev => {
         const next = prev + 1;
 
@@ -379,7 +396,7 @@ const Match = () => {
           ? opponentStarters.reduce((sum, p) => sum + p.overall, 0) / opponentStarters.length
           : 75;
         const userAvgOvr = userStarters.length > 0
-          ? userStarters.reduce((sum, p) => sum + p.overall, 0) / userStarters.length
+          ? userStarters.reduce((sum, p) => sum + getEffectiveOverall(p), 0) / userStarters.length
           : 75;
         const difficultyFactor = Math.max(0.5, Math.min(1.5, (150 - opponentAvgOvr) / 75));
 
