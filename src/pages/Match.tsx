@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useAuth } from "@/hooks/useAuth";
 import { evolveTeamPlayers } from "@/utils/playerEvolution";
-import { applyEnergyChanges, drainEnergyPerMinute, getEffectiveOverall } from "@/utils/energySystem";
+import { applyEnergyChanges, drainEnergyPerMinute, getEffectiveOverall, initMatchEnergy, finalizeMatchEnergy } from "@/utils/energySystem";
 import { PenaltyKickerModal } from "@/components/PenaltyKickerModal";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { flushPendingWrites } from "@/utils/localChampionship";
@@ -129,18 +129,22 @@ const Match = () => {
   // Initialize players - carregar do localStorage se existir
   const getInitialUserPlayers = () => {
     const savedPlayers = localStorage.getItem(`players_${teamName}`);
+    let players: Player[];
     if (savedPlayers) {
-      return JSON.parse(savedPlayers);
+      players = JSON.parse(savedPlayers);
+    } else {
+      const raw = teamName === "Botafogo" 
+        ? botafogoPlayers 
+        : teamName === "Flamengo"
+        ? flamengoPlayers
+        : generateTeamPlayers(teamName);
+      const { players: optimized, starterOrder } = optimizeStartersDefault(raw);
+      localStorage.setItem(`players_${teamName}`, JSON.stringify(optimized));
+      localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
+      players = optimized;
     }
-    const raw = teamName === "Botafogo" 
-      ? botafogoPlayers 
-      : teamName === "Flamengo"
-      ? flamengoPlayers
-      : generateTeamPlayers(teamName);
-    const { players: optimized, starterOrder } = optimizeStartersDefault(raw);
-    localStorage.setItem(`players_${teamName}`, JSON.stringify(optimized));
-    localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
-    return optimized;
+    // Initialize matchEnergy from energy at start of match
+    return initMatchEnergy(players);
   };
 
   const [userPlayers, setUserPlayers] = useState<Player[]>(getInitialUserPlayers);
@@ -267,15 +271,9 @@ const Match = () => {
         toast.success("Investimento: +$200 mil recebidos!");
       }
 
-      // Save current in-match energy to players before evolution
-      // Use the latest userPlayers state which has been drained during the match
-      const currentPlayers = [...userPlayers];
-      // Increment consecutiveMatches for starters
-      const withMatchData = currentPlayers.map(p => ({
-        ...p,
-        consecutiveMatches: p.isStarter ? (p.consecutiveMatches ?? 0) + 1 : p.consecutiveMatches ?? 0,
-      }));
-      localStorage.setItem(`players_${teamName}`, JSON.stringify(withMatchData));
+      // Finalize energy: save matchEnergy to energy, apply extra drain, update consecutiveMatches
+      const finalizedPlayers = finalizeMatchEnergy(userPlayers);
+      localStorage.setItem(`players_${teamName}`, JSON.stringify(finalizedPlayers));
       
       const savedPlayers = localStorage.getItem(`players_${teamName}`);
       if (savedPlayers) {
@@ -376,7 +374,7 @@ const Match = () => {
       setUserPlayers(prev => {
         const updated = prev.map(p => {
           if (!p.isStarter) return p;
-          return { ...p, energy: drainEnergyPerMinute(p) };
+          return { ...p, matchEnergy: drainEnergyPerMinute(p) };
         });
         return updated;
       });

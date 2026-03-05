@@ -21,7 +21,7 @@ const getEnergyColor = (energy: number) => {
 
 /** Field variant: small circle with OVR + name label + horizontal energy bar */
 const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, showEnergyBar = true }: PlayerBubbleProps) => {
-  const energy = player.energy ?? 100;
+  const energy = player.matchEnergy ?? player.energy ?? 100;
 
   return (
     <div
@@ -88,7 +88,7 @@ const ReserveBubble = ({ player, isSelected, onClick }: PlayerBubbleProps) => {
   const isElite = player.overall >= 80;
   const rarityColor = isElite ? 'hsl(270 100% 65%)' : 'hsl(142 70% 50%)';
   const rarityGlow = isElite ? 'hsl(270 100% 65% / 0.4)' : 'hsl(142 70% 50% / 0.3)';
-  const energy = player.energy ?? 100;
+  const energy = player.matchEnergy ?? player.energy ?? 100;
 
   return (
     <button
