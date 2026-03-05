@@ -61,10 +61,21 @@ const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, s
 
       {/* Horizontal energy bar below position */}
       {showEnergyBar && (
-        <div className="w-10 h-[5px] rounded-sm bg-white/15 overflow-hidden mt-0.5">
+        <div
+          className="w-10 h-[5px] rounded-sm overflow-hidden mt-0.5"
+          style={{
+            background: 'hsl(0 0% 20%)',
+            boxShadow: '0 0 0 1px hsl(0 0% 0%)',
+            borderRadius: '3px',
+          }}
+        >
           <div
             className="h-full rounded-sm"
-            style={{ width: `${energy}%`, background: getEnergyColor(energy) }}
+            style={{
+              width: `${energy}%`,
+              background: getEnergyColor(energy),
+              transition: 'width 0.5s ease-out',
+            }}
           />
         </div>
       )}
