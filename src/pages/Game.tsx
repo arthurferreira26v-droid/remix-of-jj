@@ -27,7 +27,6 @@ import { getTeamLogo } from "@/utils/teamLogos";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
-import { getSquadAverageEnergy } from "@/utils/energySystem";
 import { toast } from "sonner";
 
 const Game = () => {
@@ -53,12 +52,11 @@ const Game = () => {
   const [selectedPlayerForValue, setSelectedPlayerForValue] = useState<Player | null>(null);
   
   
-  // Initialize players state - save > default (admin loaded async)
+  // Initialize players state - always prefer localStorage (preserves energy state)
   const getInitialPlayers = () => {
     const savedPlayers = localStorage.getItem(`players_${teamName}`);
-    const isLoadedFromSave = sessionStorage.getItem(`loaded_save_${teamName}`) === 'true';
     
-    if (savedPlayers && isLoadedFromSave) {
+    if (savedPlayers) {
       return JSON.parse(savedPlayers);
     }
     
@@ -76,10 +74,10 @@ const Game = () => {
   };
   const [players, setPlayers] = useState<Player[]>(getInitialPlayers);
 
-  // Load admin overrides from DB (global, permanent)
+  // Load admin overrides from DB (only if no existing player data in localStorage)
   useEffect(() => {
-    const isLoadedFromSave = sessionStorage.getItem(`loaded_save_${teamName}`) === 'true';
-    if (isLoadedFromSave) return; // don't override save data
+    const savedPlayers = localStorage.getItem(`players_${teamName}`);
+    if (savedPlayers) return; // don't override existing player data (preserves energy)
 
     (async () => {
       const [adminPlayers] = await Promise.all([fetchAdminPlayers(true), fetchAdminLogos()]);
@@ -494,28 +492,6 @@ const Game = () => {
 
       {/* Caixa do Time - Fora do header, não acompanha scroll */}
       <TeamBudget budget={budget} />
-
-      {/* Energia do Elenco */}
-      {(() => {
-        const avgEnergy = getSquadAverageEnergy(players);
-        const energyColor = avgEnergy >= 80 ? 'hsl(142 70% 50%)' : avgEnergy >= 60 ? 'hsl(45 100% 50%)' : 'hsl(0 80% 55%)';
-        return (
-          <div className="container mx-auto px-4 pt-3">
-            <div className="bg-zinc-900 rounded-lg px-4 py-3 flex items-center gap-3">
-              <Zap className="w-4 h-4 flex-shrink-0" style={{ color: energyColor }} />
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-semibold text-white/70">Energia do Elenco</span>
-                  <span className="text-xs font-bold" style={{ color: energyColor }}>{avgEnergy}%</span>
-                </div>
-                <div className="w-full h-[6px] rounded-full overflow-hidden" style={{ background: 'hsl(0 0% 20%)' }}>
-                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${avgEnergy}%`, background: energyColor }} />
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
 
       {/* Libertadores Match Section */}
       {showLibMatch && nextLibertadoresMatch && (
