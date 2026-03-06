@@ -111,9 +111,14 @@ export const MatchCard = ({
 
       // Evolve players
       if (savedPlayers) {
-        const { applyEnergyChanges } = await import("@/utils/energySystem");
+        const { finalizeMatchEnergy } = await import("@/utils/energySystem");
         const currentPlayers = JSON.parse(savedPlayers);
-        const withEnergy = applyEnergyChanges(currentPlayers);
+        // Simulate in-match energy drain: starters lose ~30-50 energy
+        const withMatchEnergy = currentPlayers.map((p: any) => ({
+          ...p,
+          matchEnergy: p.isStarter ? Math.max(0, (p.energy ?? 100) - (Math.floor(Math.random() * 20) + 30)) : p.energy,
+        }));
+        const withEnergy = finalizeMatchEnergy(withMatchEnergy);
         const { evolvedPlayers } = evolveTeamPlayers(withEnergy);
         localStorage.setItem(`players_${userTeam}`, JSON.stringify(evolvedPlayers));
       }

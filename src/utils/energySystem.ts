@@ -54,24 +54,31 @@ export const getEffectiveOverall = (player: Player): number => {
 };
 
 /**
- * Finaliza a partida: salva matchEnergy em energy, aplica desgaste extra,
- * e atualiza consecutiveMatches.
+ * Finaliza a partida: salva matchEnergy em energy com recuperação parcial (+20, max 95).
+ * Jogador que jogou uma única partida não pode ficar abaixo de 45% de energia.
+ * Jogadores que não jogaram recuperam 100%.
  */
 export const finalizeMatchEnergy = (players: Player[]): Player[] => {
   return players.map(p => {
     if (p.isStarter) {
       const matchE = p.matchEnergy ?? p.energy ?? 100;
-      const extraDrain = Math.floor(Math.random() * 4) + 3; // 3 a 6
-      const finalEnergy = Math.max(0, Math.min(100, matchE - extraDrain));
+      // Recuperação parcial pós-partida: +20, teto 95
+      const recovered = Math.min(95, matchE + 20);
+      // Se apenas 1 partida consecutiva (esta), energia mínima = 45
+      const consecutive = (p.consecutiveMatches ?? 0) + 1;
+      const minEnergy = consecutive <= 1 ? 45 : 0;
+      const finalEnergy = Math.max(minEnergy, Math.min(95, recovered));
       return {
         ...p,
         energy: finalEnergy,
         matchEnergy: undefined,
-        consecutiveMatches: (p.consecutiveMatches ?? 0) + 1,
+        consecutiveMatches: consecutive,
       };
     } else {
+      // Quem não jogou recupera totalmente
       return {
         ...p,
+        energy: 100,
         matchEnergy: undefined,
         consecutiveMatches: 0,
       };
@@ -81,8 +88,8 @@ export const finalizeMatchEnergy = (players: Player[]): Player[] => {
 
 /**
  * Aplica recuperação de energia entre partidas (antes da próxima partida).
- * - Titular: +3
- * - Reserva: +15
+ * - Titular: +3 (max 95)
+ * - Reserva que não jogou: volta para 100
  */
 export const applyEnergyRecovery = (players: Player[]): Player[] => {
   return players.map(p => {
@@ -90,16 +97,25 @@ export const applyEnergyRecovery = (players: Player[]): Player[] => {
     if (p.isStarter) {
       return {
         ...p,
-        energy: Math.min(100, currentEnergy + 3),
+        energy: Math.min(95, currentEnergy + 3),
       };
     } else {
       return {
         ...p,
-        energy: Math.min(100, currentEnergy + 15),
+        energy: 100,
         consecutiveMatches: 0,
       };
     }
   });
+};
+
+/**
+ * Calcula a energia média do elenco (0-100).
+ */
+export const getSquadAverageEnergy = (players: Player[]): number => {
+  if (players.length === 0) return 100;
+  const total = players.reduce((sum, p) => sum + (p.energy ?? 100), 0);
+  return Math.round(total / players.length);
 };
 
 /**
