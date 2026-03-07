@@ -8,7 +8,7 @@ import { TeamBudget } from "@/components/TeamBudget";
 import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { TransferMarket } from "@/components/TransferMarket";
 import { FinancesModal } from "@/components/FinancesModal";
-import { SaveLoadModal } from "@/components/SaveLoadModal";
+
 import { teams } from "@/data/teams";
 import {
   botafogoPlayers,
@@ -21,8 +21,6 @@ import { useChampionship } from "@/hooks/useChampionship";
 import { useLibertadores } from "@/hooks/useLibertadores";
 import { useTeamForm } from "@/hooks/useTeamForm";
 import { useTeamBudget } from "@/hooks/useTeamBudget";
-import { useAuth } from "@/hooks/useAuth";
-import { useCloudSaveLoad, type CloudSaveData } from "@/hooks/useCloudSaveLoad";
 import { getTeamLogo } from "@/utils/teamLogos";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
@@ -481,8 +479,6 @@ const Game = () => {
             onManageSquad={() => setShowSquadManager(true)} 
             onTransferMarket={() => setShowTransferMarket(true)}
             onFinances={() => setShowFinances(true)}
-            onSaveGame={() => setShowSaveModal(true)}
-            onLoadGame={() => setShowLoadModal(true)}
           />
         </div>
       </header>
