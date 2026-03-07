@@ -22,7 +22,7 @@ import { useLibertadores } from "@/hooks/useLibertadores";
 import { useTeamForm } from "@/hooks/useTeamForm";
 import { useTeamBudget } from "@/hooks/useTeamBudget";
 import { getTeamLogo } from "@/utils/teamLogos";
-import { getLocalStandings } from "@/utils/localChampionship";
+import { getLocalStandings, deleteLocalChampionship } from "@/utils/localChampionship";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
@@ -401,8 +401,6 @@ const Game = () => {
             onTransferMarket={() => setShowTransferMarket(true)}
             onFinances={() => setShowFinances(true)}
             onExit={() => {
-              // Clear all save data for this team
-              const { deleteLocalChampionship } = require("@/utils/localChampionship");
               deleteLocalChampionship(teamName);
               localStorage.removeItem(`players_${teamName}`);
               localStorage.removeItem(`starter_order_${teamName}`);
