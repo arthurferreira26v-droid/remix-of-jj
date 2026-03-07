@@ -22,6 +22,7 @@ import { useLibertadores } from "@/hooks/useLibertadores";
 import { useTeamForm } from "@/hooks/useTeamForm";
 import { useTeamBudget } from "@/hooks/useTeamBudget";
 import { getTeamLogo } from "@/utils/teamLogos";
+import { getLocalStandings } from "@/utils/localChampionship";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
@@ -141,6 +142,14 @@ const Game = () => {
   const opponentLogo = nextMatch
     ? (isHome ? nextMatch.away_team_logo : nextMatch.home_team_logo)
     : "";
+
+  // Get real standings positions
+  const standings = getLocalStandings(teamName);
+  const sortedStandings = [...standings].sort((a, b) => b.points - a.points || b.goal_difference - a.goal_difference || b.goals_for - a.goals_for);
+  const userStanding = sortedStandings.findIndex(s => s.team_name === teamName);
+  const opponentStanding = sortedStandings.findIndex(s => s.team_name === opponentName);
+  const userPositionStr = userStanding >= 0 ? `${userStanding + 1}º` : "";
+  const opponentPositionStr = opponentStanding >= 0 ? `${opponentStanding + 1}º` : "";
 
   // Buscar os últimos 5 resultados reais de cada time
   const { form: userForm, loading: userFormLoading } = useTeamForm(teamName, championship?.id);
@@ -441,10 +450,10 @@ const Game = () => {
           <MatchCard
             userTeam={teamName}
             userLogo={getTeamLogo(teamName, selectedTeam?.logo || "")}
-            userPosition="1º"
+            userPosition={userPositionStr}
             opponentTeam={opponentName}
             opponentLogo={getTeamLogo(opponentName, opponentLogo)}
-            opponentPosition="8º"
+            opponentPosition={opponentPositionStr}
             round={`${nextMatch.round}ª Rodada`}
             userForm={userForm}
             opponentForm={opponentForm}
