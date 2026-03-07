@@ -6,7 +6,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Users, TrendingUp, Briefcase, Calendar, Trophy } from "lucide-react";
+import { Menu, Users, TrendingUp, Briefcase, Calendar, Trophy, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface GameMenuProps {
@@ -14,6 +14,7 @@ interface GameMenuProps {
   onManageSquad?: () => void;
   onTransferMarket?: () => void;
   onFinances?: () => void;
+  onExit?: () => void;
 }
 
 export const GameMenu = ({ 
@@ -21,6 +22,7 @@ export const GameMenu = ({
   onManageSquad, 
   onTransferMarket, 
   onFinances,
+  onExit,
 }: GameMenuProps) => {
   const navigate = useNavigate();
 
@@ -82,6 +84,16 @@ export const GameMenu = ({
             <span>Finanças</span>
           </Button>
 
+          <div className="border-t border-border mt-4 pt-4">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-2 h-11 text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={onExit}
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Sair do Modo Campanha</span>
+            </Button>
+          </div>
         </div>
       </SheetContent>
     </Sheet>
