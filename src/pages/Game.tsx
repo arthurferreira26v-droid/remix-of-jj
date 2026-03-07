@@ -8,7 +8,7 @@ import { TeamBudget } from "@/components/TeamBudget";
 import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { TransferMarket } from "@/components/TransferMarket";
 import { FinancesModal } from "@/components/FinancesModal";
-import { SaveLoadModal } from "@/components/SaveLoadModal";
+
 import { teams } from "@/data/teams";
 import {
   botafogoPlayers,
@@ -21,8 +21,6 @@ import { useChampionship } from "@/hooks/useChampionship";
 import { useLibertadores } from "@/hooks/useLibertadores";
 import { useTeamForm } from "@/hooks/useTeamForm";
 import { useTeamBudget } from "@/hooks/useTeamBudget";
-import { useAuth } from "@/hooks/useAuth";
-import { useCloudSaveLoad, type CloudSaveData } from "@/hooks/useCloudSaveLoad";
 import { getTeamLogo } from "@/utils/teamLogos";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
@@ -30,20 +28,15 @@ import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { toast } from "sonner";
 
 const Game = () => {
-  const { user } = useAuth();
-  const { loadGame: loadCloudGame } = useCloudSaveLoad();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const teamName = searchParams.get("time") || "Seu Time";
-  const loadSlotParam = searchParams.get("loadSlot");
 
   useEffect(() => { document.title = `${teamName} - Painel | Gerenciador`; }, [teamName]);
 
   const [showSquadManager, setShowSquadManager] = useState(false);
   const [showTransferMarket, setShowTransferMarket] = useState(false);
   const [showFinances, setShowFinances] = useState(false);
-  const [showSaveModal, setShowSaveModal] = useState(false);
-  const [showLoadModal, setShowLoadModal] = useState(false);
   const [totalSales, setTotalSales] = useState(0);
   const [hasActiveInvestment, setHasActiveInvestment] = useState(() => {
     return localStorage.getItem(`investment_${teamName}`) === 'true';
@@ -302,89 +295,6 @@ const Game = () => {
     }
   };
 
-  // Prepare save data for save modal
-  const getCurrentGameData = useCallback(() => ({
-    clubName: teamName,
-    season: '2024',
-    budget,
-    totalSales,
-    totalPurchases,
-    hasActiveInvestment,
-    players,
-    championshipId: championship?.id,
-    currentRound: championship?.current_round,
-    seasonStats: {
-      matchesPlayed: championship?.current_round ? championship.current_round - 1 : 0,
-      wins: 0,
-      draws: 0,
-      losses: 0,
-      goalsFor: 0,
-      goalsAgainst: 0
-    }
-  }), [teamName, budget, totalSales, totalPurchases, hasActiveInvestment, players, championship]);
-
-  // Handle loading a save (Cloud)
-  const handleLoadComplete = useCallback(
-    (save: CloudSaveData) => {
-      // Marcar que este jogo veio de um save carregado
-      sessionStorage.setItem(`loaded_save_${save.club_name}`, "true");
-      
-      // Salvar o championship_id para que useChampionship restaure o campeonato correto
-      if (save.championship_id) {
-        sessionStorage.setItem(`loaded_championship_${save.club_name}`, save.championship_id);
-      }
-
-      const loadedPlayers = (save.players as unknown as Player[]) ?? [];
-      localStorage.setItem(`players_${save.club_name}`, JSON.stringify(loadedPlayers));
-      setPlayers(loadedPlayers);
-
-      setTotalSales(save.total_sales ?? 0);
-      setTotalPurchases(save.total_purchases ?? 0);
-      setHasActiveInvestment(!!save.has_active_investment);
-      localStorage.setItem(
-        `investment_${save.club_name}`,
-        (!!save.has_active_investment).toString(),
-      );
-
-      if (typeof save.budget === "number" && save.budget !== budget) {
-        setBudget(save.budget);
-      }
-
-      window.location.reload();
-    },
-    [budget, setBudget],
-  );
-
-  // Se veio da tela inicial com loadSlot, carregar o save do slot automaticamente
-  useEffect(() => {
-    if (!user) return;
-    if (!loadSlotParam) return;
-
-    const slot = Number(loadSlotParam);
-    if (!Number.isFinite(slot) || slot < 1) return;
-
-    let isActive = true;
-    (async () => {
-      const data = await loadCloudGame(slot);
-      if (!isActive) return;
-
-      if (!data) {
-        toast.error("Nenhum save encontrado neste slot");
-        return;
-      }
-
-      // limpar query param para evitar loop
-      navigate(`/jogo?time=${encodeURIComponent(data.club_name)}`, {
-        replace: true,
-      });
-
-      handleLoadComplete(data);
-    })();
-
-    return () => {
-      isActive = false;
-    };
-  }, [user, loadSlotParam, loadCloudGame, navigate, handleLoadComplete]);
 
   if (loading || userFormLoading || opponentFormLoading || budgetLoading || libertadoresLoading) {
     return (
@@ -481,8 +391,6 @@ const Game = () => {
             onManageSquad={() => setShowSquadManager(true)} 
             onTransferMarket={() => setShowTransferMarket(true)}
             onFinances={() => setShowFinances(true)}
-            onSaveGame={() => setShowSaveModal(true)}
-            onLoadGame={() => setShowLoadModal(true)}
           />
         </div>
       </header>
@@ -644,21 +552,6 @@ const Game = () => {
         />
       )}
 
-      {/* Save Modal */}
-      <SaveLoadModal
-        isOpen={showSaveModal}
-        onClose={() => setShowSaveModal(false)}
-        mode="save"
-        currentGameData={getCurrentGameData()}
-      />
-
-      {/* Load Modal */}
-      <SaveLoadModal
-        isOpen={showLoadModal}
-        onClose={() => setShowLoadModal(false)}
-        mode="load"
-        onLoadComplete={handleLoadComplete}
-      />
     </div>
   );
 };
