@@ -400,6 +400,19 @@ const Game = () => {
             onManageSquad={() => setShowSquadManager(true)} 
             onTransferMarket={() => setShowTransferMarket(true)}
             onFinances={() => setShowFinances(true)}
+            onExit={() => {
+              // Clear all save data for this team
+              const { deleteLocalChampionship } = require("@/utils/localChampionship");
+              deleteLocalChampionship(teamName);
+              localStorage.removeItem(`players_${teamName}`);
+              localStorage.removeItem(`starter_order_${teamName}`);
+              localStorage.removeItem(`investment_${teamName}`);
+              localStorage.removeItem(`lib_championship_${teamName}`);
+              localStorage.removeItem(`lib_matches_${teamName}`);
+              localStorage.removeItem(`lib_standings_${teamName}`);
+              localStorage.removeItem(`lib_prelib_teams`);
+              navigate("/");
+            }}
           />
         </div>
       </header>
