@@ -6,18 +6,14 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Users, TrendingUp, Briefcase, Calendar, Trophy, LogOut, Save, Download } from "lucide-react";
+import { Menu, Users, TrendingUp, Briefcase, Calendar, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
 
 interface GameMenuProps {
   teamName: string;
   onManageSquad?: () => void;
   onTransferMarket?: () => void;
   onFinances?: () => void;
-  onSaveGame?: () => void;
-  onLoadGame?: () => void;
 }
 
 export const GameMenu = ({ 
@@ -25,17 +21,8 @@ export const GameMenu = ({
   onManageSquad, 
   onTransferMarket, 
   onFinances,
-  onSaveGame,
-  onLoadGame
 }: GameMenuProps) => {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    await signOut();
-    toast.success("Você saiu da sua conta");
-    navigate("/auth");
-  };
 
   return (
     <Sheet>

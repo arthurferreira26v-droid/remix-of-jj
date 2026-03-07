@@ -18,7 +18,6 @@ import QuickMatchTeamSelect from "./pages/QuickMatchTeamSelect";
 import QuickMatchRoom from "./pages/QuickMatchRoom";
 import QuickMatchJoinRoom from "./pages/QuickMatchJoinRoom";
 import QuickMatchJoinTeamSelect from "./pages/QuickMatchJoinTeamSelect";
-import Auth from "./pages/Auth";
 import Store from "./pages/Store";
 
 const queryClient = new QueryClient();
@@ -31,7 +30,6 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<ModeSelection />} />
-          <Route path="/auth" element={<Auth />} />
           <Route path="/loja" element={<Store />} />
           <Route path="/selecionar-time" element={<Index />} />
           
