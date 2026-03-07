@@ -82,37 +82,6 @@ export const GameMenu = ({
             <span>Finanças</span>
           </Button>
 
-          {/* Save/Load Section */}
-          <div className="pt-3 mt-3 border-t border-border">
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-2 h-11 text-sm"
-              onClick={onSaveGame}
-            >
-              <Save className="h-4 w-4" />
-              <span>Salvar Jogo</span>
-            </Button>
-
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-2 h-11 text-sm"
-              onClick={onLoadGame}
-            >
-              <Download className="h-4 w-4" />
-              <span>Carregar Jogo</span>
-            </Button>
-          </div>
-
-          <div className="pt-3 mt-3 border-t border-border">
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-2 h-11 text-sm text-red-500 hover:text-red-600 hover:bg-red-500/10"
-              onClick={handleSignOut}
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="font-semibold">Sair</span>
-            </Button>
-          </div>
         </div>
       </SheetContent>
     </Sheet>
