@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trophy, Gamepad2, ShoppingBag, ChevronRight, Shield } from "lucide-react";
+import { Trophy, Gamepad2, ShoppingBag, Shield } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import heroCampaign from "@/assets/hero-campaign.jpg";
 import heroQuickmatch from "@/assets/hero-quickmatch.jpg";
