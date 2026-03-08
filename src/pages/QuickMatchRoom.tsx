@@ -68,31 +68,24 @@ const QuickMatchRoom = () => {
   const roomCodeParam = params.get("code") || "";
   const team = teams.find((t) => t.name === teamName);
 
-  // Determine role: if code param exists, we're a guest joining an existing room
   const isHost = !roomCodeParam;
   const roomCode = useMemo(() => isHost ? generateRoomCode() : roomCodeParam, []);
 
-  // Room state from DB
   const [roomData, setRoomData] = useState<any>(null);
   const [myReady, setMyReady] = useState(false);
   const [opponentReady, setOpponentReady] = useState(false);
   const [opponentTeamName, setOpponentTeamName] = useState<string | null>(null);
 
-  // Save room to DB on mount (host only)
   useEffect(() => {
     if (!team || !isHost) return;
     const saveRoom = async () => {
       await supabase.from("quick_match_rooms" as any).insert({
-        code: roomCode,
-        team_name: team.name,
-        host_ready: false,
-        guest_ready: false,
+        code: roomCode, team_name: team.name, host_ready: false, guest_ready: false,
       } as any);
     };
     saveRoom();
   }, [roomCode, team, isHost]);
 
-  // Guest: update guest_team_name on mount
   useEffect(() => {
     if (!team || isHost) return;
     const joinRoom = async () => {
@@ -103,39 +96,22 @@ const QuickMatchRoom = () => {
     joinRoom();
   }, [roomCode, team, isHost]);
 
-  // Fetch initial room data and subscribe to realtime
   useEffect(() => {
     const fetchRoom = async () => {
       const { data } = await supabase
-        .from("quick_match_rooms" as any)
-        .select("*")
-        .eq("code", roomCode)
-        .maybeSingle();
-      if (data) {
-        setRoomData(data);
-        updateFromRoomData(data);
-      }
+        .from("quick_match_rooms" as any).select("*").eq("code", roomCode).maybeSingle();
+      if (data) { setRoomData(data); updateFromRoomData(data); }
     };
     fetchRoom();
 
     const channel = supabase
       .channel(`room-${roomCode}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'quick_match_rooms',
-          filter: `code=eq.${roomCode}`,
-        },
-        (payload: any) => {
-          const newData = payload.new;
-          if (newData) {
-            setRoomData(newData);
-            updateFromRoomData(newData);
-          }
-        }
-      )
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'quick_match_rooms', filter: `code=eq.${roomCode}`,
+      }, (payload: any) => {
+        const newData = payload.new;
+        if (newData) { setRoomData(newData); updateFromRoomData(newData); }
+      })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
@@ -153,7 +129,6 @@ const QuickMatchRoom = () => {
     }
   };
 
-  // Check if both ready → navigate to match
   useEffect(() => {
     if (myReady && opponentReady && opponentTeamName && roomData) {
       const oppStyle = isHost ? (roomData.guest_play_style || 'balanced') : (roomData.host_play_style || 'balanced');
@@ -165,9 +140,7 @@ const QuickMatchRoom = () => {
     const newReady = !myReady;
     setMyReady(newReady);
     const updateField = isHost ? { host_ready: newReady } : { guest_ready: newReady };
-    await supabase.from("quick_match_rooms" as any)
-      .update(updateField as any)
-      .eq("code", roomCode);
+    await supabase.from("quick_match_rooms" as any).update(updateField as any).eq("code", roomCode);
   };
 
   const opponentTeam = opponentTeamName ? teams.find(t => t.name === opponentTeamName) : null;
@@ -210,7 +183,6 @@ const QuickMatchRoom = () => {
     setSlotAssignments(computeSlotAssignments(starters, formation));
   }, [selectedFormation]);
 
-  // Sync formation/playStyle to DB for opponent visibility
   useEffect(() => {
     const field = isHost ? { host_formation: selectedFormation } : { guest_formation: selectedFormation };
     supabase.from("quick_match_rooms" as any).update(field as any).eq("code", roomCode);
@@ -229,26 +201,15 @@ const QuickMatchRoom = () => {
   );
 
   const handlePlayerClick = useCallback((player: Player) => {
-    if (!selectedPlayer) {
-      setSelectedPlayer(player);
-      return;
-    }
-    if (selectedPlayer.id === player.id) {
-      setSelectedPlayer(null);
-      return;
-    }
+    if (!selectedPlayer) { setSelectedPlayer(player); return; }
+    if (selectedPlayer.id === player.id) { setSelectedPlayer(null); return; }
 
     const bothStarters = selectedPlayer.isStarter && player.isStarter;
-
     if (bothStarters) {
       const newSlots = [...slotAssignments];
       const idx1 = newSlots.indexOf(selectedPlayer.id);
       const idx2 = newSlots.indexOf(player.id);
-      if (idx1 !== -1 && idx2 !== -1) {
-        newSlots[idx1] = player.id;
-        newSlots[idx2] = selectedPlayer.id;
-        setSlotAssignments(newSlots);
-      }
+      if (idx1 !== -1 && idx2 !== -1) { newSlots[idx1] = player.id; newSlots[idx2] = selectedPlayer.id; setSlotAssignments(newSlots); }
     } else if (!selectedPlayer.isStarter && !player.isStarter) {
       // both reserves - noop
     } else {
@@ -272,34 +233,33 @@ const QuickMatchRoom = () => {
 
   if (!team) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-black">Time não encontrado</p>
+      <div className="min-h-screen bg-[#0a0a0b] flex items-center justify-center">
+        <p className="text-white/50">Time não encontrado</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col pb-24">
+    <div className="min-h-screen bg-[#0a0a0b] flex flex-col pb-24">
       <div className="flex-1 flex flex-col px-6 pt-8 pb-8">
         {/* Back */}
         <button
           onClick={() => navigate(isHost ? "/jogo-rapido/criar" : "/jogo-rapido/entrar")}
-          className="self-start mb-6 p-2 -ml-2 text-black/60 hover:text-black transition-colors"
+          className="self-start mb-6 p-2 -ml-2 text-white/50 hover:text-white transition-colors"
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
 
         {/* Room code card */}
-        <div className="bg-[#e8e8e8] rounded-2xl px-6 py-5 flex flex-col items-center mb-8">
-          <span className="text-black text-sm font-bold tracking-widest uppercase">CODE</span>
-          <span className="text-black text-[32px] font-bold tracking-[0.15em] mt-1">{roomCode}</span>
+        <div className="bg-white/[0.07] border border-white/[0.08] rounded-2xl px-6 py-5 flex flex-col items-center mb-8">
+          <span className="text-white/40 text-xs font-bold tracking-[0.3em] uppercase">CÓDIGO</span>
+          <span className="text-white text-[32px] font-bold tracking-[0.15em] mt-1">{roomCode}</span>
         </div>
 
         {/* Match card */}
-        <div className="bg-[#0a1744] rounded-2xl px-6 py-6 flex flex-col items-center mb-8">
-          <span className="text-white text-sm font-bold tracking-widest uppercase mb-4">AMISTOSO</span>
+        <div className="bg-white/[0.05] border border-white/[0.06] rounded-2xl px-6 py-6 flex flex-col items-center mb-8">
+          <span className="text-white/40 text-xs font-bold tracking-[0.3em] uppercase mb-4">AMISTOSO</span>
           <div className="flex items-center justify-center gap-6 w-full">
-            {/* Host team */}
             <div className="flex flex-col items-center gap-1">
               {isHost ? (
                 <div className="w-24 h-24 flex items-center justify-center">
@@ -310,18 +270,17 @@ const QuickMatchRoom = () => {
                   <img src={opponentTeam.logo} alt={opponentTeam.name} className="max-w-full max-h-full object-contain" />
                 </div>
               ) : (
-                <div className="w-24 h-24 flex items-center justify-center opacity-30">
+                <div className="w-24 h-24 flex items-center justify-center opacity-20">
                   <span className="text-white text-4xl font-bold">?</span>
                 </div>
               )}
               {isHost && opponentReady && (
-                <span className="text-xs text-green-400 font-bold">PRONTO</span>
+                <span className="text-xs text-emerald-400 font-bold">PRONTO</span>
               )}
             </div>
 
-            <span className="text-white text-[28px] font-bold">X</span>
+            <span className="text-white/30 text-[28px] font-bold">×</span>
 
-            {/* Guest/Opponent team */}
             <div className="flex flex-col items-center gap-1">
               {isHost ? (
                 opponentTeam ? (
@@ -329,7 +288,7 @@ const QuickMatchRoom = () => {
                     <img src={opponentTeam.logo} alt={opponentTeam.name} className="max-w-full max-h-full object-contain" />
                   </div>
                 ) : (
-                  <div className="w-24 h-24 flex items-center justify-center opacity-30">
+                  <div className="w-24 h-24 flex items-center justify-center opacity-20">
                     <span className="text-white text-4xl font-bold">?</span>
                   </div>
                 )
@@ -339,14 +298,13 @@ const QuickMatchRoom = () => {
                 </div>
               )}
               {!isHost && opponentReady && (
-                <span className="text-xs text-green-400 font-bold">PRONTO</span>
+                <span className="text-xs text-emerald-400 font-bold">PRONTO</span>
               )}
             </div>
           </div>
-          
-          {/* Waiting message */}
+
           {isHost && !opponentTeamName && (
-            <p className="text-white/50 text-sm mt-4 animate-pulse">Aguardando oponente...</p>
+            <p className="text-white/30 text-sm mt-4 animate-pulse">Aguardando oponente...</p>
           )}
         </div>
 
@@ -370,24 +328,24 @@ const QuickMatchRoom = () => {
           <div className="relative">
             <button
               onClick={() => toggleDropdown("style")}
-              className="w-full bg-[#e8e8e8] text-black rounded-xl px-4 py-3 flex items-center justify-between font-medium hover:bg-[#ddd] transition-colors"
+              className="w-full bg-white/[0.07] border border-white/[0.08] text-white rounded-xl px-4 py-3 flex items-center justify-between font-medium hover:bg-white/[0.12] transition-colors"
             >
               <span className="text-sm">{playStyle.name}</span>
-              <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === "style" ? "rotate-180" : ""}`} />
+              <ChevronDown className={`w-4 h-4 text-white/40 transition-transform ${openDropdown === "style" ? "rotate-180" : ""}`} />
             </button>
-            
+
             {openDropdown === "style" && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl overflow-hidden shadow-xl z-50 border border-gray-200">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-[#1c1c1e] rounded-xl overflow-hidden shadow-2xl z-50 border border-white/[0.1]">
                 {playStyles.map((style) => (
                   <button
                     key={style.id}
                     onClick={() => { setSelectedPlayStyle(style.id); setOpenDropdown(null); }}
-                    className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-                      selectedPlayStyle === style.id ? "bg-[#c8ff00]/20" : ""
+                    className={`w-full px-4 py-3 text-left hover:bg-white/[0.08] transition-colors border-b border-white/[0.06] last:border-b-0 ${
+                      selectedPlayStyle === style.id ? "bg-white/[0.1]" : ""
                     }`}
                   >
-                    <div className="font-medium text-black text-sm">{style.name}</div>
-                    <div className="text-xs text-gray-500">{style.description}</div>
+                    <div className="font-medium text-white text-sm">{style.name}</div>
+                    <div className="text-xs text-white/35">{style.description}</div>
                   </button>
                 ))}
               </div>
@@ -398,23 +356,23 @@ const QuickMatchRoom = () => {
           <div className="relative">
             <button
               onClick={() => toggleDropdown("formation")}
-              className="w-full bg-[#e8e8e8] text-black rounded-xl px-4 py-3 flex items-center justify-between font-medium hover:bg-[#ddd] transition-colors"
+              className="w-full bg-white/[0.07] border border-white/[0.08] text-white rounded-xl px-4 py-3 flex items-center justify-between font-medium hover:bg-white/[0.12] transition-colors"
             >
               <span className="text-sm">{formation.name}</span>
-              <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === "formation" ? "rotate-180" : ""}`} />
+              <ChevronDown className={`w-4 h-4 text-white/40 transition-transform ${openDropdown === "formation" ? "rotate-180" : ""}`} />
             </button>
-            
+
             {openDropdown === "formation" && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl overflow-hidden shadow-xl z-50 border border-gray-200">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-[#1c1c1e] rounded-xl overflow-hidden shadow-2xl z-50 border border-white/[0.1] max-h-60 overflow-y-auto">
                 {formations.map((form) => (
                   <button
                     key={form.id}
                     onClick={() => { setSelectedFormation(form.id); setOpenDropdown(null); }}
-                    className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-                      selectedFormation === form.id ? "bg-[#c8ff00]/20" : ""
+                    className={`w-full px-4 py-3 text-left hover:bg-white/[0.08] transition-colors border-b border-white/[0.06] last:border-b-0 ${
+                      selectedFormation === form.id ? "bg-white/[0.1]" : ""
                     }`}
                   >
-                    <div className="font-medium text-black text-sm">{form.name}</div>
+                    <div className="font-medium text-white text-sm">{form.name}</div>
                   </button>
                 ))}
               </div>
@@ -424,17 +382,17 @@ const QuickMatchRoom = () => {
 
         {/* Reserves bench */}
         {reserves.length > 0 && (
-          <div className="bg-[#f5f5f5] rounded-2xl p-4">
-            <h3 className="text-black text-lg font-bold mb-3">Reservas</h3>
+          <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-4">
+            <h3 className="text-white text-lg font-bold mb-3">Reservas</h3>
             <div className="space-y-2">
               {reserves.map(player => (
                 <button
                   key={player.id}
                   onClick={() => handlePlayerClick(player)}
-                  className={`w-full flex items-center justify-between p-3 rounded-xl transition-colors ${
+                  className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${
                     selectedPlayer?.id === player.id
-                      ? 'bg-[#c8ff00] text-black'
-                      : 'bg-white text-black hover:bg-gray-50'
+                      ? 'bg-white text-black'
+                      : 'bg-white/[0.06] text-white hover:bg-white/[0.1]'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -443,17 +401,19 @@ const QuickMatchRoom = () => {
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-sm">{player.name}</span>
                         {player.ovrChange && player.ovrChange > 0 && (
-                          <span className="flex items-center text-green-600 text-xs font-bold">
+                          <span className="flex items-center text-emerald-400 text-xs font-bold">
                             <TrendingUp className="w-3 h-3 mr-0.5" />+{player.ovrChange}
                           </span>
                         )}
                         {player.ovrChange && player.ovrChange < 0 && (
-                          <span className="flex items-center text-red-500 text-xs font-bold">
+                          <span className="flex items-center text-red-400 text-xs font-bold">
                             <TrendingDown className="w-3 h-3 mr-0.5" />{player.ovrChange}
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <div className={`flex items-center gap-2 text-xs ${
+                        selectedPlayer?.id === player.id ? 'text-black/50' : 'text-white/35'
+                      }`}>
                         <span>{player.position}</span>
                         <span>• {player.age} anos</span>
                       </div>
@@ -468,20 +428,20 @@ const QuickMatchRoom = () => {
 
         {/* Substitution hint */}
         {selectedPlayer && (
-          <div className="fixed bottom-28 left-1/2 transform -translate-x-1/2 bg-[#c8ff00] text-black px-6 py-3 rounded-lg font-medium z-50 shadow-lg">
+          <div className="fixed bottom-28 left-1/2 transform -translate-x-1/2 bg-white text-black px-6 py-3 rounded-lg font-medium z-50 shadow-lg">
             Clique em outro jogador para trocar
           </div>
         )}
       </div>
 
       {/* Floating PRONTO button */}
-      <div className="fixed bottom-0 left-0 right-0 px-6 pb-6 pt-3 bg-gradient-to-t from-white via-white to-transparent z-40">
+      <div className="fixed bottom-0 left-0 right-0 px-6 pb-6 pt-3 bg-gradient-to-t from-[#0a0a0b] via-[#0a0a0b] to-transparent z-40">
         <button
           onClick={handleReady}
           className={`w-full h-16 rounded-2xl flex items-center justify-center transition-all active:scale-[0.98] font-bold text-[20px] ${
             myReady
-              ? "bg-green-500 text-white"
-              : "bg-[#c8ff00] text-black hover:bg-[#b8ef00]"
+              ? "bg-emerald-500 text-white"
+              : "bg-white text-black hover:bg-white/90"
           }`}
         >
           {myReady ? "✓ PRONTO" : "PRONTO"}

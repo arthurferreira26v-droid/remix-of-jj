@@ -41,23 +41,24 @@ const QuickMatchJoinRoom = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-[#0a0a0b] flex flex-col">
       <div className="flex-1 flex flex-col px-6 pt-8">
-        {/* Back */}
         <button
           onClick={() => navigate("/jogo-rapido")}
-          className="self-start mb-6 p-2 -ml-2 text-black/60 hover:text-black transition-colors"
+          className="self-start mb-6 p-2 -ml-2 text-white/50 hover:text-white transition-colors"
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
 
-        <h1 className="text-[24px] font-bold text-black mb-6 text-center">
+        <h1 className="text-[24px] font-bold text-white mb-2 text-center">
           Digitar Código da Sala
         </h1>
+        <p className="text-[13px] text-white/35 text-center mb-8">
+          Insira o código de 6 dígitos
+        </p>
 
         {/* Code display + hidden input overlay */}
-        <div className="relative flex justify-center gap-2 mb-4">
-          {/* Invisible input covering the squares area */}
+        <div className="relative flex justify-center gap-2.5 mb-4">
           <input
             ref={inputRef}
             type="text"
@@ -68,9 +69,7 @@ const QuickMatchJoinRoom = () => {
             spellCheck={false}
             value={code}
             onChange={(e) => handleChange(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleConfirm();
-            }}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm(); }}
             maxLength={maxLength}
             className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
             style={{ fontSize: '16px', caretColor: 'transparent' }}
@@ -79,18 +78,22 @@ const QuickMatchJoinRoom = () => {
           {Array.from({ length: maxLength }).map((_, i) => (
             <div
               key={i}
-              className={`w-12 h-14 rounded-xl flex items-center justify-center text-[24px] font-bold border-2 transition-colors ${
+              className={`w-12 h-14 rounded-xl flex items-center justify-center text-[24px] font-bold transition-all ${
                 code[i]
-                  ? "bg-white border-black text-black"
+                  ? "bg-white/[0.12] border-2 border-white/30 text-white"
                   : i === code.length
-                  ? "bg-white border-gray-400 animate-pulse"
-                  : "bg-[#e8e8e8] border-transparent text-gray-400"
+                  ? "bg-white/[0.08] border-2 border-white/20 animate-pulse"
+                  : "bg-white/[0.05] border-2 border-white/[0.06] text-white/20"
               }`}
             >
               {code[i] || ""}
             </div>
           ))}
         </div>
+
+        {error && (
+          <p className="text-center text-red-400 text-sm mt-2">{error}</p>
+        )}
       </div>
 
       {/* Confirm button */}
@@ -98,13 +101,13 @@ const QuickMatchJoinRoom = () => {
         <button
           onClick={handleConfirm}
           disabled={code.length < maxLength || checking}
-          className={`w-full h-16 rounded-2xl flex items-center justify-center transition-colors active:scale-[0.98] ${
+          className={`w-full h-16 rounded-2xl flex items-center justify-center transition-all active:scale-[0.98] ${
             code.length === maxLength
-              ? "bg-[#c8ff00] hover:bg-[#b8ef00]"
-              : "bg-[#e8e8e8] cursor-not-allowed"
+              ? "bg-white text-black font-bold"
+              : "bg-white/[0.07] text-white/30 cursor-not-allowed"
           }`}
         >
-          <span className={`text-[20px] font-bold ${code.length === maxLength ? "text-black" : "text-gray-400"}`}>
+          <span className="text-[20px] font-bold">
             {checking ? "Verificando..." : "Entrar"}
           </span>
         </button>
