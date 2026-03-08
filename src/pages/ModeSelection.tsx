@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trophy, Gamepad2, ShoppingBag, ChevronRight, Shield } from "lucide-react";
+import { Trophy, Gamepad2, ShoppingBag, Shield } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import heroCampaign from "@/assets/hero-campaign.jpg";
 import heroQuickmatch from "@/assets/hero-quickmatch.jpg";
@@ -159,33 +159,12 @@ const ModeSelection = () => {
             />
 
             {/* Content */}
-            <div className="relative z-10 h-full flex flex-col justify-between p-5">
-              {/* Top: Badge — more spacing, less cramped */}
-              <div className="flex items-start justify-between">
-                <span className="text-[9px] font-bold tracking-[0.3em] text-white/40 bg-white/[0.06] backdrop-blur-md px-3 py-1.5 rounded-full border border-white/[0.08]">
-                  {mode.badge}
-                </span>
-                <motion.div
-                  className="mt-0.5"
-                  initial={{ x: 0 }}
-                  whileHover={{ x: 4 }}
-                  transition={{ type: "spring", stiffness: 200 }}
-                >
-                  <ChevronRight className="w-4 h-4 text-white/25 group-hover:text-white/60 transition-colors duration-300" />
-                </motion.div>
-              </div>
-
-              {/* Bottom: Info */}
+            <div className="relative z-10 h-full flex items-end p-5">
               <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <div className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur flex items-center justify-center border border-white/10 group-hover:bg-white/15 transition-colors duration-300 shrink-0">
-                    {mode.icon}
-                  </div>
-                  <h2 className="text-[17px] font-extrabold text-white tracking-tight leading-none">
-                    {mode.label}
-                  </h2>
-                </div>
-                <p className="text-[11px] text-white/40 font-medium ml-11">
+                <h2 className="text-[20px] font-extrabold text-white tracking-tight leading-none mb-1">
+                  {mode.label}
+                </h2>
+                <p className="text-[12px] text-white/45 font-medium">
                   {mode.description}
                 </p>
               </div>
