@@ -136,7 +136,7 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
 
   return (
     <div className="bg-black min-h-full">
-      <div className="p-4">
+      <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-white text-2xl font-bold">Gerenciar Elenco</h2>
           <button onClick={onClose} className="text-white"><X className="w-6 h-6" /></button>
