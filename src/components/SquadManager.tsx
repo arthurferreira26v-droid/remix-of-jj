@@ -12,6 +12,7 @@ interface SquadManagerProps {
   players: Player[];
   onClose: () => void;
   onSquadChange: (updatedPlayers: Player[]) => void;
+  onSellPlayer?: (player: Player) => void;
 }
 
 const computeSlotAssignments = (starters: Player[], formation: Formation): string[] => {
@@ -70,7 +71,7 @@ const ensureStarterCount = (players: Player[], requiredCount: number): Player[] 
   return updated;
 };
 
-export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerProps) => {
+export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: SquadManagerProps) => {
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
   const [selectedPlayStyle, setSelectedPlayStyle] = useState("counter");
   const [openDropdown, setOpenDropdown] = useState<"style" | "formation" | null>(null);
@@ -223,6 +224,16 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
           <PlayerValueModal
             player={valuePlayer}
             onClose={() => setValuePlayer(null)}
+            canSell={!!onSellPlayer}
+            onSell={(player) => {
+              if (onSellPlayer) {
+                onSellPlayer(player);
+                setValuePlayer(null);
+                setLocalPlayers(prev => prev.filter(p => p.id !== player.id));
+                const newSlots = slotAssignments.filter(id => id !== player.id);
+                setSlotAssignments(newSlots);
+              }
+            }}
           />
         )}
       </div>

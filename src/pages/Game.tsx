@@ -526,6 +526,7 @@ const Game = () => {
           players={players}
           onClose={() => setShowSquadManager(false)}
           onSquadChange={(updatedPlayers) => setPlayers(updatedPlayers)}
+          onSellPlayer={handleSellPlayer}
         />
       )}
 
