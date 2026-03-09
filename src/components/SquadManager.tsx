@@ -142,7 +142,7 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
           <button onClick={onClose} className="text-white"><X className="w-6 h-6" /></button>
         </div>
 
-        <div className="w-full max-w-md mx-auto mb-4">
+        <div className="w-full mx-auto mb-4">
           <FormationField
             formation={formation}
             players={starters}
