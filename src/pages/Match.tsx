@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { teams } from "@/data/teams";
-import { botafogoPlayers, flamengoPlayers, generateTeamPlayers, Player } from "@/data/players";
+import { generateTeamPlayers, Player } from "@/data/players";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { TacticsManager } from "@/components/TacticsManager";
 import { ChevronLeft, Loader2 } from "lucide-react";
