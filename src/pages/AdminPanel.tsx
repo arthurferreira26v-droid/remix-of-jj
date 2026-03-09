@@ -143,7 +143,9 @@ const AdminPanel = () => {
 
   const formatCurrency = (v: number) => `R$ ${(v / 1_000_000).toFixed(1)}M`;
 
-  const marketValue = (ovr: number) => {
+  const marketValue = (p: Player) => {
+    if (p.marketValue) return p.marketValue;
+    const ovr = p.overall;
     if (ovr >= 85) return 50_000_000;
     if (ovr >= 80) return 25_000_000;
     if (ovr >= 75) return 10_000_000;
