@@ -17,14 +17,27 @@ interface GameMenuProps {
   onExit?: () => void;
 }
 
-export const GameMenu = ({ 
-  teamName, 
-  onManageSquad, 
-  onTransferMarket, 
+const menuItems = (
+  teamName: string,
+  navigate: ReturnType<typeof useNavigate>,
+  handlers: Pick<GameMenuProps, "onManageSquad" | "onTransferMarket" | "onFinances">
+) => [
+  { icon: Trophy, label: "Classificação", onClick: () => navigate(`/classificacao?time=${teamName}`) },
+  { icon: Users, label: "Gerenciar Elenco", onClick: handlers.onManageSquad },
+  { icon: TrendingUp, label: "Transferências", onClick: handlers.onTransferMarket },
+  { icon: Calendar, label: "Calendário", onClick: () => navigate(`/calendario?time=${teamName}`) },
+  { icon: Briefcase, label: "Finanças", onClick: handlers.onFinances },
+];
+
+export const GameMenu = ({
+  teamName,
+  onManageSquad,
+  onTransferMarket,
   onFinances,
   onExit,
 }: GameMenuProps) => {
   const navigate = useNavigate();
+  const items = menuItems(teamName, navigate, { onManageSquad, onTransferMarket, onFinances });
 
   return (
     <Sheet>
@@ -33,66 +46,39 @@ export const GameMenu = ({
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
-       <SheetContent side="right" className="w-64 sm:w-80 p-4 flex flex-col">
+      <SheetContent
+        side="right"
+        className="w-72 sm:w-80 border-l border-white/[0.06] flex flex-col p-0"
+        style={{ background: '#111113' }}
+      >
         <SheetHeader className="sr-only">
           <SheetTitle>{teamName}</SheetTitle>
         </SheetHeader>
-        
-        <div className="mt-8 space-y-1 flex-1">
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-2 h-11 text-sm"
-            onClick={() => navigate(`/classificacao?time=${teamName}`)}
-          >
-            <Trophy className="h-4 w-4" />
-            <span>Classificação</span>
-          </Button>
 
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-2 h-11 text-sm"
-            onClick={onManageSquad}
+        {/* Menu items */}
+        <nav className="flex-1 flex flex-col pt-16 px-2">
+          {items.map((item, i) => (
+            <button
+              key={item.label}
+              onClick={item.onClick}
+              className="group flex items-center gap-4 px-5 py-4 rounded-xl text-[15px] font-medium text-white/80 hover:text-white hover:bg-white/[0.06] transition-all duration-200 active:scale-[0.98]"
+            >
+              <item.icon className="w-[18px] h-[18px] text-white/40 group-hover:text-white/70 transition-colors" />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        {/* Exit */}
+        <div className="px-2 pb-8">
+          <button
+            onClick={onExit}
+            className="group flex items-center gap-4 px-5 py-4 rounded-xl text-[15px] font-medium text-red-400/80 hover:text-red-400 hover:bg-red-500/[0.08] transition-all duration-200 active:scale-[0.98] w-full"
           >
-            <Users className="h-4 w-4" />
-            <span>Gerenciar Elenco</span>
-          </Button>
-          
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-2 h-11 text-sm"
-            onClick={onTransferMarket}
-          >
-            <TrendingUp className="h-4 w-4" />
-            <span>Transferências</span>
-          </Button>
-          
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-2 h-11 text-sm"
-            onClick={() => navigate(`/calendario?time=${teamName}`)}
-          >
-            <Calendar className="h-4 w-4" />
-            <span>Calendário</span>
-          </Button>
-          
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-2 h-11 text-sm"
-            onClick={onFinances}
-          >
-            <Briefcase className="h-4 w-4" />
-            <span>Finanças</span>
-          </Button>
+            <LogOut className="w-[18px] h-[18px] text-red-400/50 group-hover:text-red-400/80 transition-colors" />
+            <span>Sair</span>
+          </button>
         </div>
-
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-2 h-11 text-sm text-destructive hover:text-destructive hover:bg-destructive/10 mb-4"
-          onClick={onExit}
-        >
-          <LogOut className="h-4 w-4" />
-          <span>Sair</span>
-        </Button>
       </SheetContent>
     </Sheet>
   );
