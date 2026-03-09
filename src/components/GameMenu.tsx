@@ -23,7 +23,7 @@ const menuItems = (
   handlers: Pick<GameMenuProps, "onManageSquad" | "onTransferMarket" | "onFinances">
 ) => [
   { icon: Trophy, label: "Classificação", onClick: () => navigate(`/classificacao?time=${teamName}`) },
-  { icon: Users, label: "Gerenciar Elenco", onClick: handlers.onManageSquad },
+  { icon: Users, label: "Elenco", onClick: handlers.onManageSquad },
   { icon: TrendingUp, label: "Transferências", onClick: handlers.onTransferMarket },
   { icon: Calendar, label: "Calendário", onClick: () => navigate(`/calendario?time=${teamName}`) },
   { icon: Briefcase, label: "Finanças", onClick: handlers.onFinances },
