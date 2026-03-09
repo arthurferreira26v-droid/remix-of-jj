@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ChevronDown, TrendingUp, TrendingDown } from "lucide-react";
 import { teams } from "@/data/teams";
 import { formations, playStyles, Formation } from "@/data/formations";
-import { botafogoPlayers, flamengoPlayers, generateTeamPlayers, Player } from "@/data/players";
+import { generateTeamPlayers, Player } from "@/data/players";
 import { FormationField } from "@/components/FormationField";
 import { fetchAdminPlayers } from "@/hooks/useAdminData";
 import { supabase } from "@/integrations/supabase/client";
