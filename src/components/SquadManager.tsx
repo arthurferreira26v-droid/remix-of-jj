@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Player } from "@/data/players";
 import { formations, playStyles, Formation } from "@/data/formations";
-import { X, ChevronDown } from "lucide-react";
+import { X, ChevronDown, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormationField } from "@/components/FormationField";
-import { PlayerBubble } from "@/components/PlayerBubble";
 import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { optimizeStartersForFormation } from "@/utils/formationOptimizer";
+import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 
 interface SquadManagerProps {
   players: Player[];
