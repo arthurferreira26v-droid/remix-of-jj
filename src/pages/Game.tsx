@@ -11,8 +11,6 @@ import { FinancesModal } from "@/components/FinancesModal";
 
 import { teams } from "@/data/teams";
 import {
-  botafogoPlayers,
-  flamengoPlayers,
   generateTeamPlayers,
   type Player,
 } from "@/data/players";
