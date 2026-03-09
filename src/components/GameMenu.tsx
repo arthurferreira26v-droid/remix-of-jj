@@ -48,8 +48,8 @@ export const GameMenu = ({
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="w-72 sm:w-80 border-l border-white/[0.06] flex flex-col p-0"
-        style={{ background: '#111113' }}
+        className="w-[50vw] max-w-[50vw] border-l border-white/[0.06] flex flex-col p-0"
+        style={{ background: '#0d1117' }}
       >
         <SheetHeader className="sr-only">
           <SheetTitle>{teamName}</SheetTitle>
