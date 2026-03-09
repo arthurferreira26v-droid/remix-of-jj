@@ -36,11 +36,24 @@ const getSeasonOvrChange = (age: number, isStarter: boolean): number => {
 };
 
 /**
+ * Determina se o jogador foi majoritariamente titular na temporada
+ */
+const wasSeasonStarter = (player: Player): boolean => {
+  const starterMatches = player.seasonStarterMatches ?? 0;
+  const benchMatches = player.seasonBenchMatches ?? 0;
+  // Se não tiver dados de temporada, usa o status atual
+  if (starterMatches === 0 && benchMatches === 0) {
+    return player.isStarter ?? false;
+  }
+  return starterMatches >= benchMatches;
+};
+
+/**
  * Evolui o OVR de um jogador ao final da temporada
  */
 export const evolvePlayerOvr = (player: Player): EvolutionResult => {
   const oldOvr = player.overall;
-  const isStarter = player.isStarter ?? false;
+  const isStarter = wasSeasonStarter(player);
   const change = getSeasonOvrChange(player.age, isStarter);
   const newOvr = Math.max(MIN_OVR, Math.min(MAX_OVR, oldOvr + change));
   const changed = newOvr !== oldOvr;
@@ -51,6 +64,9 @@ export const evolvePlayerOvr = (player: Player): EvolutionResult => {
       overall: newOvr,
       age: player.age + 1,
       ovrChange: changed ? (newOvr - oldOvr) : 0,
+      // Reset season stats for the new season
+      seasonStarterMatches: 0,
+      seasonBenchMatches: 0,
     },
     changed,
     oldOvr,
