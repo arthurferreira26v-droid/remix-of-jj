@@ -34,7 +34,6 @@ const Game = () => {
 
   useEffect(() => { document.title = `${teamName} - Painel | Gerenciador`; }, [teamName]);
 
-  const [showSquadManager, setShowSquadManager] = useState(false);
   const [showTransferMarket, setShowTransferMarket] = useState(false);
   const [showFinances, setShowFinances] = useState(false);
   const [totalSales, setTotalSales] = useState(0);
