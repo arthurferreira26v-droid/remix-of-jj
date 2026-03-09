@@ -213,11 +213,18 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
           </div>
         )}
 
-        <div className="max-w-md mx-auto mt-6">
+        <div className="max-w-md mx-auto mt-6 pb-8">
           <Button onClick={handleSave} className="w-full bg-[#c8ff00] text-black hover:bg-[#b3e600] font-bold">
             Salvar Escalação
           </Button>
         </div>
+
+        {valuePlayer && (
+          <PlayerValueModal
+            player={valuePlayer}
+            onClose={() => setValuePlayer(null)}
+          />
+        )}
       </div>
     </div>
   );
