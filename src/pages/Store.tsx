@@ -54,7 +54,6 @@ const LegendCard = ({ player }: { player: LegendPlayer }) => {
       <div className="flex-1 min-w-0 text-left">
         <div className="flex items-center gap-2">
           <span className="text-white text-[15px] font-semibold truncate">{player.name}</span>
-          <span className="text-[13px]">{player.flag}</span>
         </div>
         <span className="text-white/35 text-[13px]">{player.position}</span>
       </div>
