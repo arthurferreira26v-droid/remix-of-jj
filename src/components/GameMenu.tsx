@@ -22,11 +22,11 @@ const menuItems = (
   navigate: ReturnType<typeof useNavigate>,
   handlers: Pick<GameMenuProps, "onManageSquad" | "onTransferMarket" | "onFinances">
 ) => [
-  { icon: Trophy, label: "Classificação", onClick: () => navigate(`/classificacao?time=${teamName}`) },
-  { icon: Users, label: "Elenco", onClick: handlers.onManageSquad },
-  { icon: TrendingUp, label: "Transferências", onClick: handlers.onTransferMarket },
-  { icon: Calendar, label: "Calendário", onClick: () => navigate(`/calendario?time=${teamName}`) },
-  { icon: Briefcase, label: "Finanças", onClick: handlers.onFinances },
+  { icon: Trophy, label: "Classificação", iconColor: "text-yellow-400", onClick: () => navigate(`/classificacao?time=${teamName}`) },
+  { icon: Users, label: "Elenco", iconColor: "text-blue-400", onClick: handlers.onManageSquad },
+  { icon: TrendingUp, label: "Transferências", iconColor: "text-emerald-400", onClick: handlers.onTransferMarket },
+  { icon: Calendar, label: "Calendário", iconColor: "text-white", onClick: () => navigate(`/calendario?time=${teamName}`) },
+  { icon: Briefcase, label: "Finanças", iconColor: "text-white", onClick: handlers.onFinances },
 ];
 
 export const GameMenu = ({
