@@ -1,7 +1,16 @@
-// Calcula o valor de mercado baseado no overall do jogador
-export const calculateMarketValue = (overall: number): number => {
-  // Fórmula: valor cresce exponencialmente com o overall
-  // Base: jogador 70 overall = 500k, 85 overall = ~15M
+import { Player } from "@/data/players";
+
+// Calcula o valor de mercado baseado no overall do jogador (ou usa valor customizado)
+export const calculateMarketValue = (overallOrPlayer: number | Player): number => {
+  if (typeof overallOrPlayer !== 'number') {
+    // Player object - check for custom value
+    if (overallOrPlayer.marketValue) return overallOrPlayer.marketValue;
+    return calculateMarketValueByOvr(overallOrPlayer.overall);
+  }
+  return calculateMarketValueByOvr(overallOrPlayer);
+};
+
+const calculateMarketValueByOvr = (overall: number): number => {
   if (overall <= 70) return 500000;
   if (overall <= 75) return 1000000 + (overall - 70) * 200000;
   if (overall <= 80) return 2000000 + (overall - 75) * 600000;

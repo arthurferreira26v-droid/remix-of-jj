@@ -403,6 +403,18 @@ const AdminPanel = () => {
                 })}
               </div>
             </div>
+            <div className="space-y-1.5">
+              <Label className="text-zinc-300 text-sm">Valor de Mercado (R$)</Label>
+              <Input
+                type="number"
+                min={0}
+                placeholder="Auto (baseado no OVR)"
+                value={formData.marketValue ?? ""}
+                onChange={(e) => setFormData({ ...formData, marketValue: e.target.value ? +e.target.value : undefined })}
+                className="bg-zinc-800 border-zinc-700 text-white"
+              />
+              <p className="text-zinc-500 text-[11px]">Deixe vazio para calcular automaticamente pelo OVR</p>
+            </div>
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
