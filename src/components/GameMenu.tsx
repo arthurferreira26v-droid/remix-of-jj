@@ -23,7 +23,7 @@ const menuItems = (
   handlers: Pick<GameMenuProps, "onManageSquad" | "onTransferMarket" | "onFinances">
 ) => [
   { icon: Trophy, label: "Classificação", onClick: () => navigate(`/classificacao?time=${teamName}`) },
-  { icon: Users, label: "Gerenciar Elenco", onClick: handlers.onManageSquad },
+  { icon: Users, label: "Elenco", onClick: handlers.onManageSquad },
   { icon: TrendingUp, label: "Transferências", onClick: handlers.onTransferMarket },
   { icon: Calendar, label: "Calendário", onClick: () => navigate(`/calendario?time=${teamName}`) },
   { icon: Briefcase, label: "Finanças", onClick: handlers.onFinances },
@@ -49,7 +49,7 @@ export const GameMenu = ({
       <SheetContent
         side="right"
         className="w-[50vw] max-w-[50vw] border-l border-white/[0.06] flex flex-col p-0"
-        style={{ background: '#0d1117' }}
+        style={{ background: '#0f1d2e' }}
       >
         <SheetHeader className="sr-only">
           <SheetTitle>{teamName}</SheetTitle>

@@ -5,6 +5,7 @@ import { X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormationField } from "@/components/FormationField";
 import { PlayerBubble } from "@/components/PlayerBubble";
+import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { optimizeStartersForFormation } from "@/utils/formationOptimizer";
 
 interface SquadManagerProps {
@@ -74,6 +75,7 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
   const [selectedPlayStyle, setSelectedPlayStyle] = useState("counter");
   const [openDropdown, setOpenDropdown] = useState<"style" | "formation" | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [valuePlayer, setValuePlayer] = useState<Player | null>(null);
 
   const formation = formations.find((f) => f.id === selectedFormation) || formations[0];
   const playStyle = playStyles.find((s) => s.id === selectedPlayStyle) || playStyles[0];
@@ -99,7 +101,7 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
 
   const handlePlayerClick = (player: Player) => {
     if (!selectedPlayer) { setSelectedPlayer(player); return; }
-    if (selectedPlayer.id === player.id) { setSelectedPlayer(null); return; }
+    if (selectedPlayer.id === player.id) { setValuePlayer(player); setSelectedPlayer(null); return; }
 
     const bothStarters = selectedPlayer.isStarter && player.isStarter;
 
@@ -211,11 +213,18 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
           </div>
         )}
 
-        <div className="max-w-md mx-auto mt-6">
+        <div className="max-w-md mx-auto mt-6 pb-8">
           <Button onClick={handleSave} className="w-full bg-[#c8ff00] text-black hover:bg-[#b3e600] font-bold">
             Salvar Escalação
           </Button>
         </div>
+
+        {valuePlayer && (
+          <PlayerValueModal
+            player={valuePlayer}
+            onClose={() => setValuePlayer(null)}
+          />
+        )}
       </div>
     </div>
   );
