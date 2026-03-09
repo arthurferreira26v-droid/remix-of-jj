@@ -25,6 +25,7 @@ import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { toast } from "sonner";
+import { useSwipePages } from "@/hooks/useSwipePages";
 
 const Game = () => {
   const navigate = useNavigate();
