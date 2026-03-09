@@ -392,7 +392,7 @@ const Game = () => {
             onClick={() => navigate("/loja")}
             className="p-2 rounded-lg hover:bg-white/5 active:scale-95 transition-all"
           >
-            <ShoppingCart className="w-5 h-5 text-white/70" />
+            <ShoppingCart className="w-5 h-5 text-white" />
           </button>
         </div>
       </header>

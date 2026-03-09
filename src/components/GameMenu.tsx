@@ -1,13 +1,7 @@
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Menu, Users, TrendingUp, Briefcase, Calendar, Trophy, LogOut } from "lucide-react";
+import { useState } from "react";
+import { Menu, Users, TrendingUp, Briefcase, Calendar, Trophy, LogOut, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface GameMenuProps {
   teamName: string;
@@ -17,16 +11,17 @@ interface GameMenuProps {
   onExit?: () => void;
 }
 
-const menuItems = (
+const menuItemsData = (
   teamName: string,
   navigate: ReturnType<typeof useNavigate>,
-  handlers: Pick<GameMenuProps, "onManageSquad" | "onTransferMarket" | "onFinances">
+  handlers: Pick<GameMenuProps, "onManageSquad" | "onTransferMarket" | "onFinances" | "onExit">
 ) => [
-  { icon: Trophy, label: "Classificação", iconColor: "text-yellow-400", onClick: () => navigate(`/classificacao?time=${teamName}`) },
-  { icon: Users, label: "Elenco", iconColor: "text-blue-400", onClick: handlers.onManageSquad },
-  { icon: TrendingUp, label: "Transferências", iconColor: "text-emerald-400", onClick: handlers.onTransferMarket },
-  { icon: Calendar, label: "Calendário", iconColor: "text-white", onClick: () => navigate(`/calendario?time=${teamName}`) },
-  { icon: Briefcase, label: "Finanças", iconColor: "text-white", onClick: handlers.onFinances },
+  { icon: Trophy, label: "Classificação", onClick: () => navigate(`/classificacao?time=${teamName}`) },
+  { icon: Users, label: "Elenco", onClick: handlers.onManageSquad },
+  { icon: TrendingUp, label: "Transferências", onClick: handlers.onTransferMarket },
+  { icon: Calendar, label: "Calendário", onClick: () => navigate(`/calendario?time=${teamName}`) },
+  { icon: Briefcase, label: "Finanças", onClick: handlers.onFinances },
+  { icon: LogOut, label: "Sair", onClick: handlers.onExit, isDestructive: true },
 ];
 
 export const GameMenu = ({
@@ -37,52 +32,85 @@ export const GameMenu = ({
   onExit,
 }: GameMenuProps) => {
   const navigate = useNavigate();
-  const items = menuItems(teamName, navigate, { onManageSquad, onTransferMarket, onFinances });
+  const [open, setOpen] = useState(false);
+  const items = menuItemsData(teamName, navigate, { onManageSquad, onTransferMarket, onFinances, onExit });
+
+  const handleItemClick = (onClick?: () => void) => {
+    setOpen(false);
+    onClick?.();
+  };
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <button className="fixed bottom-6 right-6 z-50 w-12 h-12 bg-[#0a0a0b] rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.5)] border border-white/10 active:scale-95 transition-all duration-200">
-          <Menu className="w-5 h-5 text-white" />
-        </button>
-      </SheetTrigger>
-      <SheetContent
-        side="right"
-        className="w-[75vw] max-w-[75vw] border-l border-white/[0.06] flex flex-col p-0"
-        style={{ background: '#000000' }}
-      >
-        <SheetHeader className="sr-only">
-          <SheetTitle>{teamName}</SheetTitle>
-        </SheetHeader>
+    <>
+      {/* Overlay */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 bg-black/40"
+            onClick={() => setOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
-        {/* Menu items */}
-        <nav className="flex-1 flex flex-col pt-14 px-3">
-          {items.map((item) => (
-            <button
-              key={item.label}
-              onClick={item.onClick}
-              className="group flex items-center gap-4 px-5 py-[18px] rounded-xl text-[15px] font-medium text-white/90 hover:text-white hover:bg-[#1a1a1a] active:bg-[#1a1a1a] transition-all duration-150 active:scale-[0.97]"
-            >
-              <item.icon className={`w-5 h-5 ${item.iconColor} transition-colors`} />
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        {/* Separator + Exit */}
-        <div className="px-5 pb-2">
-          <div className="h-px w-full" style={{ background: '#2a2a2a' }} />
-        </div>
-        <div className="px-3 pb-8">
-          <button
-            onClick={onExit}
-            className="group flex items-center gap-4 px-5 py-[18px] rounded-xl text-[15px] font-medium text-red-400/80 hover:text-red-400 hover:bg-red-500/[0.08] active:bg-red-500/[0.08] transition-all duration-150 active:scale-[0.97] w-full"
+      {/* Menu items - stacked from bottom-right, above FAB */}
+      <AnimatePresence>
+        {open && items.map((item, index) => (
+          <motion.div
+            key={item.label}
+            initial={{ opacity: 0, y: 20, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.8 }}
+            transition={{ duration: 0.2, delay: index * 0.04 }}
+            className="fixed right-6 z-50 flex items-center gap-3"
+            style={{ bottom: `${(items.length - index) * 60 + 36}px` }}
           >
-            <LogOut className="w-5 h-5 text-red-400/50 group-hover:text-red-400/80 transition-colors" />
-            <span>Sair</span>
-          </button>
-        </div>
-      </SheetContent>
-    </Sheet>
+            {/* Label pill */}
+            <span
+              className="text-[13px] font-medium px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap"
+              style={{
+                background: 'hsl(0 0% 100%)',
+                color: 'hsl(0 0% 15%)',
+              }}
+            >
+              {item.label}
+            </span>
+
+            {/* Circle icon */}
+            <button
+              onClick={() => handleItemClick(item.onClick)}
+              className="w-11 h-11 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+              style={{
+                background: item.isDestructive ? 'hsl(0 70% 50%)' : 'hsl(0 0% 7%)',
+              }}
+            >
+              <item.icon className="w-[18px] h-[18px] text-white" />
+            </button>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
+      {/* FAB */}
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-95 transition-all duration-200"
+        style={{ background: 'hsl(0 0% 5%)' }}
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          {open ? (
+            <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
+              <X className="w-5 h-5 text-white" />
+            </motion.div>
+          ) : (
+            <motion.div key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
+              <Menu className="w-5 h-5 text-white" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </button>
+    </>
   );
 };
