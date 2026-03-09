@@ -48,7 +48,7 @@ export const GameMenu = ({
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="w-[50vw] max-w-[50vw] border-l border-white/10 flex flex-col p-0"
+        className="w-[75vw] max-w-[75vw] border-l border-white/[0.06] flex flex-col p-0"
         style={{ background: '#000000' }}
       >
         <SheetHeader className="sr-only">
@@ -56,26 +56,29 @@ export const GameMenu = ({
         </SheetHeader>
 
         {/* Menu items */}
-        <nav className="flex-1 flex flex-col pt-16 px-2">
+        <nav className="flex-1 flex flex-col pt-14 px-3">
           {items.map((item) => (
             <button
               key={item.label}
               onClick={item.onClick}
-              className="group flex items-center gap-4 px-5 py-4 rounded-xl text-[15px] font-medium text-white hover:bg-white/[0.08] transition-all duration-200 active:scale-[0.98]"
+              className="group flex items-center gap-4 px-5 py-[18px] rounded-xl text-[15px] font-medium text-white/90 hover:text-white hover:bg-[#1a1a1a] active:bg-[#1a1a1a] transition-all duration-150 active:scale-[0.97]"
             >
-              <item.icon className={`w-[18px] h-[18px] ${item.iconColor} transition-colors`} />
+              <item.icon className={`w-5 h-5 ${item.iconColor} transition-colors`} />
               <span>{item.label}</span>
             </button>
           ))}
         </nav>
 
-        {/* Exit */}
-        <div className="px-2 pb-8">
+        {/* Separator + Exit */}
+        <div className="px-5">
+          <div className="h-px w-full" style={{ background: '#2a2a2a' }} />
+        </div>
+        <div className="px-3 pb-8 pt-2">
           <button
             onClick={onExit}
-            className="group flex items-center gap-4 px-5 py-4 rounded-xl text-[15px] font-medium text-red-400/80 hover:text-red-400 hover:bg-red-500/[0.08] transition-all duration-200 active:scale-[0.98] w-full"
+            className="group flex items-center gap-4 px-5 py-[18px] rounded-xl text-[15px] font-medium text-red-400/80 hover:text-red-400 hover:bg-red-500/[0.08] active:bg-red-500/[0.08] transition-all duration-150 active:scale-[0.97] w-full"
           >
-            <LogOut className="w-[18px] h-[18px] text-red-400/50 group-hover:text-red-400/80 transition-colors" />
+            <LogOut className="w-5 h-5 text-red-400/50 group-hover:text-red-400/80 transition-colors" />
             <span>Sair</span>
           </button>
         </div>
