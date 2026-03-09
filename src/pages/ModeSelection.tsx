@@ -50,7 +50,7 @@ const ModeSelection = () => {
   const containerVariants = {
     hidden: {},
     visible: {
-      transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+      transition: { staggerChildren: 0.25, delayChildren: 0.3 },
     },
   };
 
