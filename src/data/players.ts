@@ -14,6 +14,10 @@ export interface Player {
   energy?: number;
   matchEnergy?: number;
   consecutiveMatches?: number;
+
+  // 📊 CONTROLE DE TEMPO DE JOGO NA TEMPORADA
+  seasonStarterMatches?: number;
+  seasonBenchMatches?: number;
 }
 
 // ================= GERADOR DE TIMES =================
