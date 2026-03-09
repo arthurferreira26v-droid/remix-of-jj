@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { teams } from "@/data/teams";
-import { botafogoPlayers, flamengoPlayers, generateTeamPlayers, Player } from "@/data/players";
+import { generateTeamPlayers, Player } from "@/data/players";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,7 @@ import { LogOut, Plus, Pencil, Trash2, Shield, Globe, Search, Loader2, CheckCirc
 import { toast } from "sonner";
 import { useAdminData, invalidateAdminCache } from "@/hooks/useAdminData";
 
-const POSITIONS = ["GOL", "LD", "LE", "ZAG", "VOL", "MC", "MD", "ME", "PD", "PE", "ATA", "ALE", "ALD"];
+const POSITIONS = ["GOL", "LD", "LE", "ZAG", "VOL", "MC", "MEI", "MD", "ME", "PD", "PE", "ATA", "ALE", "ALD"];
 
 const countryFlags: Record<string, string> = {
   brasil: "🇧🇷", argentina: "🇦🇷", uruguai: "🇺🇾", colombia: "🇨🇴",
@@ -30,13 +30,11 @@ const countryFlags: Record<string, string> = {
 };
 
 const getDefaultPlayers = (teamId: string): Player[] => {
-  if (teamId === "botafogo") return structuredClone(botafogoPlayers);
-  if (teamId === "flamengo") return structuredClone(flamengoPlayers);
   return generateTeamPlayers(teams.find((t) => t.id === teamId)?.name ?? teamId);
 };
 
 const emptyPlayer = (): Omit<Player, "id"> & { altPositions: string[] } => ({
-  name: "", number: 1, position: "ATA", altPositions: [], overall: 75, age: 22, isStarter: false,
+  name: "", number: 1, position: "ATA", altPositions: [], overall: 75, age: 22, isStarter: false, marketValue: undefined as number | undefined,
 });
 
 const AdminPanel = () => {
@@ -95,7 +93,7 @@ const AdminPanel = () => {
 
   // Edit
   const handleEdit = (p: Player) => {
-    setFormData({ name: p.name, number: p.number, position: p.position, altPositions: p.altPositions || [], overall: p.overall, age: p.age, isStarter: p.isStarter });
+    setFormData({ name: p.name, number: p.number, position: p.position, altPositions: p.altPositions || [], overall: p.overall, age: p.age, isStarter: p.isStarter, marketValue: p.marketValue });
     setEditPlayer(p);
   };
 
@@ -145,7 +143,9 @@ const AdminPanel = () => {
 
   const formatCurrency = (v: number) => `R$ ${(v / 1_000_000).toFixed(1)}M`;
 
-  const marketValue = (ovr: number) => {
+  const marketValue = (p: Player) => {
+    if (p.marketValue) return p.marketValue;
+    const ovr = p.overall;
     if (ovr >= 85) return 50_000_000;
     if (ovr >= 80) return 25_000_000;
     if (ovr >= 75) return 10_000_000;
@@ -303,8 +303,8 @@ const AdminPanel = () => {
                           {p.overall}
                         </span>
                       </TableCell>
-                      <TableCell className="text-zinc-300">{formatCurrency(marketValue(p.overall))}</TableCell>
-                      <TableCell className="text-zinc-300">{formatCurrency(marketValue(p.overall) * 1.2)}</TableCell>
+                      <TableCell className="text-zinc-300">{formatCurrency(marketValue(p))}</TableCell>
+                      <TableCell className="text-zinc-300">{formatCurrency(marketValue(p) * 1.2)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Button variant="ghost" size="icon" onClick={() => handleEdit(p)} className="text-zinc-400 hover:text-amber-500 h-8 w-8">
@@ -402,6 +402,18 @@ const AdminPanel = () => {
                   );
                 })}
               </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-zinc-300 text-sm">Valor de Mercado (R$)</Label>
+              <Input
+                type="number"
+                min={0}
+                placeholder="Auto (baseado no OVR)"
+                value={formData.marketValue ?? ""}
+                onChange={(e) => setFormData({ ...formData, marketValue: e.target.value ? +e.target.value : undefined })}
+                className="bg-zinc-800 border-zinc-700 text-white"
+              />
+              <p className="text-zinc-500 text-[11px]">Deixe vazio para calcular automaticamente pelo OVR</p>
             </div>
             <div className="flex items-center gap-2">
               <input

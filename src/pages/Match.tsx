@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { teams } from "@/data/teams";
-import { botafogoPlayers, flamengoPlayers, generateTeamPlayers, Player } from "@/data/players";
+import { generateTeamPlayers, Player } from "@/data/players";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { TacticsManager } from "@/components/TacticsManager";
 import { ChevronLeft, Loader2 } from "lucide-react";
@@ -133,11 +133,7 @@ const Match = () => {
     if (savedPlayers) {
       players = JSON.parse(savedPlayers);
     } else {
-      const raw = teamName === "Botafogo" 
-        ? botafogoPlayers 
-        : teamName === "Flamengo"
-        ? flamengoPlayers
-        : generateTeamPlayers(teamName);
+      const raw = generateTeamPlayers(teamName);
       const { players: optimized, starterOrder } = optimizeStartersDefault(raw);
       localStorage.setItem(`players_${teamName}`, JSON.stringify(optimized));
       localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
@@ -149,12 +145,7 @@ const Match = () => {
 
   const [userPlayers, setUserPlayers] = useState<Player[]>(getInitialUserPlayers);
   
-  const opponentPlayers =
-    opponentName === "Botafogo" 
-      ? botafogoPlayers 
-      : opponentName === "Flamengo"
-      ? flamengoPlayers
-      : generateTeamPlayers(opponentName);
+  const opponentPlayers = generateTeamPlayers(opponentName);
   
   const userStarters = userPlayers.filter((p) => p.isStarter);
   const userReserves = userPlayers.filter((p) => !p.isStarter);
