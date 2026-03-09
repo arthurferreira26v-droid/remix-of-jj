@@ -142,46 +142,9 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
   return (
     <div className="bg-black min-h-full">
       <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-6">
           <h2 className="text-white text-2xl font-bold">Gerenciar Elenco</h2>
           <button onClick={onClose} className="text-white"><X className="w-6 h-6" /></button>
-        </div>
-
-        {/* Dropdowns */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className="relative">
-            <button onClick={() => toggleDropdown("style")} className="w-full bg-white text-black rounded-lg px-4 py-3 flex items-center justify-between font-medium hover:bg-white/90 transition-colors">
-              <span>{playStyle.name}</span>
-              <ChevronDown className={`w-5 h-5 transition-transform ${openDropdown === "style" ? "rotate-180" : ""}`} />
-            </button>
-            {openDropdown === "style" && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg overflow-hidden shadow-lg z-50">
-                {playStyles.map((style) => (
-                  <button key={style.id} onClick={() => { setSelectedPlayStyle(style.id); setOpenDropdown(null); }}
-                    className={`w-full px-4 py-3 text-left hover:bg-gray-100 transition-colors ${selectedPlayStyle === style.id ? "bg-[#c8ff00]" : ""}`}>
-                    <div className="font-medium text-black">{style.name}</div>
-                    <div className="text-xs text-gray-600">{style.description}</div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="relative">
-            <button onClick={() => toggleDropdown("formation")} className="w-full bg-white text-black rounded-lg px-4 py-3 flex items-center justify-between font-medium hover:bg-white/90 transition-colors">
-              <span>{formation.name}</span>
-              <ChevronDown className={`w-5 h-5 transition-transform ${openDropdown === "formation" ? "rotate-180" : ""}`} />
-            </button>
-            {openDropdown === "formation" && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg overflow-hidden shadow-lg z-50">
-                {formations.map((form) => (
-                  <button key={form.id} onClick={() => { setSelectedFormation(form.id); setOpenDropdown(null); }}
-                    className={`w-full px-4 py-3 text-left hover:bg-gray-100 transition-colors ${selectedFormation === form.id ? "bg-[#c8ff00]" : ""}`}>
-                    <div className="font-medium text-black">{form.name}</div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Players grouped by position */}
@@ -191,8 +154,8 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
             if (!group || group.length === 0) return null;
             return (
               <div key={pos}>
-                <h3 className="text-white/50 text-xs font-bold uppercase tracking-widest mb-2">
-                  {pos} — {POSITION_LABELS[pos]}
+                <h3 className="text-white/40 text-xs font-bold uppercase tracking-widest mb-2">
+                  {POSITION_LABELS[pos]}
                 </h3>
                 <div className="space-y-1.5">
                   {group.map(player => {
