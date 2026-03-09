@@ -17,6 +17,24 @@ const ENERGY_DRAIN_PER_MINUTE: Record<string, number> = {
 };
 
 /**
+ * Desgaste de energia por jogo por posição.
+ * Calibrado para que após 6 jogos consecutivos, jogador chegue a ~20%.
+ * Fórmula: 100% → ~20% em 6 jogos = perda de ~13.3% por jogo
+ */
+const ENERGY_DRAIN_PER_MATCH: Record<string, number> = {
+  ATA: 14,
+  PE: 15,
+  PD: 15,
+  MC: 13,
+  MEI: 13,
+  VOL: 12,
+  LD: 12,
+  LE: 12,
+  ZAG: 11,
+  GOL: 8,
+};
+
+/**
  * Inicializa matchEnergy a partir de energy no início da partida.
  */
 export const initMatchEnergy = (players: Player[]): Player[] => {
@@ -54,26 +72,24 @@ export const getEffectiveOverall = (player: Player): number => {
 };
 
 /**
- * Finaliza a partida: salva matchEnergy em energy com recuperação parcial (+20, max 95).
- * Jogador que jogou uma única partida não pode ficar abaixo de 45% de energia.
- * Jogadores que não jogaram recuperam 100%.
+ * Finaliza a partida: aplica desgaste aos titulares, recuperação total aos reservas.
+ * Calibrado para ~20% após 6 jogos consecutivos.
  */
 export const finalizeMatchEnergy = (players: Player[]): Player[] => {
   return players.map(p => {
     if (p.isStarter) {
-      const matchE = p.matchEnergy ?? p.energy ?? 100;
-      // Recuperação parcial pós-partida: +20, teto 95
-      const recovered = Math.min(95, matchE + 20);
-      // Se apenas 1 partida consecutiva (esta), energia mínima = 45
+      const currentEnergy = p.energy ?? 100;
+      const drain = ENERGY_DRAIN_PER_MATCH[p.position] ?? 13;
       const consecutive = (p.consecutiveMatches ?? 0) + 1;
-      const minEnergy = consecutive <= 1 ? 45 : 0;
-      const finalEnergy = Math.max(minEnergy, Math.min(95, recovered));
+      
+      // Desgaste fixo por jogo (sem recuperação para titulares)
+      const finalEnergy = Math.max(0, currentEnergy - drain);
+      
       return {
         ...p,
         energy: finalEnergy,
         matchEnergy: undefined,
         consecutiveMatches: consecutive,
-        // Contabiliza partida como titular para evolução sazonal
         seasonStarterMatches: (p.seasonStarterMatches ?? 0) + 1,
       };
     } else {
@@ -83,7 +99,6 @@ export const finalizeMatchEnergy = (players: Player[]): Player[] => {
         energy: 100,
         matchEnergy: undefined,
         consecutiveMatches: 0,
-        // Contabiliza partida como reserva para evolução sazonal
         seasonBenchMatches: (p.seasonBenchMatches ?? 0) + 1,
       };
     }
@@ -91,25 +106,20 @@ export const finalizeMatchEnergy = (players: Player[]): Player[] => {
 };
 
 /**
- * Aplica recuperação de energia entre partidas (antes da próxima partida).
- * - Titular: +3 (max 95)
- * - Reserva que não jogou: volta para 100
+ * Aplica recuperação de energia entre partidas.
+ * - Reserva: volta para 100%
+ * - Titular: sem recuperação automática (precisa descansar para recuperar)
  */
 export const applyEnergyRecovery = (players: Player[]): Player[] => {
   return players.map(p => {
-    const currentEnergy = p.energy ?? 100;
-    if (p.isStarter) {
-      return {
-        ...p,
-        energy: Math.min(95, currentEnergy + 3),
-      };
-    } else {
+    if (!p.isStarter) {
       return {
         ...p,
         energy: 100,
         consecutiveMatches: 0,
       };
     }
+    return p;
   });
 };
 
@@ -123,19 +133,11 @@ export const getSquadAverageEnergy = (players: Player[]): number => {
 };
 
 /**
- * Calcula o desgaste de energia de um jogador titular após uma partida (entre rodadas).
- * Usado na simulação (MatchCard).
+ * Calcula o desgaste de energia de um jogador titular após uma partida.
+ * Calibrado: 6 jogos seguidos → ~20% energia.
  */
 export const calculateEnergyDrain = (player: Player): number => {
-  const consecutive = player.consecutiveMatches ?? 0;
-  const baseDrain = 10 + consecutive * 3;
-  let modifier = 1;
-  if (player.overall >= 85) {
-    modifier = 0.8;
-  } else if (player.overall < 75) {
-    modifier = 1.15;
-  }
-  return Math.round(baseDrain * modifier);
+  return ENERGY_DRAIN_PER_MATCH[player.position] ?? 13;
 };
 
 /**
@@ -154,7 +156,7 @@ export const applyEnergyChanges = (players: Player[]): Player[] => {
     } else {
       return {
         ...player,
-        energy: Math.min(100, currentEnergy + 15),
+        energy: 100,
         consecutiveMatches: 0,
       };
     }
