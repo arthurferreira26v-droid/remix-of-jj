@@ -186,8 +186,7 @@ const Game = () => {
     setSelectedStarter(null);
     
     if (selectedReserve?.id === player.id) {
-      // Se clicar no mesmo jogador, abre o modal de valor
-      setSelectedPlayerForValue(player);
+      // Deselect
       setSelectedReserve(null);
     } else {
       setSelectedReserve(player);
