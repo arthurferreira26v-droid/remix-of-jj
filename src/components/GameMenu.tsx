@@ -33,12 +33,12 @@ export const GameMenu = ({
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-64 sm:w-80 p-4">
+       <SheetContent side="right" className="w-64 sm:w-80 p-4 flex flex-col">
         <SheetHeader>
           <SheetTitle className="text-xl font-bold">{teamName}</SheetTitle>
         </SheetHeader>
         
-        <div className="mt-6 space-y-1">
+        <div className="mt-6 space-y-1 flex-1">
           <Button
             variant="ghost"
             className="w-full justify-start gap-2 h-11 text-sm"
@@ -83,17 +83,17 @@ export const GameMenu = ({
             <Briefcase className="h-4 w-4" />
             <span>Finanças</span>
           </Button>
+        </div>
 
-          <div className="border-t border-border mt-4 pt-4">
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-2 h-11 text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={onExit}
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Sair do Modo Campanha</span>
-            </Button>
-          </div>
+        <div className="pb-4">
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 h-11 text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={onExit}
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Sair</span>
+          </Button>
         </div>
       </SheetContent>
     </Sheet>
