@@ -478,7 +478,7 @@ const Game = () => {
 
         <div className="bg-zinc-900 rounded-lg p-4">
           <h3 className="text-white text-xl font-bold mb-4">Reservas</h3>
-          <p className="text-xs text-zinc-400 mb-3">Clique para selecionar. Clique novamente para ver valor de mercado.</p>
+          <p className="text-xs text-zinc-400 mb-3">Clique para selecionar e trocar com um titular.</p>
           <div className="space-y-2">
             {reserves.map((player) => {
               const energy = player.energy ?? 100;
@@ -499,18 +499,13 @@ const Game = () => {
                       <div className="font-medium">{player.name}</div>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-sm opacity-70">{player.position}</span>
-                        <span className="flex items-center gap-0.5">
-                          <Zap className="w-3 h-3" style={{ color: selectedReserve?.id === player.id ? 'black' : energyColor }} />
-                          <span className="text-[11px] font-bold" style={{ color: selectedReserve?.id === player.id ? 'black' : energyColor }}>
-                            {energy}%
-                          </span>
-                        </span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm font-bold ${selectedReserve?.id === player.id ? 'text-black' : 'text-white/70'}`}>
-                      {formatMarketValue(calculateMarketValue(player.overall))}
+                  <div className="flex items-center gap-1">
+                    <Zap className="w-3.5 h-3.5" style={{ color: selectedReserve?.id === player.id ? 'black' : energyColor }} />
+                    <span className="text-[12px] font-bold" style={{ color: selectedReserve?.id === player.id ? 'black' : energyColor }}>
+                      {energy}%
                     </span>
                   </div>
                 </button>
