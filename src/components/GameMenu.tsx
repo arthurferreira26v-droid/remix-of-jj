@@ -70,10 +70,10 @@ export const GameMenu = ({
         </nav>
 
         {/* Separator + Exit */}
-        <div className="px-5">
+        <div className="px-5 pb-2">
           <div className="h-px w-full" style={{ background: '#2a2a2a' }} />
         </div>
-        <div className="px-3 pb-8 pt-2">
+        <div className="px-3 pb-8">
           <button
             onClick={onExit}
             className="group flex items-center gap-4 px-5 py-[18px] rounded-xl text-[15px] font-medium text-red-400/80 hover:text-red-400 hover:bg-red-500/[0.08] active:bg-red-500/[0.08] transition-all duration-150 active:scale-[0.97] w-full"
