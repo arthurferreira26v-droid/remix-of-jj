@@ -138,89 +138,120 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
     return 'hsl(0 80% 55%)';
   };
 
+  const [activeTab, setActiveTab] = useState<"squad" | "scout">("squad");
+
   return (
     <div className="bg-black min-h-full">
       <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-white text-2xl font-bold">Gerenciar Elenco</h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-white text-2xl font-bold">Elenco</h2>
           <button onClick={onClose} className="text-white"><X className="w-6 h-6" /></button>
         </div>
 
-        {/* Players grouped by position */}
-        <div className="space-y-6">
-          {POSITION_ORDER.map(pos => {
-            const group = groupedPlayers[pos];
-            if (!group || group.length === 0) return null;
-            return (
-              <div key={pos}>
-                <h3 className="text-white/40 text-xs font-bold uppercase tracking-widest mb-2">
-                  {POSITION_LABELS[pos]}
-                </h3>
-                <div className="space-y-1.5">
-                  {group.map(player => {
-                    const energy = player.matchEnergy ?? player.energy ?? 100;
-                    const energyColor = getEnergyColor(energy);
-                    const value = calculateMarketValue(player);
-                    const isSelected = selectedPlayer?.id === player.id;
-                    return (
-                      <button
-                        key={player.id}
-                        onClick={() => handlePlayerClick(player)}
-                        className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
-                          isSelected
-                            ? "bg-[#c8ff00] text-black"
-                            : "bg-zinc-800/80 text-white hover:bg-zinc-700/80"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={`font-bold text-lg w-8 text-center ${isSelected ? 'text-black' : 'text-blue-400'}`}>
-                            {player.overall}
-                          </span>
-                          <div className="text-left">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-[14px]">{player.name}</span>
-                              {player.isStarter && (
-                                <Star className="w-3 h-3 fill-current" style={{ color: isSelected ? 'black' : '#c8ff00' }} />
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className={`text-[11px] font-semibold ${isSelected ? 'text-black/60' : 'text-white/40'}`}>
-                                {player.position}
-                              </span>
-                              <span className={`text-[10px] ${isSelected ? 'text-black/30' : 'text-white/20'}`}>•</span>
-                              <span className={`text-[11px] ${isSelected ? 'text-black/60' : 'text-white/40'}`}>
-                                {player.age} anos
-                              </span>
-                              <Zap className="w-3 h-3" style={{ color: isSelected ? 'black' : energyColor }} />
-                              <span className="text-[11px] font-bold" style={{ color: isSelected ? 'black' : energyColor }}>
-                                {energy}%
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <span className={`text-[11px] font-semibold ${isSelected ? 'text-black' : 'text-green-400'}`}>
-                          {formatMarketValue(value)}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+        {/* Tab icons */}
+        <div className="flex justify-center gap-6 mb-6">
+          <button
+            onClick={() => setActiveTab("squad")}
+            className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors ${
+              activeTab === "squad" ? "text-white" : "text-white/30"
+            }`}
+          >
+            <Users className="w-5 h-5" />
+            <span className="text-[10px] font-semibold uppercase tracking-wide">Elenco</span>
+            {activeTab === "squad" && <div className="w-5 h-0.5 rounded-full bg-white mt-0.5" />}
+          </button>
+          <button
+            onClick={() => setActiveTab("scout")}
+            className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors ${
+              activeTab === "scout" ? "text-white" : "text-white/30"
+            }`}
+          >
+            <Eye className="w-5 h-5" />
+            <span className="text-[10px] font-semibold uppercase tracking-wide">Observação</span>
+            {activeTab === "scout" && <div className="w-5 h-0.5 rounded-full bg-white mt-0.5" />}
+          </button>
         </div>
 
-        {selectedPlayer && (
-          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#c8ff00] text-black px-6 py-3 rounded-lg font-medium z-10">
-            Clique em outro jogador para trocar
+        {activeTab === "squad" ? (
+          <>
+            {/* Players grouped by position */}
+            <div className="space-y-6">
+              {POSITION_ORDER.map(pos => {
+                const group = groupedPlayers[pos];
+                if (!group || group.length === 0) return null;
+                return (
+                  <div key={pos}>
+                    <h3 className="text-white/40 text-xs font-bold uppercase tracking-widest mb-2">
+                      {POSITION_LABELS[pos]}
+                    </h3>
+                    <div className="space-y-1.5">
+                      {group.map(player => {
+                        const energy = player.matchEnergy ?? player.energy ?? 100;
+                        const energyColor = getEnergyColor(energy);
+                        const value = calculateMarketValue(player);
+                        const isSelected = selectedPlayer?.id === player.id;
+                        return (
+                          <button
+                            key={player.id}
+                            onClick={() => handlePlayerClick(player)}
+                            className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                              isSelected
+                                ? "bg-[#c8ff00] text-black"
+                                : "bg-zinc-800/80 text-white hover:bg-zinc-700/80"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`font-bold text-lg w-8 text-center ${isSelected ? 'text-black' : 'text-blue-400'}`}>
+                                {player.overall}
+                              </span>
+                              <div className="text-left">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-[14px]">{player.name}</span>
+                                  {player.isStarter && (
+                                    <Star className="w-3 h-3 fill-current" style={{ color: isSelected ? 'black' : '#c8ff00' }} />
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className={`text-[11px] font-semibold ${isSelected ? 'text-black/60' : 'text-white/40'}`}>
+                                    {player.position}
+                                  </span>
+                                  <span className={`text-[10px] ${isSelected ? 'text-black/30' : 'text-white/20'}`}>•</span>
+                                  <span className={`text-[11px] ${isSelected ? 'text-black/60' : 'text-white/40'}`}>
+                                    {player.age} anos
+                                  </span>
+                                  <Zap className="w-3 h-3" style={{ color: isSelected ? 'black' : energyColor }} />
+                                  <span className="text-[11px] font-bold" style={{ color: isSelected ? 'black' : energyColor }}>
+                                    {energy}%
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <span className={`text-[11px] font-semibold ${isSelected ? 'text-black' : 'text-green-400'}`}>
+                              {formatMarketValue(value)}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {selectedPlayer && (
+              <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#c8ff00] text-black px-6 py-3 rounded-lg font-medium z-10">
+                Clique em outro jogador para trocar
+              </div>
+            )}
+
+            <div className="pb-8" />
+          </>
+        ) : (
+          /* Scout / Observação tab - placeholder */
+          <div className="flex items-center justify-center py-32">
+            <p className="text-zinc-600 text-sm">Em andamento</p>
           </div>
         )}
-
-        <div className="mt-6 pb-8">
-          <Button onClick={handleSave} className="w-full bg-[#c8ff00] text-black hover:bg-[#b3e600] font-bold">
-            Salvar Escalação
-          </Button>
-        </div>
 
         {valuePlayer && (
           <PlayerValueModal
