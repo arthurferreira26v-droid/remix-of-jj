@@ -47,6 +47,7 @@ const LegendCard = ({ player }: { player: LegendPlayer }) => {
             }}
           />
         </div>
+        <span className="absolute -top-1 -right-1 text-[12px]">{player.flag}</span>
       </div>
 
       {/* Name + Position */}
