@@ -11,8 +11,8 @@ interface LegendPlayer {
 }
 
 const legends: LegendPlayer[] = [
-  { name: "Ronaldinho", position: "PE", overall: 93, flag: "🇧🇷", price: "R$2,99" },
-  { name: "Ronaldo", position: "ATA", overall: 96, flag: "🇧🇷", price: "R$4,99" },
+  { name: "Ronaldinho O Bruxo", position: "PE", overall: 93, flag: "🇧🇷", price: "R$2,99" },
+  { name: "Ronaldo O Fenômeno", position: "ATA", overall: 96, flag: "🇧🇷", price: "R$4,99" },
   { name: "Garrincha", position: "PD", overall: 92, flag: "🇧🇷", price: "R$2,99" },
   { name: "Cafu", position: "LD", overall: 91, flag: "🇧🇷", price: "R$1,99" },
 ];
