@@ -14,7 +14,7 @@ import {
   generateTeamPlayers,
   type Player,
 } from "@/data/players";
-import { Loader2, Zap } from "lucide-react";
+import { Loader2, Zap, ShoppingCart } from "lucide-react";
 import { useChampionship } from "@/hooks/useChampionship";
 import { useLibertadores } from "@/hooks/useLibertadores";
 import { useTeamForm } from "@/hooks/useTeamForm";
