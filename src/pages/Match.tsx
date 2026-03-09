@@ -133,11 +133,7 @@ const Match = () => {
     if (savedPlayers) {
       players = JSON.parse(savedPlayers);
     } else {
-      const raw = teamName === "Botafogo" 
-        ? botafogoPlayers 
-        : teamName === "Flamengo"
-        ? flamengoPlayers
-        : generateTeamPlayers(teamName);
+      const raw = generateTeamPlayers(teamName);
       const { players: optimized, starterOrder } = optimizeStartersDefault(raw);
       localStorage.setItem(`players_${teamName}`, JSON.stringify(optimized));
       localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
