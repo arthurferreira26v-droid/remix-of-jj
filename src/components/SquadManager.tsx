@@ -191,20 +191,45 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
         </div>
 
         {/* Reservas */}
-        <div className="rounded-2xl p-4 max-w-md mx-auto relative overflow-hidden" style={{
-          background: 'radial-gradient(ellipse at 50% 0%, hsl(0 0% 14%) 0%, hsl(0 0% 6%) 70%, hsl(0 0% 4%) 100%)'
-        }}>
-          <h3 className="text-white/90 text-lg font-semibold tracking-wide mb-4 uppercase">Banco de Reservas</h3>
-          <div className="space-y-2.5">
-            {reserves.map(player => (
-              <PlayerBubble
-                key={player.id}
-                player={player}
-                variant="reserve"
-                isSelected={selectedPlayer?.id === player.id}
-                onClick={() => handlePlayerClick(player)}
-              />
-            ))}
+        <div className="bg-zinc-900 rounded-lg p-4">
+          <h3 className="text-white text-xl font-bold mb-4">Reservas</h3>
+          <p className="text-xs text-zinc-400 mb-3">Clique para selecionar e trocar com um titular.</p>
+          <div className="space-y-2">
+            {reserves.map(player => {
+              const energy = player.matchEnergy ?? player.energy ?? 100;
+              const energyColor = energy >= 80 ? 'hsl(142 70% 50%)' : energy >= 60 ? 'hsl(45 100% 50%)' : 'hsl(0 80% 55%)';
+              const value = calculateMarketValue(player);
+              return (
+                <button
+                  key={player.id}
+                  onClick={() => handlePlayerClick(player)}
+                  className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                    selectedPlayer?.id === player.id
+                      ? "bg-[#c8ff00] text-black"
+                      : "bg-zinc-800 text-white hover:bg-zinc-700"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={`font-bold text-lg w-8 ${selectedPlayer?.id === player.id ? 'text-black' : 'text-blue-800'}`}>{player.overall}</span>
+                    <div className="text-left">
+                      <div className="font-medium">{player.name}</div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-sm opacity-70">{player.position}</span>
+                        <span className="opacity-30 text-[10px]">•</span>
+                        <span className="text-[11px] opacity-50">{player.age} anos</span>
+                        <Zap className="w-3 h-3" style={{ color: selectedPlayer?.id === player.id ? 'black' : energyColor }} />
+                        <span className="text-[11px] font-bold" style={{ color: selectedPlayer?.id === player.id ? 'black' : energyColor }}>
+                          {energy}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className={`text-[11px] font-semibold ${selectedPlayer?.id === player.id ? 'text-black' : 'text-green-400'}`}>
+                    {formatMarketValue(value)}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
