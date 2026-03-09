@@ -12,6 +12,7 @@ interface SquadManagerProps {
   players: Player[];
   onClose: () => void;
   onSquadChange: (updatedPlayers: Player[]) => void;
+  onSellPlayer?: (player: Player) => void;
 }
 
 const computeSlotAssignments = (starters: Player[], formation: Formation): string[] => {
