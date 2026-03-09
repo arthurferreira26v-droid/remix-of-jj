@@ -224,6 +224,16 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
           <PlayerValueModal
             player={valuePlayer}
             onClose={() => setValuePlayer(null)}
+            canSell={!!onSellPlayer}
+            onSell={(player) => {
+              if (onSellPlayer) {
+                onSellPlayer(player);
+                setValuePlayer(null);
+                setLocalPlayers(prev => prev.filter(p => p.id !== player.id));
+                const newSlots = slotAssignments.filter(id => id !== player.id);
+                setSlotAssignments(newSlots);
+              }
+            }}
           />
         )}
       </div>

@@ -48,8 +48,8 @@ export const GameMenu = ({
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="w-[50vw] max-w-[50vw] border-l border-white/[0.06] flex flex-col p-0"
-        style={{ background: '#0f1d2e' }}
+        className="w-[50vw] max-w-[50vw] border-l border-white/10 flex flex-col p-0"
+        style={{ background: '#000000' }}
       >
         <SheetHeader className="sr-only">
           <SheetTitle>{teamName}</SheetTitle>
@@ -57,13 +57,13 @@ export const GameMenu = ({
 
         {/* Menu items */}
         <nav className="flex-1 flex flex-col pt-16 px-2">
-          {items.map((item, i) => (
+          {items.map((item) => (
             <button
               key={item.label}
               onClick={item.onClick}
-              className="group flex items-center gap-4 px-5 py-4 rounded-xl text-[15px] font-medium text-white/80 hover:text-white hover:bg-white/[0.06] transition-all duration-200 active:scale-[0.98]"
+              className="group flex items-center gap-4 px-5 py-4 rounded-xl text-[15px] font-medium text-white hover:bg-white/[0.08] transition-all duration-200 active:scale-[0.98]"
             >
-              <item.icon className="w-[18px] h-[18px] text-white/40 group-hover:text-white/70 transition-colors" />
+              <item.icon className={`w-[18px] h-[18px] ${item.iconColor} transition-colors`} />
               <span>{item.label}</span>
             </button>
           ))}
