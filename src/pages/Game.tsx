@@ -44,20 +44,8 @@ const Game = () => {
   const [totalPurchases, setTotalPurchases] = useState(0);
   const [selectedPlayerForValue, setSelectedPlayerForValue] = useState<Player | null>(null);
 
-  // Swipe horizontal para abrir gerenciamento de elenco
-  const touchStartX = useRef<number | null>(null);
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
-    // Swipe para esquerda (delta negativo) abre o gerenciamento
-    if (deltaX < -80) {
-      setShowSquadManager(true);
-    }
-    touchStartX.current = null;
-  };
+  // Swipe horizontal entre tela principal e gerenciamento de elenco
+  const swipe = useSwipePages({ threshold: 0.3 });
   
   
   // Initialize players state - always prefer localStorage (preserves energy state)
