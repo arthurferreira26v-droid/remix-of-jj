@@ -61,7 +61,7 @@ export const MatchCard = ({
         getLocalBudget,
         saveLocalBudget,
       } = await import("@/utils/localChampionship");
-      const { evolveTeamPlayers } = await import("@/utils/playerEvolution");
+      // Evolução de jogadores ocorre apenas no final da temporada
       const { generateTeamPlayers } = await import("@/data/players");
 
       const nextMatch = getNextUserMatch(userTeam);
@@ -106,18 +106,17 @@ export const MatchCard = ({
         saveLocalBudget(userTeam, currentBudget + 200000);
       }
 
-      // Evolve players
+      // Energy update
       if (savedPlayers) {
         const { finalizeMatchEnergy } = await import("@/utils/energySystem");
         const currentPlayers = JSON.parse(savedPlayers);
-        // Simulate in-match energy drain: starters lose ~30-50 energy
         const withMatchEnergy = currentPlayers.map((p: any) => ({
           ...p,
           matchEnergy: p.isStarter ? Math.max(0, (p.energy ?? 100) - (Math.floor(Math.random() * 20) + 30)) : p.energy,
         }));
         const withEnergy = finalizeMatchEnergy(withMatchEnergy);
-        const { evolvedPlayers } = evolveTeamPlayers(withEnergy);
-        localStorage.setItem(`players_${userTeam}`, JSON.stringify(evolvedPlayers));
+        // Evolução de OVR ocorre apenas no final da temporada
+        localStorage.setItem(`players_${userTeam}`, JSON.stringify(withEnergy));
       }
 
       flushPendingWrites();

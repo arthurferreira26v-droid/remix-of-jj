@@ -73,6 +73,8 @@ export const finalizeMatchEnergy = (players: Player[]): Player[] => {
         energy: finalEnergy,
         matchEnergy: undefined,
         consecutiveMatches: consecutive,
+        // Contabiliza partida como titular para evolução sazonal
+        seasonStarterMatches: (p.seasonStarterMatches ?? 0) + 1,
       };
     } else {
       // Quem não jogou recupera totalmente
@@ -81,6 +83,8 @@ export const finalizeMatchEnergy = (players: Player[]): Player[] => {
         energy: 100,
         matchEnergy: undefined,
         consecutiveMatches: 0,
+        // Contabiliza partida como reserva para evolução sazonal
+        seasonBenchMatches: (p.seasonBenchMatches ?? 0) + 1,
       };
     }
   });

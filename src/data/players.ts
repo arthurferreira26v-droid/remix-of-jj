@@ -14,6 +14,10 @@ export interface Player {
   energy?: number;
   matchEnergy?: number;
   consecutiveMatches?: number;
+
+  // 📊 CONTROLE DE TEMPO DE JOGO NA TEMPORADA
+  seasonStarterMatches?: number;
+  seasonBenchMatches?: number;
 }
 
 // ================= GERADOR DE TIMES =================
@@ -52,6 +56,8 @@ export const generateTeamPlayers = (teamName: string): Player[] => {
     age: Math.floor(Math.random() * 18) + 18,
     isStarter: p.isStarter,
     energy: 100,
-    consecutiveMatches: 0
+    consecutiveMatches: 0,
+    seasonStarterMatches: p.isStarter ? 1 : 0,
+    seasonBenchMatches: p.isStarter ? 0 : 1,
   }));
 };
