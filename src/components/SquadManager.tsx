@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { Player } from "@/data/players";
 import { formations, playStyles, Formation } from "@/data/formations";
-import { X, ChevronDown, Zap } from "lucide-react";
+import { X, ChevronDown, Zap, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FormationField } from "@/components/FormationField";
 import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { optimizeStartersForFormation } from "@/utils/formationOptimizer";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
@@ -15,34 +14,19 @@ interface SquadManagerProps {
   onSellPlayer?: (player: Player) => void;
 }
 
-const computeSlotAssignments = (starters: Player[], formation: Formation): string[] => {
-  const available = [...starters];
-  const assignments: string[] = new Array(formation.positions.length).fill("");
+const POSITION_ORDER = ["GOL", "ZAG", "LD", "LE", "VOL", "MC", "MEI", "PD", "PE", "ATA"] as const;
 
-  for (let i = 0; i < formation.positions.length; i++) {
-    const role = formation.positions[i].role;
-    const idx = available.findIndex(p => p.position === role);
-    if (idx !== -1) {
-      assignments[i] = available[idx].id;
-      available.splice(idx, 1);
-    }
-  }
-  for (let i = 0; i < formation.positions.length; i++) {
-    if (assignments[i]) continue;
-    const role = formation.positions[i].role;
-    const idx = available.findIndex(p => p.altPositions?.includes(role));
-    if (idx !== -1) {
-      assignments[i] = available[idx].id;
-      available.splice(idx, 1);
-    }
-  }
-  for (let i = 0; i < formation.positions.length; i++) {
-    if (assignments[i]) continue;
-    if (available.length > 0) {
-      assignments[i] = available.shift()!.id;
-    }
-  }
-  return assignments;
+const POSITION_LABELS: Record<string, string> = {
+  GOL: "Goleiros",
+  ZAG: "Zagueiros",
+  LD: "Lateral Direito",
+  LE: "Lateral Esquerdo",
+  VOL: "Volantes",
+  MC: "Meias",
+  MEI: "Meias Atacantes",
+  PD: "Ponta Direita",
+  PE: "Ponta Esquerda",
+  ATA: "Atacantes",
 };
 
 const ensureStarterCount = (players: Player[], requiredCount: number): Player[] => {
@@ -85,54 +69,75 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
     ensureStarterCount(players, formation.positions.length)
   );
 
-  const [slotAssignments, setSlotAssignments] = useState<string[]>(() => {
-    const fixed = ensureStarterCount(players, formation.positions.length);
-    return computeSlotAssignments(fixed.filter(p => p.isStarter), formation);
-  });
-
   useEffect(() => {
-    const { players: optimized, starterOrder } = optimizeStartersForFormation(localPlayers, formation);
+    const { players: optimized } = optimizeStartersForFormation(localPlayers, formation);
     setLocalPlayers(optimized);
-    setSlotAssignments(starterOrder);
   }, [selectedFormation]);
-
-  const starters = localPlayers.filter(p => p.isStarter);
-  const reserves = localPlayers.filter(p => !p.isStarter);
-  const orderedStarters = slotAssignments.map(id => localPlayers.find(p => p.id === id) || null);
 
   const handlePlayerClick = (player: Player) => {
     if (!selectedPlayer) { setSelectedPlayer(player); return; }
     if (selectedPlayer.id === player.id) { setValuePlayer(player); setSelectedPlayer(null); return; }
 
-    const bothStarters = selectedPlayer.isStarter && player.isStarter;
+    // Swap starter status
+    const sel = selectedPlayer;
+    const tgt = player;
 
-    if (bothStarters) {
-      const newSlots = [...slotAssignments];
-      const idx1 = newSlots.indexOf(selectedPlayer.id);
-      const idx2 = newSlots.indexOf(player.id);
-      if (idx1 !== -1 && idx2 !== -1) {
-        newSlots[idx1] = player.id;
-        newSlots[idx2] = selectedPlayer.id;
-        setSlotAssignments(newSlots);
-      }
-    } else if (!selectedPlayer.isStarter && !player.isStarter) {
-      // both reserves – no-op
-    } else {
-      const starterId = selectedPlayer.isStarter ? selectedPlayer.id : player.id;
-      const reserveId = selectedPlayer.isStarter ? player.id : selectedPlayer.id;
+    if (sel.isStarter !== tgt.isStarter) {
+      // One starter, one reserve → swap
       const updatedPlayers = localPlayers.map(p => {
-        if (p.id === starterId) return { ...p, isStarter: false };
-        if (p.id === reserveId) return { ...p, isStarter: true };
+        if (p.id === sel.id) return { ...p, isStarter: tgt.isStarter };
+        if (p.id === tgt.id) return { ...p, isStarter: sel.isStarter };
         return p;
       });
       setLocalPlayers(updatedPlayers);
-      setSlotAssignments(slotAssignments.map(id => id === starterId ? reserveId : id));
+    } else if (sel.isStarter && tgt.isStarter) {
+      // Both starters → just visual swap (positions handled by optimizer)
+      const updatedPlayers = localPlayers.map(p => {
+        if (p.id === sel.id) return { ...p, isStarter: false };
+        if (p.id === tgt.id) return { ...p, isStarter: false };
+        return p;
+      });
+      // Re-add both as starters (swap effect)
+      const final = updatedPlayers.map(p => {
+        if (p.id === sel.id) return { ...p, isStarter: true };
+        if (p.id === tgt.id) return { ...p, isStarter: true };
+        return p;
+      });
+      setLocalPlayers(final);
     }
     setSelectedPlayer(null);
   };
 
   const handleSave = () => { onSquadChange(localPlayers); onClose(); };
   const toggleDropdown = (d: "style" | "formation") => setOpenDropdown(openDropdown === d ? null : d);
+
+  // Group all players by position
+  const groupedPlayers: Record<string, Player[]> = {};
+  for (const pos of POSITION_ORDER) {
+    groupedPlayers[pos] = [];
+  }
+  for (const p of localPlayers) {
+    if (groupedPlayers[p.position]) {
+      groupedPlayers[p.position].push(p);
+    } else {
+      // Fallback for unknown positions
+      if (!groupedPlayers["OTHER"]) groupedPlayers["OTHER"] = [];
+      groupedPlayers["OTHER"].push(p);
+    }
+  }
+  // Sort each group: starters first, then by overall desc
+  for (const pos of Object.keys(groupedPlayers)) {
+    groupedPlayers[pos].sort((a, b) => {
+      if (a.isStarter !== b.isStarter) return a.isStarter ? -1 : 1;
+      return b.overall - a.overall;
+    });
+  }
+
+  const getEnergyColor = (energy: number) => {
+    if (energy >= 80) return 'hsl(142 70% 50%)';
+    if (energy >= 60) return 'hsl(45 100% 50%)';
+    return 'hsl(0 80% 55%)';
+  };
 
   return (
     <div className="bg-black min-h-full">
@@ -142,19 +147,8 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
           <button onClick={onClose} className="text-white"><X className="w-6 h-6" /></button>
         </div>
 
-        <div className="w-full mx-auto mb-4">
-          <FormationField
-            formation={formation}
-            players={starters}
-            orderedPlayers={orderedStarters}
-            onPlayerClick={handlePlayerClick}
-            canSubstitute={!!selectedPlayer}
-            selectedPlayerId={selectedPlayer?.id}
-          />
-        </div>
-
         {/* Dropdowns */}
-        <div className="grid grid-cols-2 gap-3 max-w-md mx-auto mb-6 px-4">
+        <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="relative">
             <button onClick={() => toggleDropdown("style")} className="w-full bg-white text-black rounded-lg px-4 py-3 flex items-center justify-between font-medium hover:bg-white/90 transition-colors">
               <span>{playStyle.name}</span>
@@ -190,56 +184,77 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
           </div>
         </div>
 
-        {/* Reservas */}
-        <div className="bg-zinc-900 rounded-lg p-4">
-          <h3 className="text-white text-xl font-bold mb-4">Reservas</h3>
-          <p className="text-xs text-zinc-400 mb-3">Clique para selecionar e trocar com um titular.</p>
-          <div className="space-y-2">
-            {reserves.map(player => {
-              const energy = player.matchEnergy ?? player.energy ?? 100;
-              const energyColor = energy >= 80 ? 'hsl(142 70% 50%)' : energy >= 60 ? 'hsl(45 100% 50%)' : 'hsl(0 80% 55%)';
-              const value = calculateMarketValue(player);
-              return (
-                <button
-                  key={player.id}
-                  onClick={() => handlePlayerClick(player)}
-                  className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
-                    selectedPlayer?.id === player.id
-                      ? "bg-[#c8ff00] text-black"
-                      : "bg-zinc-800 text-white hover:bg-zinc-700"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className={`font-bold text-lg w-8 ${selectedPlayer?.id === player.id ? 'text-black' : 'text-blue-800'}`}>{player.overall}</span>
-                    <div className="text-left">
-                      <div className="font-medium">{player.name}</div>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-sm opacity-70">{player.position}</span>
-                        <span className="opacity-30 text-[10px]">•</span>
-                        <span className="text-[11px] opacity-50">{player.age} anos</span>
-                        <Zap className="w-3 h-3" style={{ color: selectedPlayer?.id === player.id ? 'black' : energyColor }} />
-                        <span className="text-[11px] font-bold" style={{ color: selectedPlayer?.id === player.id ? 'black' : energyColor }}>
-                          {energy}%
+        {/* Players grouped by position */}
+        <div className="space-y-6">
+          {POSITION_ORDER.map(pos => {
+            const group = groupedPlayers[pos];
+            if (!group || group.length === 0) return null;
+            return (
+              <div key={pos}>
+                <h3 className="text-white/50 text-xs font-bold uppercase tracking-widest mb-2">
+                  {pos} — {POSITION_LABELS[pos]}
+                </h3>
+                <div className="space-y-1.5">
+                  {group.map(player => {
+                    const energy = player.matchEnergy ?? player.energy ?? 100;
+                    const energyColor = getEnergyColor(energy);
+                    const value = calculateMarketValue(player);
+                    const isSelected = selectedPlayer?.id === player.id;
+                    return (
+                      <button
+                        key={player.id}
+                        onClick={() => handlePlayerClick(player)}
+                        className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                          isSelected
+                            ? "bg-[#c8ff00] text-black"
+                            : "bg-zinc-800/80 text-white hover:bg-zinc-700/80"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className={`font-bold text-lg w-8 text-center ${isSelected ? 'text-black' : 'text-blue-400'}`}>
+                            {player.overall}
+                          </span>
+                          <div className="text-left">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-[14px]">{player.name}</span>
+                              {player.isStarter && (
+                                <Star className="w-3 h-3 fill-current" style={{ color: isSelected ? 'black' : '#c8ff00' }} />
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className={`text-[11px] font-semibold ${isSelected ? 'text-black/60' : 'text-white/40'}`}>
+                                {player.position}
+                              </span>
+                              <span className={`text-[10px] ${isSelected ? 'text-black/30' : 'text-white/20'}`}>•</span>
+                              <span className={`text-[11px] ${isSelected ? 'text-black/60' : 'text-white/40'}`}>
+                                {player.age} anos
+                              </span>
+                              <Zap className="w-3 h-3" style={{ color: isSelected ? 'black' : energyColor }} />
+                              <span className="text-[11px] font-bold" style={{ color: isSelected ? 'black' : energyColor }}>
+                                {energy}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <span className={`text-[11px] font-semibold ${isSelected ? 'text-black' : 'text-green-400'}`}>
+                          {formatMarketValue(value)}
                         </span>
-                      </div>
-                    </div>
-                  </div>
-                  <span className={`text-[11px] font-semibold ${selectedPlayer?.id === player.id ? 'text-black' : 'text-green-400'}`}>
-                    {formatMarketValue(value)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {selectedPlayer && (
-          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#c8ff00] text-black px-6 py-3 rounded-lg font-medium">
+          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#c8ff00] text-black px-6 py-3 rounded-lg font-medium z-10">
             Clique em outro jogador para trocar
           </div>
         )}
 
-        <div className="max-w-md mx-auto mt-6 pb-8">
+        <div className="mt-6 pb-8">
           <Button onClick={handleSave} className="w-full bg-[#c8ff00] text-black hover:bg-[#b3e600] font-bold">
             Salvar Escalação
           </Button>
@@ -255,8 +270,6 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
                 onSellPlayer(player);
                 setValuePlayer(null);
                 setLocalPlayers(prev => prev.filter(p => p.id !== player.id));
-                const newSlots = slotAssignments.filter(id => id !== player.id);
-                setSlotAssignments(newSlots);
               }
             }}
           />
