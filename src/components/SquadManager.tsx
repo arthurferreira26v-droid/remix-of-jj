@@ -75,6 +75,7 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
   const [selectedPlayStyle, setSelectedPlayStyle] = useState("counter");
   const [openDropdown, setOpenDropdown] = useState<"style" | "formation" | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [valuePlayer, setValuePlayer] = useState<Player | null>(null);
 
   const formation = formations.find((f) => f.id === selectedFormation) || formations[0];
   const playStyle = playStyles.find((s) => s.id === selectedPlayStyle) || playStyles[0];
