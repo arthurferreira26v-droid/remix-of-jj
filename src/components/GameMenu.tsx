@@ -42,9 +42,9 @@ export const GameMenu = ({
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-foreground">
-          <Menu className="h-6 w-6" />
-        </Button>
+        <button className="fixed bottom-6 right-6 z-50 w-12 h-12 bg-[#0a0a0b] rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.5)] border border-white/10 active:scale-95 transition-all duration-200">
+          <Menu className="w-5 h-5 text-white" />
+        </button>
       </SheetTrigger>
       <SheetContent
         side="right"
