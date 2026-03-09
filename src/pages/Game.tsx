@@ -387,26 +387,34 @@ const Game = () => {
             </div>
           </div>
 
-          {/* Menu hamburguer - direita */}
-          <GameMenu 
-            teamName={teamName} 
-            onManageSquad={() => setShowSquadManager(true)} 
-            onTransferMarket={() => setShowTransferMarket(true)}
-            onFinances={() => setShowFinances(true)}
-            onExit={() => {
-              deleteLocalChampionship(teamName);
-              localStorage.removeItem(`players_${teamName}`);
-              localStorage.removeItem(`starter_order_${teamName}`);
-              localStorage.removeItem(`investment_${teamName}`);
-              localStorage.removeItem(`lib_championship_${teamName}`);
-              localStorage.removeItem(`lib_matches_${teamName}`);
-              localStorage.removeItem(`lib_standings_${teamName}`);
-              localStorage.removeItem(`lib_prelib_teams`);
-              navigate("/");
-            }}
-          />
+          {/* Loja - direita */}
+          <button
+            onClick={() => navigate("/loja")}
+            className="p-2 rounded-lg hover:bg-white/5 active:scale-95 transition-all"
+          >
+            <ShoppingCart className="w-5 h-5 text-white/70" />
+          </button>
         </div>
       </header>
+
+      {/* FAB Menu flutuante */}
+      <GameMenu 
+        teamName={teamName} 
+        onManageSquad={() => setShowSquadManager(true)} 
+        onTransferMarket={() => setShowTransferMarket(true)}
+        onFinances={() => setShowFinances(true)}
+        onExit={() => {
+          deleteLocalChampionship(teamName);
+          localStorage.removeItem(`players_${teamName}`);
+          localStorage.removeItem(`starter_order_${teamName}`);
+          localStorage.removeItem(`investment_${teamName}`);
+          localStorage.removeItem(`lib_championship_${teamName}`);
+          localStorage.removeItem(`lib_matches_${teamName}`);
+          localStorage.removeItem(`lib_standings_${teamName}`);
+          localStorage.removeItem(`lib_prelib_teams`);
+          navigate("/");
+        }}
+      />
 
       {/* Spacer para compensar o header fixo */}
       <div className="h-16" />
