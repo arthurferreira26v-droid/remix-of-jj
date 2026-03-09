@@ -85,7 +85,7 @@ const Store = () => {
     <div className="min-h-screen flex flex-col" style={{ background: '#0a0a0b' }}>
       <div className="flex-1 flex flex-col px-5 pt-12 pb-8">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate(from ? from : "/")}
           className="self-start mb-8 p-2 -ml-2 text-white/35 hover:text-white transition-colors"
         >
           <ArrowLeft className="w-6 h-6" />
