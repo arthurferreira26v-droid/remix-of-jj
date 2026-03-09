@@ -154,8 +154,8 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
             if (!group || group.length === 0) return null;
             return (
               <div key={pos}>
-                <h3 className="text-white/50 text-xs font-bold uppercase tracking-widest mb-2">
-                  {pos} — {POSITION_LABELS[pos]}
+                <h3 className="text-white/40 text-xs font-bold uppercase tracking-widest mb-2">
+                  {POSITION_LABELS[pos]}
                 </h3>
                 <div className="space-y-1.5">
                   {group.map(player => {
