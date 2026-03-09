@@ -101,7 +101,7 @@ export const SquadManager = ({ players, onClose, onSquadChange }: SquadManagerPr
 
   const handlePlayerClick = (player: Player) => {
     if (!selectedPlayer) { setSelectedPlayer(player); return; }
-    if (selectedPlayer.id === player.id) { setSelectedPlayer(null); return; }
+    if (selectedPlayer.id === player.id) { setValuePlayer(player); setSelectedPlayer(null); return; }
 
     const bothStarters = selectedPlayer.isStarter && player.isStarter;
 
