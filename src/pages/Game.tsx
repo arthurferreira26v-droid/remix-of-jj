@@ -182,11 +182,23 @@ const Game = () => {
   };
 
   const handleReserveClick = (player: Player) => {
-    // Limpar seleção de titular se houver
-    setSelectedStarter(null);
-    
+    // Se tiver um titular selecionado, troca titular <-> reserva
+    if (selectedStarter) {
+      const updatedPlayers = players.map((p) => {
+        if (p.id === selectedStarter.id) return { ...p, isStarter: false };
+        if (p.id === player.id) return { ...p, isStarter: true };
+        return p;
+      });
+      const newOrder = orderedStarters.map(p =>
+        p.id === selectedStarter.id ? { ...player, isStarter: true } : p
+      );
+      saveStarterOrder(newOrder);
+      updatePlayers(updatedPlayers);
+      setSelectedStarter(null);
+      return;
+    }
+
     if (selectedReserve?.id === player.id) {
-      // Deselect
       setSelectedReserve(null);
     } else {
       setSelectedReserve(player);
