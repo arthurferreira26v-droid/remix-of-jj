@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useAuth } from "@/hooks/useAuth";
-import { evolveTeamPlayers } from "@/utils/playerEvolution";
+// Evolução de jogadores ocorre apenas no final da temporada
 import { applyEnergyChanges, drainEnergyPerMinute, getEffectiveOverall, initMatchEnergy, finalizeMatchEnergy } from "@/utils/energySystem";
 import { PenaltyKickerModal } from "@/components/PenaltyKickerModal";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";

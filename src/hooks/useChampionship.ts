@@ -9,6 +9,8 @@ import {
   type LocalMatch,
   type LocalChampionship,
 } from "@/utils/localChampionship";
+import { evolveTeamPlayers, clearOvrChanges } from "@/utils/playerEvolution";
+import { toast } from "sonner";
 
 export const useChampionship = (userTeamName: string) => {
   const [championship, setChampionship] = useState<LocalChampionship | null>(null);
@@ -52,6 +54,38 @@ export const useChampionship = (userTeamName: string) => {
   }, [userTeamName]);
 
   const resetChampionship = () => {
+    // ══════════════════════════════════════════════════════════════════════════
+    // EVOLUÇÃO DE JOGADORES AO FINAL DA TEMPORADA
+    // ══════════════════════════════════════════════════════════════════════════
+    const savedPlayers = localStorage.getItem(`players_${userTeamName}`);
+    if (savedPlayers) {
+      try {
+        const currentPlayers = JSON.parse(savedPlayers);
+        const { evolvedPlayers, improvements, declines, improvedNames, declinedNames } = evolveTeamPlayers(currentPlayers);
+        
+        // Limpar indicadores de mudança após salvar
+        const finalPlayers = clearOvrChanges(evolvedPlayers);
+        localStorage.setItem(`players_${userTeamName}`, JSON.stringify(finalPlayers));
+        
+        // Notificações de evolução
+        if (improvements > 0) {
+          toast.success(`📈 ${improvements} jogador(es) evoluíram na temporada!`, {
+            description: improvedNames.slice(0, 5).join(", ") + (improvedNames.length > 5 ? ` e mais ${improvedNames.length - 5}...` : ""),
+            duration: 6000,
+          });
+        }
+        if (declines > 0) {
+          toast.warning(`📉 ${declines} jogador(es) declinaram`, {
+            description: declinedNames.slice(0, 5).join(", ") + (declinedNames.length > 5 ? ` e mais ${declinedNames.length - 5}...` : ""),
+            duration: 6000,
+          });
+        }
+      } catch (e) {
+        console.error("Erro ao evoluir jogadores:", e);
+      }
+    }
+
+    // Salvar qualificados para Libertadores
     const standings = getLocalStandings(userTeamName);
     if (standings.length >= 6) {
       const sorted = [...standings].sort((a, b) => b.points - a.points || b.goal_difference - a.goal_difference);

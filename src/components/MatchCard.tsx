@@ -61,7 +61,7 @@ export const MatchCard = ({
         getLocalBudget,
         saveLocalBudget,
       } = await import("@/utils/localChampionship");
-      const { evolveTeamPlayers } = await import("@/utils/playerEvolution");
+      // Evolução de jogadores ocorre apenas no final da temporada
       const { generateTeamPlayers } = await import("@/data/players");
 
       const nextMatch = getNextUserMatch(userTeam);
