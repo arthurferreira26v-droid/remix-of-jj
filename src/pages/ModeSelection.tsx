@@ -55,19 +55,19 @@ const ModeSelection = () => {
   };
 
   const cardVariants = {
-    hidden: { opacity: 0, y: 40 },
+    hidden: { opacity: 0, x: -60 },
     visible: {
       opacity: 1,
-      y: 0,
+      x: 0,
       transition: { duration: 0.7, ease: [0.25, 0.1, 0.25, 1] as const },
     },
   };
 
   const headerVariants = {
-    hidden: { opacity: 0, y: -15 },
+    hidden: { opacity: 0, x: -30 },
     visible: {
       opacity: 1,
-      y: 0,
+      x: 0,
       transition: { duration: 0.5, ease: "easeOut" as const },
     },
   };
