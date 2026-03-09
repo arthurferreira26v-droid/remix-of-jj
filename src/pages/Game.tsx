@@ -52,11 +52,7 @@ const Game = () => {
       return JSON.parse(savedPlayers);
     }
     
-    const raw = teamName === "Botafogo" 
-      ? botafogoPlayers 
-      : teamName === "Flamengo"
-      ? flamengoPlayers
-      : generateTeamPlayers(teamName);
+    const raw = generateTeamPlayers(teamName);
     
     // Optimize starters to fit the default formation (4-3-3)
     const { players: optimized, starterOrder } = optimizeStartersDefault(raw);

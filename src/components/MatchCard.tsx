@@ -76,10 +76,7 @@ export const MatchCard = ({
       const userPlayers = savedPlayers ? JSON.parse(savedPlayers) : [];
       const userStarters = userPlayers.filter((p: any) => p.isStarter);
 
-      const oppPlayers =
-        opponentTeam === "Botafogo" ? botafogoPlayers
-        : opponentTeam === "Flamengo" ? flamengoPlayers
-        : generateTeamPlayers(opponentTeam);
+      const oppPlayers = generateTeamPlayers(opponentTeam);
       const oppStarters = oppPlayers.filter((p: any) => p.isStarter);
 
       // Calculate result based on OVR difference

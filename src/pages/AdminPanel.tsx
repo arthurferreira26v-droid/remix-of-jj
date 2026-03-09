@@ -30,8 +30,6 @@ const countryFlags: Record<string, string> = {
 };
 
 const getDefaultPlayers = (teamId: string): Player[] => {
-  if (teamId === "botafogo") return structuredClone(botafogoPlayers);
-  if (teamId === "flamengo") return structuredClone(flamengoPlayers);
   return generateTeamPlayers(teams.find((t) => t.id === teamId)?.name ?? teamId);
 };
 

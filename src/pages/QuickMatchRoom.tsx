@@ -160,10 +160,7 @@ const QuickMatchRoom = () => {
 
   useEffect(() => {
     if (!team) return;
-    let defaultPlayers: Player[];
-    if (team.id === "botafogo") defaultPlayers = botafogoPlayers;
-    else if (team.id === "flamengo") defaultPlayers = flamengoPlayers;
-    else defaultPlayers = generateTeamPlayers(team.name);
+    let defaultPlayers: Player[] = generateTeamPlayers(team.name);
 
     (async () => {
       const adminPlayers = await fetchAdminPlayers(true);

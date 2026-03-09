@@ -145,12 +145,7 @@ const Match = () => {
 
   const [userPlayers, setUserPlayers] = useState<Player[]>(getInitialUserPlayers);
   
-  const opponentPlayers =
-    opponentName === "Botafogo" 
-      ? botafogoPlayers 
-      : opponentName === "Flamengo"
-      ? flamengoPlayers
-      : generateTeamPlayers(opponentName);
+  const opponentPlayers = generateTeamPlayers(opponentName);
   
   const userStarters = userPlayers.filter((p) => p.isStarter);
   const userReserves = userPlayers.filter((p) => !p.isStarter);
