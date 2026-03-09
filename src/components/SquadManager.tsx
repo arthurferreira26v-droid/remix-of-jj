@@ -135,8 +135,8 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
   const toggleDropdown = (d: "style" | "formation") => setOpenDropdown(openDropdown === d ? null : d);
 
   return (
-    <div className="fixed inset-0 bg-black z-50 overflow-y-auto">
-      <div className="min-h-screen p-4">
+    <div className="bg-black min-h-full">
+      <div className="p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-white text-2xl font-bold">Gerenciar Elenco</h2>
           <button onClick={onClose} className="text-white"><X className="w-6 h-6" /></button>

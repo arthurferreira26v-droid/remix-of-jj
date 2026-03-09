@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { GameMenu } from "@/components/GameMenu";
 import { MatchCard } from "@/components/MatchCard";
@@ -25,6 +25,7 @@ import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { toast } from "sonner";
+import { useSwipePages } from "@/hooks/useSwipePages";
 
 const Game = () => {
   const navigate = useNavigate();
@@ -33,7 +34,6 @@ const Game = () => {
 
   useEffect(() => { document.title = `${teamName} - Painel | Gerenciador`; }, [teamName]);
 
-  const [showSquadManager, setShowSquadManager] = useState(false);
   const [showTransferMarket, setShowTransferMarket] = useState(false);
   const [showFinances, setShowFinances] = useState(false);
   const [totalSales, setTotalSales] = useState(0);
@@ -43,20 +43,8 @@ const Game = () => {
   const [totalPurchases, setTotalPurchases] = useState(0);
   const [selectedPlayerForValue, setSelectedPlayerForValue] = useState<Player | null>(null);
 
-  // Swipe horizontal para abrir gerenciamento de elenco
-  const touchStartX = useRef<number | null>(null);
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
-    // Swipe para esquerda (delta negativo) abre o gerenciamento
-    if (deltaX < -80) {
-      setShowSquadManager(true);
-    }
-    touchStartX.current = null;
-  };
+  // Swipe horizontal entre tela principal e gerenciamento de elenco
+  const swipe = useSwipePages({ threshold: 0.3 });
   
   
   // Initialize players state - always prefer localStorage (preserves energy state)
@@ -399,11 +387,10 @@ const Game = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-      {/* Header fixo com info do time e menu */}
+    <div className="fixed inset-0 overflow-hidden bg-black">
+      {/* Header fixo */}
       <header className="border-b border-[#1a2c4a] bg-black fixed top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Time selecionado - esquerda */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center p-1.5">
               <img src={selectedTeam?.logo} alt={teamName} className="w-full h-full object-contain" />
@@ -413,8 +400,6 @@ const Game = () => {
               <span className="text-xs text-green-400 font-medium">$ {(budget / 1000000).toFixed(1)} M</span>
             </div>
           </div>
-
-          {/* Loja - direita */}
           <button
             onClick={() => navigate(`/loja?from=/jogo?time=${encodeURIComponent(teamName)}`)}
             className="p-2 rounded-lg hover:bg-white/5 active:scale-95 transition-all"
@@ -424,10 +409,24 @@ const Game = () => {
         </div>
       </header>
 
+      {/* Page indicator dots */}
+      <div className="fixed top-[60px] left-1/2 -translate-x-1/2 z-50 flex gap-1.5 py-1.5">
+        {[0, 1].map(i => (
+          <div
+            key={i}
+            className="h-1 rounded-full transition-all duration-300"
+            style={{
+              width: swipe.currentPage === i ? 16 : 6,
+              background: swipe.currentPage === i ? 'hsl(0 0% 100%)' : 'hsl(0 0% 100% / 0.25)',
+            }}
+          />
+        ))}
+      </div>
+
       {/* FAB Menu flutuante */}
       <GameMenu 
         teamName={teamName} 
-        onManageSquad={() => setShowSquadManager(true)} 
+        onManageSquad={() => swipe.goToPage(1)} 
         onTransferMarket={() => setShowTransferMarket(true)}
         onFinances={() => setShowFinances(true)}
         onExit={() => {
@@ -443,124 +442,137 @@ const Game = () => {
         }}
       />
 
-      {/* Spacer para compensar o header fixo */}
-      <div className="h-16" />
-
-      {/* Libertadores Match Section */}
-      {showLibMatch && nextLibertadoresMatch && (
-        <div className="container mx-auto px-4 pt-6">
-          <h3 className="text-sm font-bold text-[#c8ff00] mb-3">
-            {nextLibertadoresChampionshipId && nextLibertadoresMatch.championship_id ? 
-              (nextLibertadoresMatch.round <= 4 && PRE_LIBERTADORES_TEAMS.includes(teamName) && !libertadoresId
-                ? `Pré-Libertadores - Fase ${nextLibertadoresMatch.round <= 2 ? 1 : 2} (${nextLibertadoresMatch.round % 2 === 1 ? "Ida" : "Volta"})`
-                : `Quarta-feira • Libertadores - ${nextLibertadoresMatch.round}ª Rodada`) 
-              : "Libertadores"}
-          </h3>
-          <MatchCard
-            userTeam={teamName}
-            userLogo={getTeamLogo(teamName, selectedTeam?.logo || "")}
-            userPosition=""
-            opponentTeam={nextLibertadoresMatch.home_team_name === teamName ? nextLibertadoresMatch.away_team_name : nextLibertadoresMatch.home_team_name}
-            opponentLogo={getTeamLogo(
-              nextLibertadoresMatch.home_team_name === teamName ? nextLibertadoresMatch.away_team_name : nextLibertadoresMatch.home_team_name,
-              nextLibertadoresMatch.home_team_name === teamName ? nextLibertadoresMatch.away_team_logo : nextLibertadoresMatch.home_team_logo
-            )}
-            opponentPosition=""
-            round={nextLibertadoresMatch.round <= 4 && PRE_LIBERTADORES_TEAMS.includes(teamName) && !libertadoresId
-              ? `Pré-Lib Fase ${nextLibertadoresMatch.round <= 2 ? 1 : 2} - ${nextLibertadoresMatch.round % 2 === 1 ? "Ida" : "Volta"}`
-              : `Libertadores - ${nextLibertadoresMatch.round}ª Rodada`}
-            userForm={[]}
-            opponentForm={[]}
-            isHome={nextLibertadoresMatch.home_team_name === teamName}
-            championshipId={nextLibertadoresChampionshipId || undefined}
-          />
-        </div>
-      )}
-
-      {/* Match Section - Brasileirão */}
-      {!showLibMatch && nextMatch && (
-        <div className="container mx-auto px-4 py-8">
-          <h3 className="text-sm font-bold text-white/60 mb-3">
-            Sábado • Brasileirão - {nextMatch.round}ª Rodada
-          </h3>
-          <MatchCard
-            userTeam={teamName}
-            userLogo={getTeamLogo(teamName, selectedTeam?.logo || "")}
-            userPosition={userPositionStr}
-            opponentTeam={opponentName}
-            opponentLogo={getTeamLogo(opponentName, opponentLogo)}
-            opponentPosition={opponentPositionStr}
-            round={`${nextMatch.round}ª Rodada`}
-            userForm={userForm}
-            opponentForm={opponentForm}
-            isHome={isHome}
-          />
-        </div>
-      )}
-
-      {/* Tactics Manager Section */}
-      <div className="container mx-auto px-4 pb-12 pt-8 space-y-6">
-        <TacticsManager
-          teamName={teamName}
-          players={orderedStarters}
-          onStarterClick={handleStarterClick}
-          canSubstitute={!!selectedReserve}
-          selectedStarterId={selectedStarter?.id}
-        />
-
-        <div className="bg-zinc-900 rounded-lg p-4">
-          <h3 className="text-white text-xl font-bold mb-4">Reservas</h3>
-          <p className="text-xs text-zinc-400 mb-3">Clique para selecionar e trocar com um titular.</p>
-          <div className="space-y-2">
-            {reserves.map((player) => {
-              const energy = player.energy ?? 100;
-              const energyColor = energy >= 80 ? 'hsl(142 70% 50%)' : energy >= 60 ? 'hsl(45 100% 50%)' : 'hsl(0 80% 55%)';
-              return (
-                <button
-                  key={player.id}
-                  onClick={() => handleReserveClick(player)}
-                  className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
-                    selectedReserve?.id === player.id
-                      ? "bg-[#c8ff00] text-black"
-                      : "bg-zinc-800 text-white hover:bg-zinc-700"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className={`font-bold text-lg w-8 ${selectedReserve?.id === player.id ? 'text-black' : 'text-blue-800'}`}>{player.overall}</span>
-                    <div className="text-left">
-                      <div className="font-medium">{player.name}</div>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-sm opacity-70">{player.position}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Zap className="w-3.5 h-3.5" style={{ color: selectedReserve?.id === player.id ? 'black' : energyColor }} />
-                    <span className="text-[12px] font-bold" style={{ color: selectedReserve?.id === player.id ? 'black' : energyColor }}>
-                      {energy}%
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-          {selectedReserve && (
-            <p className="mt-3 text-xs text-[#c8ff00]">
-              Selecione um titular no campo para substituir.
-            </p>
+      {/* Swipeable pages container */}
+      <div
+        className="flex h-full w-[200vw] pt-16"
+        style={{
+          transform: `translateX(${swipe.translateX}vw)`,
+          transition: swipe.isDragging ? 'none' : 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          touchAction: 'pan-y',
+        }}
+        onTouchStart={swipe.handleTouchStart}
+        onTouchMove={swipe.handleTouchMove}
+        onTouchEnd={swipe.handleTouchEnd}
+      >
+        {/* Page 0: Tela Principal */}
+        <div className="w-screen h-full overflow-y-auto">
+          {/* Libertadores Match Section */}
+          {showLibMatch && nextLibertadoresMatch && (
+            <div className="container mx-auto px-4 pt-6">
+              <h3 className="text-sm font-bold text-[#c8ff00] mb-3">
+                {nextLibertadoresChampionshipId && nextLibertadoresMatch.championship_id ? 
+                  (nextLibertadoresMatch.round <= 4 && PRE_LIBERTADORES_TEAMS.includes(teamName) && !libertadoresId
+                    ? `Pré-Libertadores - Fase ${nextLibertadoresMatch.round <= 2 ? 1 : 2} (${nextLibertadoresMatch.round % 2 === 1 ? "Ida" : "Volta"})`
+                    : `Quarta-feira • Libertadores - ${nextLibertadoresMatch.round}ª Rodada`) 
+                  : "Libertadores"}
+              </h3>
+              <MatchCard
+                userTeam={teamName}
+                userLogo={getTeamLogo(teamName, selectedTeam?.logo || "")}
+                userPosition=""
+                opponentTeam={nextLibertadoresMatch.home_team_name === teamName ? nextLibertadoresMatch.away_team_name : nextLibertadoresMatch.home_team_name}
+                opponentLogo={getTeamLogo(
+                  nextLibertadoresMatch.home_team_name === teamName ? nextLibertadoresMatch.away_team_name : nextLibertadoresMatch.home_team_name,
+                  nextLibertadoresMatch.home_team_name === teamName ? nextLibertadoresMatch.away_team_logo : nextLibertadoresMatch.home_team_logo
+                )}
+                opponentPosition=""
+                round={nextLibertadoresMatch.round <= 4 && PRE_LIBERTADORES_TEAMS.includes(teamName) && !libertadoresId
+                  ? `Pré-Lib Fase ${nextLibertadoresMatch.round <= 2 ? 1 : 2} - ${nextLibertadoresMatch.round % 2 === 1 ? "Ida" : "Volta"}`
+                  : `Libertadores - ${nextLibertadoresMatch.round}ª Rodada`}
+                userForm={[]}
+                opponentForm={[]}
+                isHome={nextLibertadoresMatch.home_team_name === teamName}
+                championshipId={nextLibertadoresChampionshipId || undefined}
+              />
+            </div>
           )}
+
+          {/* Match Section - Brasileirão */}
+          {!showLibMatch && nextMatch && (
+            <div className="container mx-auto px-4 py-8">
+              <h3 className="text-sm font-bold text-white/60 mb-3">
+                Sábado • Brasileirão - {nextMatch.round}ª Rodada
+              </h3>
+              <MatchCard
+                userTeam={teamName}
+                userLogo={getTeamLogo(teamName, selectedTeam?.logo || "")}
+                userPosition={userPositionStr}
+                opponentTeam={opponentName}
+                opponentLogo={getTeamLogo(opponentName, opponentLogo)}
+                opponentPosition={opponentPositionStr}
+                round={`${nextMatch.round}ª Rodada`}
+                userForm={userForm}
+                opponentForm={opponentForm}
+                isHome={isHome}
+              />
+            </div>
+          )}
+
+          {/* Tactics Manager Section */}
+          <div className="container mx-auto px-4 pb-12 pt-8 space-y-6">
+            <TacticsManager
+              teamName={teamName}
+              players={orderedStarters}
+              onStarterClick={handleStarterClick}
+              canSubstitute={!!selectedReserve}
+              selectedStarterId={selectedStarter?.id}
+            />
+
+            <div className="bg-zinc-900 rounded-lg p-4">
+              <h3 className="text-white text-xl font-bold mb-4">Reservas</h3>
+              <p className="text-xs text-zinc-400 mb-3">Clique para selecionar e trocar com um titular.</p>
+              <div className="space-y-2">
+                {reserves.map((player) => {
+                  const energy = player.energy ?? 100;
+                  const energyColor = energy >= 80 ? 'hsl(142 70% 50%)' : energy >= 60 ? 'hsl(45 100% 50%)' : 'hsl(0 80% 55%)';
+                  return (
+                    <button
+                      key={player.id}
+                      onClick={() => handleReserveClick(player)}
+                      className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                        selectedReserve?.id === player.id
+                          ? "bg-[#c8ff00] text-black"
+                          : "bg-zinc-800 text-white hover:bg-zinc-700"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`font-bold text-lg w-8 ${selectedReserve?.id === player.id ? 'text-black' : 'text-blue-800'}`}>{player.overall}</span>
+                        <div className="text-left">
+                          <div className="font-medium">{player.name}</div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-sm opacity-70">{player.position}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Zap className="w-3.5 h-3.5" style={{ color: selectedReserve?.id === player.id ? 'black' : energyColor }} />
+                        <span className="text-[12px] font-bold" style={{ color: selectedReserve?.id === player.id ? 'black' : energyColor }}>
+                          {energy}%
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              {selectedReserve && (
+                <p className="mt-3 text-xs text-[#c8ff00]">
+                  Selecione um titular no campo para substituir.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Page 1: Gerenciar Elenco */}
+        <div className="w-screen h-full overflow-y-auto">
+          <SquadManager
+            players={players}
+            onClose={() => swipe.goToPage(0)}
+            onSquadChange={(updatedPlayers) => setPlayers(updatedPlayers)}
+            onSellPlayer={handleSellPlayer}
+          />
         </div>
       </div>
-
-      {/* Squad Manager Modal */}
-      {showSquadManager && (
-        <SquadManager
-          players={players}
-          onClose={() => setShowSquadManager(false)}
-          onSquadChange={(updatedPlayers) => setPlayers(updatedPlayers)}
-          onSellPlayer={handleSellPlayer}
-        />
-      )}
 
       {/* Player Value Modal */}
       {selectedPlayerForValue && (
@@ -592,7 +604,6 @@ const Game = () => {
           hasActiveInvestment={hasActiveInvestment}
         />
       )}
-
     </div>
   );
 };
