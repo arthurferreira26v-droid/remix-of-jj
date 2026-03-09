@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { GameMenu } from "@/components/GameMenu";
 import { MatchCard } from "@/components/MatchCard";
@@ -42,6 +42,21 @@ const Game = () => {
   });
   const [totalPurchases, setTotalPurchases] = useState(0);
   const [selectedPlayerForValue, setSelectedPlayerForValue] = useState<Player | null>(null);
+
+  // Swipe horizontal para abrir gerenciamento de elenco
+  const touchStartX = useRef<number | null>(null);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    // Swipe para esquerda (delta negativo) abre o gerenciamento
+    if (deltaX < -80) {
+      setShowSquadManager(true);
+    }
+    touchStartX.current = null;
+  };
   
   
   // Initialize players state - always prefer localStorage (preserves energy state)
@@ -384,7 +399,7 @@ const Game = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       {/* Header fixo com info do time e menu */}
       <header className="border-b border-[#1a2c4a] bg-black fixed top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
