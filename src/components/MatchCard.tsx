@@ -62,7 +62,7 @@ export const MatchCard = ({
         saveLocalBudget,
       } = await import("@/utils/localChampionship");
       const { evolveTeamPlayers } = await import("@/utils/playerEvolution");
-      const { generateTeamPlayers, botafogoPlayers, flamengoPlayers } = await import("@/data/players");
+      const { generateTeamPlayers } = await import("@/data/players");
 
       const nextMatch = getNextUserMatch(userTeam);
       if (!nextMatch) {
