@@ -303,8 +303,8 @@ const AdminPanel = () => {
                           {p.overall}
                         </span>
                       </TableCell>
-                      <TableCell className="text-zinc-300">{formatCurrency(marketValue(p.overall))}</TableCell>
-                      <TableCell className="text-zinc-300">{formatCurrency(marketValue(p.overall) * 1.2)}</TableCell>
+                      <TableCell className="text-zinc-300">{formatCurrency(marketValue(p))}</TableCell>
+                      <TableCell className="text-zinc-300">{formatCurrency(marketValue(p) * 1.2)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Button variant="ghost" size="icon" onClick={() => handleEdit(p)} className="text-zinc-400 hover:text-amber-500 h-8 w-8">
