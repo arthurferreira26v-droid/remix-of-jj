@@ -77,6 +77,8 @@ const LegendCard = ({ player }: { player: LegendPlayer }) => {
 
 const Store = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const from = searchParams.get("from");
   useEffect(() => { document.title = "Loja | Gerenciador"; }, []);
 
   return (
