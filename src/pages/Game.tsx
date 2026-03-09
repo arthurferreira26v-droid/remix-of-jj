@@ -409,20 +409,6 @@ const Game = () => {
         </div>
       </header>
 
-      {/* Page indicator dots */}
-      <div className="fixed top-[60px] left-1/2 -translate-x-1/2 z-50 flex gap-1.5 py-1.5">
-        {[0, 1].map(i => (
-          <div
-            key={i}
-            className="h-1 rounded-full transition-all duration-300"
-            style={{
-              width: swipe.currentPage === i ? 16 : 6,
-              background: swipe.currentPage === i ? 'hsl(0 0% 100%)' : 'hsl(0 0% 100% / 0.25)',
-            }}
-          />
-        ))}
-      </div>
-
       {/* FAB Menu flutuante */}
       <GameMenu 
         teamName={teamName} 
