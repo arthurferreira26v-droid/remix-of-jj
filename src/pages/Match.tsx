@@ -266,25 +266,7 @@ const Match = () => {
       const finalizedPlayers = finalizeMatchEnergy(userPlayers);
       localStorage.setItem(`players_${teamName}`, JSON.stringify(finalizedPlayers));
       
-      const savedPlayers = localStorage.getItem(`players_${teamName}`);
-      if (savedPlayers) {
-        const playersForEvolution = JSON.parse(savedPlayers);
-        const { evolvedPlayers, improvements, declines, improvedNames, declinedNames } = evolveTeamPlayers(playersForEvolution);
-        localStorage.setItem(`players_${teamName}`, JSON.stringify(evolvedPlayers));
-        
-        if (improvements > 0) {
-          toast.success(`📈 ${improvements} jogador(es) evoluíram!`, {
-            description: improvedNames.join(", "),
-            duration: 5000,
-          });
-        }
-        if (declines > 0) {
-          toast.warning(`📉 ${declines} jogador(es) declinaram`, {
-            description: declinedNames.join(", "),
-            duration: 5000,
-          });
-        }
-      }
+      // Evolução de OVR é aplicada apenas no final da temporada
 
       // Flush all pending async writes before navigating
       flushPendingWrites();
