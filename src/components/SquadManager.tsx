@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Player } from "@/data/players";
 import { formations, playStyles, Formation } from "@/data/formations";
-import { X, ChevronDown, Zap, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { X, Zap, Star, Users, Eye } from "lucide-react";
 import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { optimizeStartersForFormation } from "@/utils/formationOptimizer";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
