@@ -64,10 +64,10 @@ const ModeSelection = () => {
   };
 
   const headerVariants = {
-    hidden: { opacity: 0, y: -15 },
+    hidden: { opacity: 0, x: -30 },
     visible: {
       opacity: 1,
-      y: 0,
+      x: 0,
       transition: { duration: 0.5, ease: "easeOut" as const },
     },
   };
