@@ -5,6 +5,7 @@ import { X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormationField } from "@/components/FormationField";
 import { PlayerBubble } from "@/components/PlayerBubble";
+import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { optimizeStartersForFormation } from "@/utils/formationOptimizer";
 
 interface SquadManagerProps {
