@@ -383,7 +383,7 @@ const Game = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-bold text-white">{teamName}</span>
-              <span className="text-xs text-muted-foreground">Painel do Time</span>
+              <span className="text-xs text-green-400 font-medium">$ {(budget / 1000000).toFixed(1)} M</span>
             </div>
           </div>
 
@@ -410,9 +410,6 @@ const Game = () => {
 
       {/* Spacer para compensar o header fixo */}
       <div className="h-16" />
-
-      {/* Caixa do Time - Fora do header, não acompanha scroll */}
-      <TeamBudget budget={budget} />
 
       {/* Libertadores Match Section */}
       {showLibMatch && nextLibertadoresMatch && (
