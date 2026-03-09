@@ -65,18 +65,36 @@ const Game = () => {
   };
   const [players, setPlayers] = useState<Player[]>(getInitialPlayers);
 
-  // Load admin overrides from DB (only if no existing player data in localStorage)
+  // Load admin overrides from DB — always merge admin info (name, age, overall, etc.)
+  // while preserving runtime state (energy, consecutiveMatches, season stats)
   useEffect(() => {
-    const savedPlayers = localStorage.getItem(`players_${teamName}`);
-    if (savedPlayers) return; // don't override existing player data (preserves energy)
-
     (async () => {
       const [adminPlayers] = await Promise.all([fetchAdminPlayers(true), fetchAdminLogos()]);
       const team = teams.find(t => t.name === teamName);
       const teamId = team?.id ?? teamName;
-      if (adminPlayers[teamId]) {
-        setPlayers(adminPlayers[teamId]);
-        localStorage.setItem(`players_${teamName}`, JSON.stringify(adminPlayers[teamId]));
+      if (adminPlayers[teamId] && adminPlayers[teamId].length > 0) {
+        const adminList = adminPlayers[teamId];
+        setPlayers(prev => {
+          // Merge: use admin data as base, overlay runtime fields from existing players
+          const merged = adminList.map((adminP) => {
+            const existing = prev.find(p => p.id === adminP.id);
+            if (existing) {
+              return {
+                ...adminP, // admin controls: name, age, overall, position, altPositions, marketValue, number
+                isStarter: existing.isStarter,
+                energy: existing.energy,
+                matchEnergy: existing.matchEnergy,
+                consecutiveMatches: existing.consecutiveMatches,
+                seasonStarterMatches: existing.seasonStarterMatches,
+                seasonBenchMatches: existing.seasonBenchMatches,
+                ovrChange: existing.ovrChange,
+              };
+            }
+            return { ...adminP, energy: adminP.energy ?? 100, consecutiveMatches: 0 };
+          });
+          localStorage.setItem(`players_${teamName}`, JSON.stringify(merged));
+          return merged;
+        });
       }
     })();
   }, [teamName]);
