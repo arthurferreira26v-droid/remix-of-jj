@@ -93,7 +93,7 @@ const AdminPanel = () => {
 
   // Edit
   const handleEdit = (p: Player) => {
-    setFormData({ name: p.name, number: p.number, position: p.position, altPositions: p.altPositions || [], overall: p.overall, age: p.age, isStarter: p.isStarter, marketValue: p.marketValue });
+    setFormData({ name: p.name, number: p.number, position: p.position, altPositions: p.altPositions || [], overall: p.overall, age: p.age, isStarter: p.isStarter, marketValue: p.marketValue, yellowCardChance: p.yellowCardChance });
     setEditPlayer(p);
   };
 
