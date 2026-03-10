@@ -34,7 +34,7 @@ const getDefaultPlayers = (teamId: string): Player[] => {
 };
 
 const emptyPlayer = (): Omit<Player, "id"> & { altPositions: string[] } => ({
-  name: "", number: 1, position: "ATA", altPositions: [], overall: 75, age: 22, isStarter: false, marketValue: undefined as number | undefined,
+  name: "", number: 1, position: "ATA", altPositions: [], overall: 75, age: 22, isStarter: false, marketValue: undefined as number | undefined, yellowCardChance: undefined as number | undefined,
 });
 
 const AdminPanel = () => {
