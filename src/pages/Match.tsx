@@ -263,8 +263,9 @@ const Match = () => {
         toast.success("Investimento: +$200 mil recebidos!");
       }
 
-      // Finalize energy: save matchEnergy to energy, apply extra drain, update consecutiveMatches
-      const finalizedPlayers = finalizeMatchEnergy(userPlayers);
+      // Finalize energy and cards
+      const afterEnergy = finalizeMatchEnergy(userPlayers);
+      const finalizedPlayers = finalizeCardsAfterMatch(afterEnergy);
       localStorage.setItem(`players_${teamName}`, JSON.stringify(finalizedPlayers));
       
       // Evolução de OVR é aplicada apenas no final da temporada

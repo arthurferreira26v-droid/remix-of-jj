@@ -415,6 +415,26 @@ const AdminPanel = () => {
               />
               <p className="text-zinc-500 text-[11px]">Deixe vazio para calcular automaticamente pelo OVR</p>
             </div>
+            <div className="space-y-1.5">
+              <Label className="text-zinc-300 text-sm">Chance de Cartão Amarelo (%)</Label>
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                placeholder={`Auto (${(() => {
+                  const pos = formData.position;
+                  if (pos === 'GOL') return '3';
+                  if (['ZAG','LE','LD'].includes(pos)) return '27';
+                  if (['MC','VOL','MEI','MD','ME'].includes(pos)) return '20';
+                  if (['ATA','PE','PD'].includes(pos)) return '10';
+                  return '15';
+                })()}% pela posição)`}
+                value={formData.yellowCardChance ?? ""}
+                onChange={(e) => setFormData({ ...formData, yellowCardChance: e.target.value ? +e.target.value : undefined })}
+                className="bg-zinc-800 border-zinc-700 text-white"
+              />
+              <p className="text-zinc-500 text-[11px]">Deixe vazio para usar o padrão da posição</p>
+            </div>
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
