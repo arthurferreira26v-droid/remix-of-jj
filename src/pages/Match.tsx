@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 // Evolução de jogadores ocorre apenas no final da temporada
 import { applyEnergyChanges, drainEnergyPerMinute, getEffectiveOverall, initMatchEnergy, finalizeMatchEnergy } from "@/utils/energySystem";
 import { PenaltyKickerModal } from "@/components/PenaltyKickerModal";
+import { applySuspensions } from "@/utils/cardSystem";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { flushPendingWrites } from "@/utils/localChampionship";
 import { getYellowCardChance, applyCardToPlayer, finalizeCardsAfterMatch } from "@/utils/cardSystem";
