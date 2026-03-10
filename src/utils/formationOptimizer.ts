@@ -76,6 +76,7 @@ export function optimizeStartersForFormation(
   }
 
   // Pass 4: fill any remaining slots with whoever is left (unassigned starters first, then reserves by OVR)
+  // This guarantees all 11 slots are filled even if positions don't match
   const remaining = [
     ...starters.filter(p => !used.has(p.id)).sort((a, b) => b.overall - a.overall),
     ...reserves.filter(p => !used.has(p.id)).sort((a, b) => b.overall - a.overall),
@@ -88,6 +89,21 @@ export function optimizeStartersForFormation(
       pick.isStarter = true;
       assignments[i] = pick;
       used.add(pick.id);
+    }
+  }
+
+  // Safety: ensure exactly 11 starters - if any slot is still null, something is very wrong
+  // but we guarantee isStarter count matches slot count
+  let starterCount = allPlayers.filter(p => p.isStarter).length;
+  if (starterCount < slots.length) {
+    // Promote remaining reserves by OVR until we have enough
+    const nonStarters = allPlayers
+      .filter(p => !p.isStarter)
+      .sort((a, b) => b.overall - a.overall);
+    for (const p of nonStarters) {
+      if (starterCount >= slots.length) break;
+      p.isStarter = true;
+      starterCount++;
     }
   }
 

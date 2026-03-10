@@ -80,7 +80,7 @@ const Game = () => {
             const existing = prev.find(p => p.id === adminP.id);
             if (existing) {
               return {
-                ...adminP, // admin controls: name, age, overall, position, altPositions, marketValue, number
+                ...adminP,
                 isStarter: existing.isStarter,
                 energy: existing.energy,
                 matchEnergy: existing.matchEnergy,
@@ -92,8 +92,23 @@ const Game = () => {
             }
             return { ...adminP, energy: adminP.energy ?? 100, consecutiveMatches: 0 };
           });
-          localStorage.setItem(`players_${teamName}`, JSON.stringify(merged));
-          return merged;
+          // Ensure exactly 11 starters and optimize positions for current formation
+          const { players: optimized, starterOrder } = optimizeStartersDefault(merged);
+          localStorage.setItem(`players_${teamName}`, JSON.stringify(optimized));
+          localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
+          return optimized;
+        });
+      } else {
+        // No admin data — still ensure 11 starters
+        setPlayers(prev => {
+          const starterCount = prev.filter(p => p.isStarter).length;
+          if (starterCount !== 11) {
+            const { players: optimized, starterOrder } = optimizeStartersDefault(prev);
+            localStorage.setItem(`players_${teamName}`, JSON.stringify(optimized));
+            localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
+            return optimized;
+          }
+          return prev;
         });
       }
     })();
