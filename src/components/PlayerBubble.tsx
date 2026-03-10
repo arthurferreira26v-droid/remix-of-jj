@@ -10,6 +10,9 @@ interface PlayerBubbleProps {
   /** "field" = small circle on pitch, "reserve" = row in bench list */
   variant?: "field" | "reserve";
   role?: string;
+  /** Card state for match visuals */
+  yellowCard?: boolean;
+  redCard?: boolean;
 }
 
 /** Energy color based on percentage */
