@@ -15,6 +15,7 @@ import { applyEnergyChanges, drainEnergyPerMinute, getEffectiveOverall, initMatc
 import { PenaltyKickerModal } from "@/components/PenaltyKickerModal";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { flushPendingWrites } from "@/utils/localChampionship";
+import { getYellowCardChance, applyCardToPlayer, finalizeCardsAfterMatch } from "@/utils/cardSystem";
 
 interface MatchEvent {
   minute: number;
