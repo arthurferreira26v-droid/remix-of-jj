@@ -372,11 +372,11 @@ const Match = () => {
           : 75;
         const difficultyFactor = Math.max(0.5, Math.min(1.5, (150 - opponentAvgOvr) / 75));
 
-        // Red cards reduce team strength
+        // Red cards reduce team strength by 22% each
         const homeRedCards = matchEvents.filter(e => e.type === 'red_card' && e.team === 'home').length;
         const awayRedCards = matchEvents.filter(e => e.type === 'red_card' && e.team === 'away').length;
-        const homeStrength = Math.max(0.6, 1 - homeRedCards * 0.12);
-        const awayStrength = Math.max(0.6, 1 - awayRedCards * 0.12);
+        const homeStrength = Math.max(0.3, 1 - homeRedCards * 0.22);
+        const awayStrength = Math.max(0.3, 1 - awayRedCards * 0.22);
 
         // Play style bonuses
         let styleAttackBonus = 0;
