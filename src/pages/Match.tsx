@@ -476,18 +476,32 @@ const Match = () => {
             setFouls(s => ({ ...s, away: s.away + 1 }));
           }
           
-          // Chance de cartão amarelo (10% das faltas)
-          if (Math.random() < 0.3) {
-            const cardPlayer = getRandomPlayer(isHomeFoul ? 'home' : 'away');
-            // Chance de cartão vermelho (10% dos cartões)
-            const isRed = Math.random() < 0.1;
-            
-            setMatchEvents(events => [...events, {
-              minute: next,
-              type: isRed ? 'red_card' : 'yellow_card',
-              team: isHomeFoul ? 'home' : 'away',
-              playerName: cardPlayer
-            }]);
+          // Card system: pick a random player from the fouling team
+          const foulTeam: 'home' | 'away' = isHomeFoul ? 'home' : 'away';
+          const foulPlayers = foulTeam === 'away' ? userStarters.filter(p => !p.matchRedCard) : opponentStarters;
+          if (foulPlayers.length > 0) {
+            const foulPlayer = foulPlayers[Math.floor(Math.random() * foulPlayers.length)];
+            const cardChance = getYellowCardChance(foulPlayer);
+            // Roll: cardChance% chance per foul to get a yellow
+            if (Math.random() * 100 < cardChance) {
+              const currentYellows = foulPlayer.matchYellowCards || 0;
+              const isSecondYellow = currentYellows >= 1;
+              const cardType = isSecondYellow ? 'red_card' as const : 'yellow_card' as const;
+
+              // Update player state if it's the user's team
+              if (foulTeam === 'away') {
+                setUserPlayers(prev => prev.map(p =>
+                  p.id === foulPlayer.id ? applyCardToPlayer(p, cardType) : p
+                ));
+              }
+
+              setMatchEvents(events => [...events, {
+                minute: next,
+                type: cardType,
+                team: foulTeam,
+                playerName: foulPlayer.name
+              }]);
+            }
           }
         }
         
