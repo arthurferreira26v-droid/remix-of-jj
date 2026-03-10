@@ -109,14 +109,15 @@ export const MatchCard = ({
       // Energy update
       if (savedPlayers) {
         const { finalizeMatchEnergy } = await import("@/utils/energySystem");
+        const { finalizeCardsAfterMatch } = await import("@/utils/cardSystem");
         const currentPlayers = JSON.parse(savedPlayers);
         const withMatchEnergy = currentPlayers.map((p: any) => ({
           ...p,
           matchEnergy: p.isStarter ? Math.max(0, (p.energy ?? 100) - (Math.floor(Math.random() * 20) + 30)) : p.energy,
         }));
         const withEnergy = finalizeMatchEnergy(withMatchEnergy);
-        // Evolução de OVR ocorre apenas no final da temporada
-        localStorage.setItem(`players_${userTeam}`, JSON.stringify(withEnergy));
+        const withCards = finalizeCardsAfterMatch(withEnergy);
+        localStorage.setItem(`players_${userTeam}`, JSON.stringify(withCards));
       }
 
       flushPendingWrites();
