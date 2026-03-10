@@ -34,7 +34,7 @@ const getDefaultPlayers = (teamId: string): Player[] => {
 };
 
 const emptyPlayer = (): Omit<Player, "id"> & { altPositions: string[] } => ({
-  name: "", number: 1, position: "ATA", altPositions: [], overall: 75, age: 22, isStarter: false, marketValue: undefined as number | undefined,
+  name: "", number: 1, position: "ATA", altPositions: [], overall: 75, age: 22, isStarter: false, marketValue: undefined as number | undefined, yellowCardChance: undefined as number | undefined,
 });
 
 const AdminPanel = () => {
@@ -93,7 +93,7 @@ const AdminPanel = () => {
 
   // Edit
   const handleEdit = (p: Player) => {
-    setFormData({ name: p.name, number: p.number, position: p.position, altPositions: p.altPositions || [], overall: p.overall, age: p.age, isStarter: p.isStarter, marketValue: p.marketValue });
+    setFormData({ name: p.name, number: p.number, position: p.position, altPositions: p.altPositions || [], overall: p.overall, age: p.age, isStarter: p.isStarter, marketValue: p.marketValue, yellowCardChance: p.yellowCardChance });
     setEditPlayer(p);
   };
 
@@ -414,6 +414,26 @@ const AdminPanel = () => {
                 className="bg-zinc-800 border-zinc-700 text-white"
               />
               <p className="text-zinc-500 text-[11px]">Deixe vazio para calcular automaticamente pelo OVR</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-zinc-300 text-sm">Chance de Cartão Amarelo (%)</Label>
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                placeholder={`Auto (${(() => {
+                  const pos = formData.position;
+                  if (pos === 'GOL') return '3';
+                  if (['ZAG','LE','LD'].includes(pos)) return '27';
+                  if (['MC','VOL','MEI','MD','ME'].includes(pos)) return '20';
+                  if (['ATA','PE','PD'].includes(pos)) return '10';
+                  return '15';
+                })()}% pela posição)`}
+                value={formData.yellowCardChance ?? ""}
+                onChange={(e) => setFormData({ ...formData, yellowCardChance: e.target.value ? +e.target.value : undefined })}
+                className="bg-zinc-800 border-zinc-700 text-white"
+              />
+              <p className="text-zinc-500 text-[11px]">Deixe vazio para usar o padrão da posição</p>
             </div>
             <div className="flex items-center gap-2">
               <input

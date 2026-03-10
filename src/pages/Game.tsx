@@ -88,6 +88,10 @@ const Game = () => {
                 seasonStarterMatches: existing.seasonStarterMatches,
                 seasonBenchMatches: existing.seasonBenchMatches,
                 ovrChange: existing.ovrChange,
+                accumulatedYellows: existing.accumulatedYellows,
+                suspensionMatches: existing.suspensionMatches,
+                matchYellowCards: 0,
+                matchRedCard: false,
               };
             }
             return { ...adminP, energy: adminP.energy ?? 100, consecutiveMatches: 0 };

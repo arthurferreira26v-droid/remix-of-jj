@@ -13,8 +13,10 @@ import { useAuth } from "@/hooks/useAuth";
 // Evolução de jogadores ocorre apenas no final da temporada
 import { applyEnergyChanges, drainEnergyPerMinute, getEffectiveOverall, initMatchEnergy, finalizeMatchEnergy } from "@/utils/energySystem";
 import { PenaltyKickerModal } from "@/components/PenaltyKickerModal";
+import { applySuspensions } from "@/utils/cardSystem";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { flushPendingWrites } from "@/utils/localChampionship";
+import { getYellowCardChance, applyCardToPlayer, finalizeCardsAfterMatch } from "@/utils/cardSystem";
 
 interface MatchEvent {
   minute: number;
@@ -139,8 +141,13 @@ const Match = () => {
       localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
       players = optimized;
     }
+    // Apply suspensions: bench suspended starters, promote reserves
+    const afterSuspensions = applySuspensions(players);
+    // Reset match-specific card fields
+    const resetCards = afterSuspensions.map(p => ({ ...p, matchYellowCards: 0, matchRedCard: false }));
+    localStorage.setItem(`players_${teamName}`, JSON.stringify(resetCards));
     // Initialize matchEnergy from energy at start of match
-    return initMatchEnergy(players);
+    return initMatchEnergy(resetCards);
   };
 
   const [userPlayers, setUserPlayers] = useState<Player[]>(getInitialUserPlayers);
@@ -262,8 +269,9 @@ const Match = () => {
         toast.success("Investimento: +$200 mil recebidos!");
       }
 
-      // Finalize energy: save matchEnergy to energy, apply extra drain, update consecutiveMatches
-      const finalizedPlayers = finalizeMatchEnergy(userPlayers);
+      // Finalize energy and cards
+      const afterEnergy = finalizeMatchEnergy(userPlayers);
+      const finalizedPlayers = finalizeCardsAfterMatch(afterEnergy);
       localStorage.setItem(`players_${teamName}`, JSON.stringify(finalizedPlayers));
       
       // Evolução de OVR é aplicada apenas no final da temporada
@@ -371,11 +379,11 @@ const Match = () => {
           : 75;
         const difficultyFactor = Math.max(0.5, Math.min(1.5, (150 - opponentAvgOvr) / 75));
 
-        // Red cards reduce team strength
+        // Red cards reduce team strength by 22% each
         const homeRedCards = matchEvents.filter(e => e.type === 'red_card' && e.team === 'home').length;
         const awayRedCards = matchEvents.filter(e => e.type === 'red_card' && e.team === 'away').length;
-        const homeStrength = Math.max(0.6, 1 - homeRedCards * 0.12);
-        const awayStrength = Math.max(0.6, 1 - awayRedCards * 0.12);
+        const homeStrength = Math.max(0.3, 1 - homeRedCards * 0.22);
+        const awayStrength = Math.max(0.3, 1 - awayRedCards * 0.22);
 
         // Play style bonuses
         let styleAttackBonus = 0;
@@ -475,18 +483,32 @@ const Match = () => {
             setFouls(s => ({ ...s, away: s.away + 1 }));
           }
           
-          // Chance de cartão amarelo (10% das faltas)
-          if (Math.random() < 0.3) {
-            const cardPlayer = getRandomPlayer(isHomeFoul ? 'home' : 'away');
-            // Chance de cartão vermelho (10% dos cartões)
-            const isRed = Math.random() < 0.1;
-            
-            setMatchEvents(events => [...events, {
-              minute: next,
-              type: isRed ? 'red_card' : 'yellow_card',
-              team: isHomeFoul ? 'home' : 'away',
-              playerName: cardPlayer
-            }]);
+          // Card system: pick a random player from the fouling team
+          const foulTeam: 'home' | 'away' = isHomeFoul ? 'home' : 'away';
+          const foulPlayers = foulTeam === 'away' ? userStarters.filter(p => !p.matchRedCard) : opponentStarters;
+          if (foulPlayers.length > 0) {
+            const foulPlayer = foulPlayers[Math.floor(Math.random() * foulPlayers.length)];
+            const cardChance = getYellowCardChance(foulPlayer);
+            // Roll: cardChance% chance per foul to get a yellow
+            if (Math.random() * 100 < cardChance) {
+              const currentYellows = foulPlayer.matchYellowCards || 0;
+              const isSecondYellow = currentYellows >= 1;
+              const cardType = isSecondYellow ? 'red_card' as const : 'yellow_card' as const;
+
+              // Update player state if it's the user's team
+              if (foulTeam === 'away') {
+                setUserPlayers(prev => prev.map(p =>
+                  p.id === foulPlayer.id ? applyCardToPlayer(p, cardType) : p
+                ));
+              }
+
+              setMatchEvents(events => [...events, {
+                minute: next,
+                type: cardType,
+                team: foulTeam,
+                playerName: foulPlayer.name
+              }]);
+            }
           }
         }
         

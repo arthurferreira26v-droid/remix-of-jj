@@ -10,6 +10,9 @@ interface PlayerBubbleProps {
   /** "field" = small circle on pitch, "reserve" = row in bench list */
   variant?: "field" | "reserve";
   role?: string;
+  /** Card state for match visuals */
+  yellowCard?: boolean;
+  redCard?: boolean;
 }
 
 /** Energy color based on percentage */
@@ -20,28 +23,42 @@ const getEnergyColor = (energy: number) => {
 };
 
 /** Field variant: small circle with OVR + name label + horizontal energy bar */
-const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, showEnergyBar = true }: PlayerBubbleProps) => {
+const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, showEnergyBar = true, yellowCard, redCard }: PlayerBubbleProps) => {
   const energy = player.matchEnergy ?? player.energy ?? 100;
+  const hasYellow = yellowCard || (player.matchYellowCards || 0) >= 1;
+  const hasRed = redCard || player.matchRedCard;
 
   return (
     <div
-      className={`flex flex-col items-center gap-0.5 ${onClick ? "cursor-pointer" : ""} ${isSelected ? "scale-110 z-10" : ""}`}
-      onClick={onClick}
+      className={`flex flex-col items-center gap-0.5 ${onClick && !hasRed ? "cursor-pointer" : ""} ${isSelected ? "scale-110 z-10" : ""} ${hasRed ? "opacity-40 pointer-events-none" : ""}`}
+      onClick={hasRed ? undefined : onClick}
     >
       {/* OVR circle */}
       <div className="relative">
-        <div className={`w-10 h-10 border-2 rounded-full flex items-center justify-center shadow-lg ${
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg ${
           isSelected 
-            ? "bg-[#c8ff00] border-[#c8ff00]" 
-            : "bg-black/90 border-white/80"
-        }`}>
+            ? "bg-[#c8ff00] border-[3px] border-[#c8ff00]" 
+            : hasRed
+            ? "bg-black/90 border-[3px] border-red-500"
+            : hasYellow
+            ? "bg-black/90 border-[3px] border-yellow-400"
+            : "bg-black/90 border-2 border-white/80"
+        }`}
+          style={hasRed ? { boxShadow: '0 0 8px rgba(239,68,68,0.6)' } : hasYellow ? { boxShadow: '0 0 8px rgba(250,204,21,0.5)' } : {}}
+        >
           <span className={`text-sm font-bold ${isSelected ? "text-black" : "text-white"}`}>{player.overall}</span>
         </div>
 
-        {!isInPosition && (
+        {!isInPosition && !hasRed && (
           <div className="absolute -top-1 -left-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center shadow-md border border-white">
             <span className="text-black text-[9px] font-bold">!</span>
           </div>
+        )}
+        {hasRed && (
+          <div className="absolute -top-1 -right-1 text-[10px]">🔴</div>
+        )}
+        {hasYellow && !hasRed && (
+          <div className="absolute -top-1 -right-1 text-[10px]">🟡</div>
         )}
       </div>
 

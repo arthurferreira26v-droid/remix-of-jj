@@ -18,6 +18,13 @@ export interface Player {
   // 📊 CONTROLE DE TEMPO DE JOGO NA TEMPORADA
   seasonStarterMatches?: number;
   seasonBenchMatches?: number;
+
+  // 🟨 SISTEMA DE CARTÕES
+  yellowCardChance?: number; // % chance de amarelo na partida (override manual)
+  accumulatedYellows?: number; // amarelos acumulados entre partidas
+  suspensionMatches?: number; // partidas de suspensão restantes
+  matchYellowCards?: number; // amarelos recebidos NA partida atual (0, 1, ou 2=vermelho)
+  matchRedCard?: boolean; // expulso na partida atual
 }
 
 // ================= GERADOR DE TIMES =================
