@@ -141,8 +141,13 @@ const Match = () => {
       localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
       players = optimized;
     }
+    // Apply suspensions: bench suspended starters, promote reserves
+    const afterSuspensions = applySuspensions(players);
+    // Reset match-specific card fields
+    const resetCards = afterSuspensions.map(p => ({ ...p, matchYellowCards: 0, matchRedCard: false }));
+    localStorage.setItem(`players_${teamName}`, JSON.stringify(resetCards));
     // Initialize matchEnergy from energy at start of match
-    return initMatchEnergy(players);
+    return initMatchEnergy(resetCards);
   };
 
   const [userPlayers, setUserPlayers] = useState<Player[]>(getInitialUserPlayers);
