@@ -85,15 +85,15 @@ const ModeSelection = () => {
       {/* Ambient background glow */}
       <div className="fixed inset-0 pointer-events-none">
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, ease: "easeOut" }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-600/5 rounded-full blur-[120px]"
         />
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, ease: "easeOut", delay: 0.5 }}
+          transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
           className="absolute bottom-0 left-1/4 w-[600px] h-[300px] bg-emerald-600/5 rounded-full blur-[100px]"
         />
       </div>
