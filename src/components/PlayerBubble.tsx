@@ -30,8 +30,9 @@ const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, s
 
   return (
     <div
-      className={`flex flex-col items-center gap-0.5 ${onClick && !hasRed ? "cursor-pointer" : ""} ${isSelected ? "scale-110 z-10" : ""} ${hasRed ? "opacity-40 pointer-events-none" : ""}`}
+      className={`flex flex-col items-center gap-0.5 transition-all duration-300 ${onClick && !hasRed ? "cursor-pointer" : ""} ${isSelected ? "scale-110 z-10" : ""}`}
       onClick={hasRed ? undefined : onClick}
+      style={hasRed ? { opacity: 0.25, pointerEvents: 'none', filter: 'grayscale(100%)' } : {}}
     >
       {/* OVR circle */}
       <div className="relative">
@@ -39,36 +40,48 @@ const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, s
           isSelected 
             ? "bg-[#c8ff00] border-[3px] border-[#c8ff00]" 
             : hasRed
-            ? "bg-black/90 border-[3px] border-red-500"
+            ? "bg-red-900 border-[4px] border-red-500"
             : hasYellow
-            ? "bg-black/90 border-[3px] border-yellow-400"
+            ? "bg-black/90 border-[4px] border-yellow-400"
             : "bg-black/90 border-2 border-white/80"
         }`}
-          style={hasRed ? { boxShadow: '0 0 8px rgba(239,68,68,0.6)' } : hasYellow ? { boxShadow: '0 0 8px rgba(250,204,21,0.5)' } : {}}
+          style={
+            hasRed 
+              ? { boxShadow: '0 0 14px rgba(239,68,68,0.8), 0 0 4px rgba(239,68,68,1)' } 
+              : hasYellow 
+              ? { boxShadow: '0 0 12px rgba(250,204,21,0.7), 0 0 4px rgba(250,204,21,0.9)' } 
+              : {}
+          }
         >
-          <span className={`text-sm font-bold ${isSelected ? "text-black" : "text-white"}`}>{player.overall}</span>
+          {hasRed ? (
+            <span className="text-red-400 text-sm font-black">✕</span>
+          ) : (
+            <span className={`text-sm font-bold ${isSelected ? "text-black" : "text-white"}`}>{player.overall}</span>
+          )}
         </div>
 
-        {!isInPosition && !hasRed && (
+        {!isInPosition && !hasRed && !hasYellow && (
           <div className="absolute -top-1 -left-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center shadow-md border border-white">
             <span className="text-black text-[9px] font-bold">!</span>
           </div>
         )}
         {hasRed && (
-          <div className="absolute -top-1 -right-1 text-[10px]">🔴</div>
+          <div className="absolute -top-2 -right-2 text-sm drop-shadow-lg">🟥</div>
         )}
         {hasYellow && !hasRed && (
-          <div className="absolute -top-1 -right-1 text-[10px]">🟡</div>
+          <div className="absolute -top-2 -right-2 text-sm drop-shadow-lg">🟨</div>
         )}
       </div>
 
       {/* Name */}
-      <div className="bg-black/70 px-1.5 py-0.5 rounded text-white text-[8px] font-medium whitespace-nowrap">
+      <div className={`px-1.5 py-0.5 rounded text-[8px] font-medium whitespace-nowrap ${
+        hasRed ? 'bg-red-900/70 text-red-300 line-through' : 'bg-black/70 text-white'
+      }`}>
         {player.name}
       </div>
 
       {/* Position role tag */}
-      {role && (
+      {role && !hasRed && (
         <div className={`px-1.5 py-0 rounded text-[7px] font-bold whitespace-nowrap ${
           isInPosition ? 'bg-white/20 text-white/80' : 'bg-yellow-500/30 text-yellow-300'
         }`}>
@@ -77,7 +90,7 @@ const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, s
       )}
 
       {/* Horizontal energy bar below position */}
-      {showEnergyBar && (
+      {showEnergyBar && !hasRed && (
         <div
           className="w-11 h-[6px] rounded-full overflow-hidden mt-0.5"
           style={{

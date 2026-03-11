@@ -485,29 +485,48 @@ const Match = () => {
           
           // Card system: pick a random player from the fouling team
           const foulTeam: 'home' | 'away' = isHomeFoul ? 'home' : 'away';
-          const foulPlayers = foulTeam === 'away' ? userStarters.filter(p => !p.matchRedCard) : opponentStarters;
-          if (foulPlayers.length > 0) {
-            const foulPlayer = foulPlayers[Math.floor(Math.random() * foulPlayers.length)];
-            const cardChance = getYellowCardChance(foulPlayer);
-            // Roll: cardChance% chance per foul to get a yellow
-            if (Math.random() * 100 < cardChance) {
-              const currentYellows = foulPlayer.matchYellowCards || 0;
-              const isSecondYellow = currentYellows >= 1;
-              const cardType = isSecondYellow ? 'red_card' as const : 'yellow_card' as const;
-
-              // Update player state if it's the user's team
-              if (foulTeam === 'away') {
-                setUserPlayers(prev => prev.map(p =>
+          if (foulTeam === 'away') {
+            // User team: use functional state to get fresh player data
+            setUserPlayers(prev => {
+              const activeStarters = prev.filter(p => p.isStarter && !p.matchRedCard);
+              if (activeStarters.length === 0) return prev;
+              const foulPlayer = activeStarters[Math.floor(Math.random() * activeStarters.length)];
+              const cardChance = getYellowCardChance(foulPlayer);
+              if (Math.random() * 100 < cardChance) {
+                const currentYellows = foulPlayer.matchYellowCards || 0;
+                const isSecondYellow = currentYellows >= 1;
+                const cardType = isSecondYellow ? 'red_card' as const : 'yellow_card' as const;
+                
+                setMatchEvents(events => [...events, {
+                  minute: next,
+                  type: cardType,
+                  team: 'away' as const,
+                  playerName: foulPlayer.name
+                }]);
+                
+                return prev.map(p =>
                   p.id === foulPlayer.id ? applyCardToPlayer(p, cardType) : p
-                ));
+                );
               }
-
-              setMatchEvents(events => [...events, {
-                minute: next,
-                type: cardType,
-                team: foulTeam,
-                playerName: foulPlayer.name
-              }]);
+              return prev;
+            });
+          } else {
+            // Opponent team: stateless, just generate event
+            const foulPlayers = opponentStarters;
+            if (foulPlayers.length > 0) {
+              const foulPlayer = foulPlayers[Math.floor(Math.random() * foulPlayers.length)];
+              const cardChance = getYellowCardChance(foulPlayer);
+              if (Math.random() * 100 < cardChance) {
+                const currentYellows = foulPlayer.matchYellowCards || 0;
+                const isSecondYellow = currentYellows >= 1;
+                const cardType = isSecondYellow ? 'red_card' as const : 'yellow_card' as const;
+                setMatchEvents(events => [...events, {
+                  minute: next,
+                  type: cardType,
+                  team: 'home' as const,
+                  playerName: foulPlayer.name
+                }]);
+              }
             }
           }
         }
