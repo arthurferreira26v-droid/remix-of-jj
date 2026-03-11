@@ -11,13 +11,24 @@ import heroStore from "@/assets/hero-store.jpg";
   const img = new Image();
   img.src = src;
 });
+const allImages = [heroCampaign, heroQuickmatch, heroStore];
 
 const ModeSelection = () => {
   const navigate = useNavigate();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [imagesReady, setImagesReady] = useState(false);
 
   useEffect(() => {
     document.title = "Gerenciador de Futebol";
+    let loaded = 0;
+    allImages.forEach(src => {
+      const img = new Image();
+      img.onload = img.onerror = () => {
+        loaded++;
+        if (loaded >= allImages.length) setImagesReady(true);
+      };
+      img.src = src;
+    });
   }, []);
 
   const modes = [
