@@ -50,25 +50,25 @@ const ModeSelection = () => {
   const containerVariants = {
     hidden: {},
     visible: {
-      transition: { staggerChildren: 0.25, delayChildren: 0.3 },
+      transition: { staggerChildren: 0.06, delayChildren: 0.05 },
     },
   };
 
   const cardVariants = {
-    hidden: { opacity: 0, x: -60 },
+    hidden: { opacity: 0, x: -40 },
     visible: {
       opacity: 1,
       x: 0,
-      transition: { duration: 0.7, ease: [0.25, 0.1, 0.25, 1] as const },
+      transition: { duration: 0.23, ease: [0, 0, 0.2, 1] as const },
     },
   };
 
   const headerVariants = {
-    hidden: { opacity: 0, x: -30 },
+    hidden: { opacity: 0, x: -20 },
     visible: {
       opacity: 1,
       x: 0,
-      transition: { duration: 0.5, ease: "easeOut" as const },
+      transition: { duration: 0.23, ease: [0, 0, 0.2, 1] as const },
     },
   };
 
@@ -76,7 +76,7 @@ const ModeSelection = () => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { duration: 0.5, delay: 1.8 },
+      transition: { duration: 0.23, delay: 0.3 },
     },
   };
 
@@ -85,15 +85,15 @@ const ModeSelection = () => {
       {/* Ambient background glow */}
       <div className="fixed inset-0 pointer-events-none">
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, ease: "easeOut" }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-600/5 rounded-full blur-[120px]"
         />
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, ease: "easeOut", delay: 0.5 }}
+          transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
           className="absolute bottom-0 left-1/4 w-[600px] h-[300px] bg-emerald-600/5 rounded-full blur-[100px]"
         />
       </div>
