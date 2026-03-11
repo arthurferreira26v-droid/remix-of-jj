@@ -6,18 +6,26 @@ import heroCampaign from "@/assets/hero-campaign.jpg";
 import heroQuickmatch from "@/assets/hero-quickmatch.jpg";
 import heroStore from "@/assets/hero-store.jpg";
 
-// Preload images immediately on module load
-[heroCampaign, heroQuickmatch, heroStore].forEach(src => {
-  const img = new Image();
-  img.src = src;
-});
+
+
+const allImages = [heroCampaign, heroQuickmatch, heroStore];
 
 const ModeSelection = () => {
   const navigate = useNavigate();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [imagesReady, setImagesReady] = useState(false);
 
   useEffect(() => {
     document.title = "Gerenciador de Futebol";
+    let loaded = 0;
+    allImages.forEach(src => {
+      const img = new Image();
+      img.onload = img.onerror = () => {
+        loaded++;
+        if (loaded >= allImages.length) setImagesReady(true);
+      };
+      img.src = src;
+    });
   }, []);
 
   const modes = [
@@ -85,6 +93,10 @@ const ModeSelection = () => {
       transition: { duration: 0.23, delay: 0.3 },
     },
   };
+
+  if (!imagesReady) {
+    return <div className="min-h-screen bg-[#0a0a0b]" />;
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0a0b] flex flex-col overflow-hidden relative">
