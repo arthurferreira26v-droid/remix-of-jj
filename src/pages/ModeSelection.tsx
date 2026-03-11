@@ -148,6 +148,8 @@ const ModeSelection = () => {
             <motion.img
               src={mode.bg}
               alt={mode.label}
+              loading="eager"
+              decoding="async"
               className="absolute inset-0 w-full h-full object-cover"
               initial={{ scale: 1.05 }}
               whileHover={{ scale: 1.15 }}
