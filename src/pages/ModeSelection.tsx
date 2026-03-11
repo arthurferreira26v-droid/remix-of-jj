@@ -50,25 +50,25 @@ const ModeSelection = () => {
   const containerVariants = {
     hidden: {},
     visible: {
-      transition: { staggerChildren: 0.25, delayChildren: 0.3 },
+      transition: { staggerChildren: 0.06, delayChildren: 0.05 },
     },
   };
 
   const cardVariants = {
-    hidden: { opacity: 0, x: -60 },
+    hidden: { opacity: 0, x: -40 },
     visible: {
       opacity: 1,
       x: 0,
-      transition: { duration: 0.7, ease: [0.25, 0.1, 0.25, 1] as const },
+      transition: { duration: 0.23, ease: [0, 0, 0.2, 1] as const },
     },
   };
 
   const headerVariants = {
-    hidden: { opacity: 0, x: -30 },
+    hidden: { opacity: 0, x: -20 },
     visible: {
       opacity: 1,
       x: 0,
-      transition: { duration: 0.5, ease: "easeOut" as const },
+      transition: { duration: 0.23, ease: [0, 0, 0.2, 1] as const },
     },
   };
 
@@ -76,7 +76,7 @@ const ModeSelection = () => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { duration: 0.5, delay: 1.8 },
+      transition: { duration: 0.23, delay: 0.3 },
     },
   };
 
