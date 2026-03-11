@@ -6,11 +6,8 @@ import heroCampaign from "@/assets/hero-campaign.jpg";
 import heroQuickmatch from "@/assets/hero-quickmatch.jpg";
 import heroStore from "@/assets/hero-store.jpg";
 
-// Preload images immediately on module load
-[heroCampaign, heroQuickmatch, heroStore].forEach(src => {
-  const img = new Image();
-  img.src = src;
-});
+
+
 const allImages = [heroCampaign, heroQuickmatch, heroStore];
 
 const ModeSelection = () => {
