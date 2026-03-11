@@ -94,6 +94,10 @@ const ModeSelection = () => {
     },
   };
 
+  if (!imagesReady) {
+    return <div className="min-h-screen bg-[#0a0a0b]" />;
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0b] flex flex-col overflow-hidden relative">
       {/* Ambient background glow */}
