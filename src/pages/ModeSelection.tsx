@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Trophy, Gamepad2, ShoppingBag, Shield } from "lucide-react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import heroCampaign from "@/assets/hero-campaign.jpg";
 import heroQuickmatch from "@/assets/hero-quickmatch.jpg";
 import heroStore from "@/assets/hero-store.jpg";
+
+// Preload images immediately on module load
+[heroCampaign, heroQuickmatch, heroStore].forEach(src => {
+  const img = new Image();
+  img.src = src;
+});
 
 const ModeSelection = () => {
   const navigate = useNavigate();
@@ -142,6 +148,8 @@ const ModeSelection = () => {
             <motion.img
               src={mode.bg}
               alt={mode.label}
+              loading="eager"
+              decoding="async"
               className="absolute inset-0 w-full h-full object-cover"
               initial={{ scale: 1.05 }}
               whileHover={{ scale: 1.15 }}
