@@ -1,36 +1,56 @@
-import { useState } from "react";
-import { X, Search, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Search, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Minus, Loader2 } from "lucide-react";
 import { Player } from "@/data/players";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
-
-// Jogadores disponíveis no mercado
-const marketPlayers: Player[] = [
-  { id: "m1", name: "Lucas Silva", number: 8, position: "VOL", overall: 78, age: 26 },
-  { id: "m2", name: "Rafael Costa", number: 11, position: "PE", overall: 80, age: 23 },
-  { id: "m3", name: "Diego Souza", number: 9, position: "ATA", overall: 82, age: 35 },
-  { id: "m4", name: "Marcos Vinicius", number: 5, position: "ZAG", overall: 77, age: 21 },
-  { id: "m5", name: "André Luiz", number: 1, position: "GOL", overall: 79, age: 28 },
-  { id: "m6", name: "Felipe Santos", number: 7, position: "PD", overall: 76, age: 19 },
-  { id: "m7", name: "Carlos Eduardo", number: 10, position: "MC", overall: 83, age: 30 },
-  { id: "m8", name: "Thiago Mendes", number: 6, position: "VOL", overall: 81, age: 32 },
-  { id: "m9", name: "Bruno Henrique", number: 17, position: "LE", overall: 75, age: 22 },
-  { id: "m10", name: "Gabriel Barbosa", number: 99, position: "ATA", overall: 85, age: 28 },
-  { id: "m11", name: "Pedro Raul", number: 19, position: "ATA", overall: 79, age: 27 },
-  { id: "m12", name: "Matheus Cunha", number: 20, position: "MC", overall: 84, age: 25 },
-];
+import { fetchAdminPlayers } from "@/hooks/useAdminData";
+import { teams } from "@/data/teams";
 
 interface TransferMarketProps {
   budget: number;
+  userTeamName: string;
   onClose: () => void;
   onBuyPlayer: (player: Player, price: number) => void;
 }
 
-export const TransferMarket = ({ budget, onClose, onBuyPlayer }: TransferMarketProps) => {
+export const TransferMarket = ({ budget, userTeamName, onClose, onBuyPlayer }: TransferMarketProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterPosition, setFilterPosition] = useState<string>("ALL");
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [marketPlayers, setMarketPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const positions = ["ALL", "GOL", "ZAG", "LD", "LE", "VOL", "MC", "PD", "PE", "ATA"];
+  const positions = ["ALL", "GOL", "ZAG", "LD", "LE", "VOL", "MC", "MEI", "PD", "PE", "ATA"];
+
+  // Fetch all admin players from Brazilian teams, excluding user's team
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const adminPlayers = await fetchAdminPlayers(true);
+
+      // Get Brazilian team IDs
+      const brazilianTeams = teams
+        .filter(t => t.league === "brasileiro")
+        .map(t => t.name);
+
+      const allPlayers: Player[] = [];
+
+      for (const [teamId, players] of Object.entries(adminPlayers)) {
+        // Skip user's team
+        if (teamId.toLowerCase() === userTeamName.toLowerCase()) continue;
+        // Only include Brazilian teams
+        if (!brazilianTeams.some(name => name.toLowerCase() === teamId.toLowerCase())) continue;
+
+        players.forEach(p => {
+          allPlayers.push({ ...p, id: `market_${teamId}_${p.id}` });
+        });
+      }
+
+      // Sort by overall descending
+      allPlayers.sort((a, b) => b.overall - a.overall);
+      setMarketPlayers(allPlayers);
+      setLoading(false);
+    })();
+  }, [userTeamName]);
 
   const filteredPlayers = marketPlayers.filter((player) => {
     const matchesSearch = player.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -39,9 +59,11 @@ export const TransferMarket = ({ budget, onClose, onBuyPlayer }: TransferMarketP
   });
 
   const handleBuy = (player: Player) => {
-    const price = calculateMarketValue(player.overall);
+    const price = calculateMarketValue(player);
     if (budget >= price) {
       onBuyPlayer(player, price);
+      // Remove from market list
+      setMarketPlayers(prev => prev.filter(p => p.id !== player.id));
       setSelectedPlayer(null);
     }
   };
@@ -108,72 +130,81 @@ export const TransferMarket = ({ budget, onClose, onBuyPlayer }: TransferMarketP
 
       {/* Players List */}
       <div className="p-4 space-y-3">
-        {filteredPlayers.map((player) => {
-          const price = calculateMarketValue(player.overall);
-          const canAfford = budget >= price;
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
+            <Loader2 className="w-8 h-8 animate-spin mb-3" />
+            <span>Carregando jogadores...</span>
+          </div>
+        ) : (
+          <>
+            {filteredPlayers.map((player) => {
+              const price = calculateMarketValue(player);
+              const canAfford = budget >= price;
 
-          return (
-            <div
-              key={player.id}
-              className="bg-zinc-900 rounded-lg p-4 border border-zinc-800"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-black border-2 border-white rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold">{player.number}</span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white">{player.name}</h4>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-sm text-zinc-400">{player.position}</span>
-                      <span className="px-2 py-0.5 bg-blue-600 rounded text-xs font-bold text-white">
-                        {player.overall}
-                      </span>
-                      <span className="text-xs text-zinc-500">{player.age} anos</span>
-                      {player.age < 24 && (
-                        <span className="flex items-center text-green-400 text-xs" title="Potencial de evolução">
-                          <TrendingUp className="w-3 h-3" />
-                        </span>
-                      )}
-                      {player.age >= 24 && player.age <= 30 && (
-                        <span className="flex items-center text-yellow-400 text-xs" title="Estável">
-                          <Minus className="w-3 h-3" />
-                        </span>
-                      )}
-                      {player.age > 30 && (
-                        <span className="flex items-center text-red-400 text-xs" title="Em declínio">
-                          <TrendingDown className="w-3 h-3" />
-                        </span>
-                      )}
+              return (
+                <div
+                  key={player.id}
+                  className="bg-zinc-900 rounded-lg p-4 border border-zinc-800"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-black border-2 border-white rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold">{player.number}</span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-white">{player.name}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm text-zinc-400">{player.position}</span>
+                          <span className="px-2 py-0.5 bg-blue-600 rounded text-xs font-bold text-white">
+                            {player.overall}
+                          </span>
+                          <span className="text-xs text-zinc-500">{player.age} anos</span>
+                          {player.age < 24 && (
+                            <span className="flex items-center text-green-400 text-xs" title="Potencial de evolução">
+                              <TrendingUp className="w-3 h-3" />
+                            </span>
+                          )}
+                          {player.age >= 24 && player.age <= 30 && (
+                            <span className="flex items-center text-yellow-400 text-xs" title="Estável">
+                              <Minus className="w-3 h-3" />
+                            </span>
+                          )}
+                          {player.age > 30 && (
+                            <span className="flex items-center text-red-400 text-xs" title="Em declínio">
+                              <TrendingDown className="w-3 h-3" />
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-green-400">
+                        {formatMarketValue(price)}
+                      </div>
+                      <button
+                        onClick={() => handleBuy(player)}
+                        disabled={!canAfford}
+                        className={`mt-2 px-4 py-2 rounded-lg font-bold text-sm transition-colors ${
+                          canAfford
+                            ? "bg-[#c8ff00] text-black hover:bg-[#b8ef00]"
+                            : "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+                        }`}
+                      >
+                        {canAfford ? "Comprar" : "Sem Fundos"}
+                      </button>
                     </div>
                   </div>
                 </div>
+              );
+            })}
 
-                <div className="text-right">
-                  <div className="text-lg font-bold text-green-400">
-                    {formatMarketValue(price)}
-                  </div>
-                  <button
-                    onClick={() => handleBuy(player)}
-                    disabled={!canAfford}
-                    className={`mt-2 px-4 py-2 rounded-lg font-bold text-sm transition-colors ${
-                      canAfford
-                        ? "bg-[#c8ff00] text-black hover:bg-[#b8ef00]"
-                        : "bg-zinc-700 text-zinc-400 cursor-not-allowed"
-                    }`}
-                  >
-                    {canAfford ? "Comprar" : "Sem Fundos"}
-                  </button>
-                </div>
+            {filteredPlayers.length === 0 && (
+              <div className="text-center py-12 text-zinc-400">
+                Nenhum jogador encontrado
               </div>
-            </div>
-          );
-        })}
-
-        {filteredPlayers.length === 0 && (
-          <div className="text-center py-12 text-zinc-400">
-            Nenhum jogador encontrado
-          </div>
+            )}
+          </>
         )}
       </div>
     </div>

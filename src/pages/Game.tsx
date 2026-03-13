@@ -611,6 +611,7 @@ const Game = () => {
       {showTransferMarket && (
         <TransferMarket
           budget={budget}
+          userTeamName={teamName}
           onClose={() => setShowTransferMarket(false)}
           onBuyPlayer={handleBuyPlayer}
         />
