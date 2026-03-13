@@ -446,7 +446,7 @@ const AdminPanel = () => {
                 <Label className="text-zinc-300 text-sm">Titular</Label>
               </div>
             </div>
-          </ScrollArea>
+          </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => { setIsAdding(false); setEditPlayer(null); }} className="text-zinc-400">Cancelar</Button>
             <Button onClick={isAdding ? confirmAdd : confirmEdit} className="bg-amber-500 hover:bg-amber-400 text-black font-semibold">
