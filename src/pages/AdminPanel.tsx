@@ -341,110 +341,112 @@ const AdminPanel = () => {
               {isAdding ? "Preencha os dados do novo jogador" : `Editando ${editPlayer?.name}`}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label className="text-zinc-300 text-sm">Nome</Label>
-              <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="bg-zinc-800 border-zinc-700 text-white" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
+          <ScrollArea className="flex-1 max-h-[60vh] pr-3">
+            <div className="space-y-4 py-2">
               <div className="space-y-1.5">
-                <Label className="text-zinc-300 text-sm">Posição</Label>
-                <Select value={formData.position} onValueChange={(v) => setFormData({ ...formData, position: v })}>
-                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
-                    {POSITIONS.map((pos) => (
-                      <SelectItem key={pos} value={pos} className="text-white">{pos}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label className="text-zinc-300 text-sm">Nome</Label>
+                <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="bg-zinc-800 border-zinc-700 text-white" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-zinc-300 text-sm">Posição</Label>
+                  <Select value={formData.position} onValueChange={(v) => setFormData({ ...formData, position: v })}>
+                    <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-800 border-zinc-700">
+                      {POSITIONS.map((pos) => (
+                        <SelectItem key={pos} value={pos} className="text-white">{pos}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-zinc-300 text-sm">Número</Label>
+                  <Input type="number" value={formData.number} onChange={(e) => setFormData({ ...formData, number: +e.target.value })} className="bg-zinc-800 border-zinc-700 text-white" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-zinc-300 text-sm">Overall</Label>
+                  <Input type="number" min={40} max={99} value={formData.overall} onChange={(e) => setFormData({ ...formData, overall: +e.target.value })} className="bg-zinc-800 border-zinc-700 text-white" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-zinc-300 text-sm">Idade</Label>
+                  <Input type="number" min={15} max={45} value={formData.age} onChange={(e) => setFormData({ ...formData, age: +e.target.value })} className="bg-zinc-800 border-zinc-700 text-white" />
+                </div>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-zinc-300 text-sm">Número</Label>
-                <Input type="number" value={formData.number} onChange={(e) => setFormData({ ...formData, number: +e.target.value })} className="bg-zinc-800 border-zinc-700 text-white" />
+                <Label className="text-zinc-300 text-sm">Posições Alternativas</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {POSITIONS.filter((pos) => pos !== formData.position).map((pos) => {
+                    const isSelected = formData.altPositions?.includes(pos);
+                    return (
+                      <button
+                        key={pos}
+                        type="button"
+                        onClick={() => {
+                          const alts = formData.altPositions || [];
+                          setFormData({
+                            ...formData,
+                            altPositions: isSelected ? alts.filter((p) => p !== pos) : [...alts, pos],
+                          });
+                        }}
+                        className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
+                          isSelected
+                            ? "bg-amber-500 text-black"
+                            : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                        }`}
+                      >
+                        {pos}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-zinc-300 text-sm">Overall</Label>
-                <Input type="number" min={40} max={99} value={formData.overall} onChange={(e) => setFormData({ ...formData, overall: +e.target.value })} className="bg-zinc-800 border-zinc-700 text-white" />
+                <Label className="text-zinc-300 text-sm">Valor de Mercado (R$)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="Auto (baseado no OVR)"
+                  value={formData.marketValue ?? ""}
+                  onChange={(e) => setFormData({ ...formData, marketValue: e.target.value ? +e.target.value : undefined })}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+                <p className="text-zinc-500 text-[11px]">Deixe vazio para calcular automaticamente pelo OVR</p>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-zinc-300 text-sm">Idade</Label>
-                <Input type="number" min={15} max={45} value={formData.age} onChange={(e) => setFormData({ ...formData, age: +e.target.value })} className="bg-zinc-800 border-zinc-700 text-white" />
+                <Label className="text-zinc-300 text-sm">Chance de Cartão Amarelo (%)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder={`Auto (${(() => {
+                    const pos = formData.position;
+                    if (pos === 'GOL') return '3';
+                    if (['ZAG','LE','LD'].includes(pos)) return '27';
+                    if (['MC','VOL','MEI','MD','ME'].includes(pos)) return '20';
+                    if (['ATA','PE','PD'].includes(pos)) return '10';
+                    return '15';
+                  })()}% pela posição)`}
+                  value={formData.yellowCardChance ?? ""}
+                  onChange={(e) => setFormData({ ...formData, yellowCardChance: e.target.value ? +e.target.value : undefined })}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+                <p className="text-zinc-500 text-[11px]">Deixe vazio para usar o padrão da posição</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={formData.isStarter}
+                  onChange={(e) => setFormData({ ...formData, isStarter: e.target.checked })}
+                  className="rounded border-zinc-600"
+                />
+                <Label className="text-zinc-300 text-sm">Titular</Label>
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-zinc-300 text-sm">Posições Alternativas</Label>
-              <div className="flex flex-wrap gap-1.5">
-                {POSITIONS.filter((pos) => pos !== formData.position).map((pos) => {
-                  const isSelected = formData.altPositions?.includes(pos);
-                  return (
-                    <button
-                      key={pos}
-                      type="button"
-                      onClick={() => {
-                        const alts = formData.altPositions || [];
-                        setFormData({
-                          ...formData,
-                          altPositions: isSelected ? alts.filter((p) => p !== pos) : [...alts, pos],
-                        });
-                      }}
-                      className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
-                        isSelected
-                          ? "bg-amber-500 text-black"
-                          : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
-                      }`}
-                    >
-                      {pos}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-zinc-300 text-sm">Valor de Mercado (R$)</Label>
-              <Input
-                type="number"
-                min={0}
-                placeholder="Auto (baseado no OVR)"
-                value={formData.marketValue ?? ""}
-                onChange={(e) => setFormData({ ...formData, marketValue: e.target.value ? +e.target.value : undefined })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <p className="text-zinc-500 text-[11px]">Deixe vazio para calcular automaticamente pelo OVR</p>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-zinc-300 text-sm">Chance de Cartão Amarelo (%)</Label>
-              <Input
-                type="number"
-                min={0}
-                max={100}
-                placeholder={`Auto (${(() => {
-                  const pos = formData.position;
-                  if (pos === 'GOL') return '3';
-                  if (['ZAG','LE','LD'].includes(pos)) return '27';
-                  if (['MC','VOL','MEI','MD','ME'].includes(pos)) return '20';
-                  if (['ATA','PE','PD'].includes(pos)) return '10';
-                  return '15';
-                })()}% pela posição)`}
-                value={formData.yellowCardChance ?? ""}
-                onChange={(e) => setFormData({ ...formData, yellowCardChance: e.target.value ? +e.target.value : undefined })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <p className="text-zinc-500 text-[11px]">Deixe vazio para usar o padrão da posição</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={formData.isStarter}
-                onChange={(e) => setFormData({ ...formData, isStarter: e.target.checked })}
-                className="rounded border-zinc-600"
-              />
-              <Label className="text-zinc-300 text-sm">Titular</Label>
-            </div>
-          </div>
+          </ScrollArea>
           <DialogFooter>
             <Button variant="ghost" onClick={() => { setIsAdding(false); setEditPlayer(null); }} className="text-zinc-400">Cancelar</Button>
             <Button onClick={isAdding ? confirmAdd : confirmEdit} className="bg-amber-500 hover:bg-amber-400 text-black font-semibold">
