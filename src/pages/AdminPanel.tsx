@@ -21,7 +21,7 @@ import { LogOut, Plus, Pencil, Trash2, Shield, Globe, Search, Loader2, CheckCirc
 import { toast } from "sonner";
 import { useAdminData, invalidateAdminCache } from "@/hooks/useAdminData";
 
-const POSITIONS = ["GOL", "LD", "LE", "ZAG", "VOL", "MC", "MEI", "MD", "ME", "PD", "PE", "ATA", "ALE", "ALD"];
+const POSITIONS = ["GOL", "LD", "ALD", "LE", "ALE", "ZAG", "VOL", "MC", "MEI", "PD", "MD", "PE", "ME", "ATA"];
 
 const countryFlags: Record<string, string> = {
   brasil: "🇧🇷", argentina: "🇦🇷", uruguai: "🇺🇾", colombia: "🇨🇴",
