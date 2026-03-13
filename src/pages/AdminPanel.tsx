@@ -334,7 +334,7 @@ const AdminPanel = () => {
 
       {/* Add / Edit Dialog */}
       <Dialog open={isAdding || !!editPlayer} onOpenChange={(open) => { if (!open) { setIsAdding(false); setEditPlayer(null); } }}>
-        <DialogContent className="bg-zinc-900 border-zinc-700 text-white max-w-md">
+        <DialogContent className="bg-zinc-900 border-zinc-700 text-white max-w-md max-h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>{isAdding ? "Adicionar Jogador" : "Editar Jogador"}</DialogTitle>
             <DialogDescription className="text-zinc-400">
