@@ -334,14 +334,14 @@ const AdminPanel = () => {
 
       {/* Add / Edit Dialog */}
       <Dialog open={isAdding || !!editPlayer} onOpenChange={(open) => { if (!open) { setIsAdding(false); setEditPlayer(null); } }}>
-        <DialogContent className="bg-zinc-900 border-zinc-700 text-white max-w-md max-h-[85vh] flex flex-col">
-          <DialogHeader>
+        <DialogContent className="bg-zinc-900 border-zinc-700 text-white max-w-md max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>{isAdding ? "Adicionar Jogador" : "Editar Jogador"}</DialogTitle>
             <DialogDescription className="text-zinc-400">
               {isAdding ? "Preencha os dados do novo jogador" : `Editando ${editPlayer?.name}`}
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="flex-1 max-h-[60vh] pr-3">
+          <div className="flex-1 overflow-y-auto min-h-0 pr-1" style={{ maxHeight: 'calc(90vh - 140px)' }}>
             <div className="space-y-4 py-2">
               <div className="space-y-1.5">
                 <Label className="text-zinc-300 text-sm">Nome</Label>
