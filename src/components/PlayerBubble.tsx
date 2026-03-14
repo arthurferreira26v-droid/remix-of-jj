@@ -40,9 +40,9 @@ const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, s
           isSelected 
             ? "bg-[#c8ff00] border-[3px] border-[#c8ff00]" 
             : hasRed
-            ? "bg-red-900 border-[4px] border-red-500"
+            ? "bg-red-900 border-2 border-red-500"
             : hasYellow
-            ? "bg-black/90 border-[4px] border-yellow-400"
+            ? "bg-black/90 border-2 border-yellow-400"
             : "bg-black/90 border-2 border-white/80"
         }`}
           style={
