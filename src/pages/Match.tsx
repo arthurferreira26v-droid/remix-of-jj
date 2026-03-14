@@ -491,6 +491,20 @@ const Match = () => {
               const activeStarters = prev.filter(p => p.isStarter && !p.matchRedCard);
               if (activeStarters.length === 0) return prev;
               const foulPlayer = activeStarters[Math.floor(Math.random() * activeStarters.length)];
+              
+              // Direct red card check (18% per match ≈ 2.5% per foul)
+              if (Math.random() < 0.025) {
+                setMatchEvents(events => [...events, {
+                  minute: next,
+                  type: 'red_card' as const,
+                  team: 'away' as const,
+                  playerName: foulPlayer.name
+                }]);
+                return prev.map(p =>
+                  p.id === foulPlayer.id ? applyCardToPlayer(p, 'red_card') : p
+                );
+              }
+              
               const cardChance = getYellowCardChance(foulPlayer);
               if (Math.random() * 100 < cardChance) {
                 const currentYellows = foulPlayer.matchYellowCards || 0;
@@ -515,17 +529,28 @@ const Match = () => {
             const foulPlayers = opponentStarters;
             if (foulPlayers.length > 0) {
               const foulPlayer = foulPlayers[Math.floor(Math.random() * foulPlayers.length)];
-              const cardChance = getYellowCardChance(foulPlayer);
-              if (Math.random() * 100 < cardChance) {
-                const currentYellows = foulPlayer.matchYellowCards || 0;
-                const isSecondYellow = currentYellows >= 1;
-                const cardType = isSecondYellow ? 'red_card' as const : 'yellow_card' as const;
+              
+              // Direct red card check
+              if (Math.random() < 0.025) {
                 setMatchEvents(events => [...events, {
                   minute: next,
-                  type: cardType,
+                  type: 'red_card' as const,
                   team: 'home' as const,
                   playerName: foulPlayer.name
                 }]);
+              } else {
+                const cardChance = getYellowCardChance(foulPlayer);
+                if (Math.random() * 100 < cardChance) {
+                  const currentYellows = foulPlayer.matchYellowCards || 0;
+                  const isSecondYellow = currentYellows >= 1;
+                  const cardType = isSecondYellow ? 'red_card' as const : 'yellow_card' as const;
+                  setMatchEvents(events => [...events, {
+                    minute: next,
+                    type: cardType,
+                    team: 'home' as const,
+                    playerName: foulPlayer.name
+                  }]);
+                }
               }
             }
           }
