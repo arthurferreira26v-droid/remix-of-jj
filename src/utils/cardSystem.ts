@@ -1,12 +1,23 @@
 import { Player } from "@/data/players";
 
-/** Default yellow card chance by position */
+/**
+ * Red card chance per match: 18% total across all players.
+ * We distribute this across ~90 minutes of fouls.
+ * Per-foul: ~18% / (avg fouls ~7) ≈ 2.5% per foul event.
+ */
+const RED_CARD_CHANCE_PER_FOUL = 2.5;
+
+/**
+ * Yellow card chance per foul by position.
+ * Tuned so that 3 accumulated yellows happens ~5% of the time across a match.
+ * Lower values = rarer cards.
+ */
 export const getDefaultYellowCardChance = (position: string): number => {
-  if (position === 'GOL') return 3;
-  if (['ZAG', 'LE', 'LD'].includes(position)) return 27;
-  if (['MC', 'VOL', 'MEI', 'MD', 'ME'].includes(position)) return 20;
-  if (['ATA', 'PE', 'PD'].includes(position)) return 10;
-  return 15; // fallback
+  if (position === 'GOL') return 2;
+  if (['ZAG', 'LE', 'LD'].includes(position)) return 12;
+  if (['MC', 'VOL', 'MEI', 'MD', 'ME'].includes(position)) return 9;
+  if (['ATA', 'PE', 'PD'].includes(position)) return 5;
+  return 7; // fallback
 };
 
 /** Get effective yellow card chance for a player */
@@ -18,16 +29,19 @@ export const getYellowCardChance = (player: Player): number => {
 };
 
 /** 
- * Process card events for a minute tick.
- * Called when a foul happens. Returns card event or null.
+ * Process card events for a foul.
+ * Now includes direct red card chance (18% per match ≈ 2.5% per foul).
  */
 export const processCardEvent = (
   player: Player,
   team: 'home' | 'away'
 ): { type: 'yellow_card' | 'red_card'; playerName: string; team: 'home' | 'away' } | null => {
+  // Direct red card check first (18% per match distributed across fouls)
+  if (Math.random() * 100 < RED_CARD_CHANCE_PER_FOUL) {
+    return { type: 'red_card', playerName: player.name, team };
+  }
+
   const chance = getYellowCardChance(player);
-  // Scale: chance is % per match (90 min). Per-foul chance is roughly chance/90*2 
-  // But we call this only when a foul happens, so use chance/100 directly
   if (Math.random() * 100 > chance) return null;
 
   const currentYellows = player.matchYellowCards || 0;
@@ -53,7 +67,7 @@ export const applyCardToPlayer = (player: Player, cardType: 'yellow_card' | 'red
   // Red card (direct or via 2nd yellow)
   return {
     ...player,
-    matchYellowCards: (player.matchYellowCards || 0) + 1,
+    matchYellowCards: (player.matchYellowCards || 0),
     matchRedCard: true,
   };
 };
@@ -125,4 +139,11 @@ export const applySuspensions = (players: Player[]): Player[] => {
   });
 
   return updated;
+};
+
+/**
+ * Check if any starter is suspended. Returns list of suspended starters.
+ */
+export const getSuspendedStarters = (players: Player[]): Player[] => {
+  return players.filter(p => p.isStarter && (p.suspensionMatches || 0) > 0);
 };

@@ -190,6 +190,8 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
                         const energyColor = getEnergyColor(energy);
                         const value = calculateMarketValue(player);
                         const isSelected = selectedPlayer?.id === player.id;
+                        const isSuspended = (player.suspensionMatches || 0) > 0;
+                        const hasYellowCards = (player.accumulatedYellows || 0) > 0;
                         return (
                           <button
                             key={player.id}
@@ -197,18 +199,31 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
                             className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
                               isSelected
                                 ? "bg-[#c8ff00] text-black"
+                                : isSuspended
+                                ? "bg-red-900/30 text-white/50 border border-red-500/40"
                                 : "bg-zinc-800/80 text-white hover:bg-zinc-700/80"
                             }`}
+                            style={isSuspended ? { opacity: 0.6 } : {}}
                           >
                             <div className="flex items-center gap-3">
-                              <span className={`font-bold text-lg w-8 text-center ${isSelected ? 'text-black' : 'text-blue-400'}`}>
+                              <span className={`font-bold text-lg w-8 text-center ${isSelected ? 'text-black' : isSuspended ? 'text-red-400' : 'text-blue-400'}`}>
                                 {player.overall}
                               </span>
                               <div className="text-left">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-medium text-[14px]">{player.name}</span>
+                                  <span className={`font-medium text-[14px] ${isSuspended ? 'line-through' : ''}`}>{player.name}</span>
                                   {player.isStarter && (
                                     <Star className="w-3 h-3 fill-current" style={{ color: isSelected ? 'black' : '#c8ff00' }} />
+                                  )}
+                                  {isSuspended && (
+                                    <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded font-bold">
+                                      SUSPENSO ({player.suspensionMatches} jogo{(player.suspensionMatches || 0) > 1 ? 's' : ''})
+                                    </span>
+                                  )}
+                                  {hasYellowCards && !isSuspended && (
+                                    <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded font-bold">
+                                      🟨 {player.accumulatedYellows}/3
+                                    </span>
                                   )}
                                 </div>
                                 <div className="flex items-center gap-2 mt-0.5">

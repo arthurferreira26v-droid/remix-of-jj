@@ -6,6 +6,7 @@ import { getTeamLogo } from "@/utils/teamLogos";
 import { MatchResult } from "@/hooks/useTeamForm";
 import { instantaneo } from "@/config/gameSettings";
 import { toast } from "sonner";
+import { getSuspendedStarters } from "@/utils/cardSystem";
 
 interface MatchCardProps {
   userTeam: string;
@@ -40,6 +41,13 @@ export const MatchCard = ({
   const handlePlayMatch = () => {
     const savedPlayers = localStorage.getItem(`players_${userTeam}`);
     if (savedPlayers) {
+      const players = JSON.parse(savedPlayers);
+      const suspended = getSuspendedStarters(players);
+      if (suspended.length > 0) {
+        const names = suspended.map((p: any) => p.name).join(', ');
+        toast.error(`Jogador(es) suspenso(s): ${names}. Substitua no elenco antes de jogar!`);
+        return;
+      }
       localStorage.setItem('match_players', savedPlayers);
     }
     let url = `/partida?time=${userTeam}&adversario=${opponentTeam}`;
