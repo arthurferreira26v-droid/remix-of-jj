@@ -25,8 +25,8 @@ const getEnergyColor = (energy: number) => {
 /** Field variant: small circle with OVR + name label + horizontal energy bar */
 const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, showEnergyBar = true, yellowCard, redCard }: PlayerBubbleProps) => {
   const energy = player.matchEnergy ?? player.energy ?? 100;
-  const hasYellow = yellowCard || (player.matchYellowCards || 0) >= 1;
-  const hasRed = redCard || player.matchRedCard;
+  const hasYellow = yellowCard || (player.matchYellowCards || 0) >= 1 || (player.accumulatedYellows || 0) > 0;
+  const hasRed = redCard || player.matchRedCard || (player.suspensionMatches || 0) > 0;
 
   return (
     <div
