@@ -6,6 +6,7 @@ import { getTeamLogo } from "@/utils/teamLogos";
 import { MatchResult } from "@/hooks/useTeamForm";
 import { instantaneo } from "@/config/gameSettings";
 import { toast } from "sonner";
+import { getSuspendedStarters } from "@/utils/cardSystem";
 
 interface MatchCardProps {
   userTeam: string;
