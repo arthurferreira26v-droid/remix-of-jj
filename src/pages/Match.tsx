@@ -44,7 +44,7 @@ const Match = () => {
   const [minute, setMinute] = useState(1);
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
-  const [possession, setPossession] = useState({ home: 50, away: 50 });
+  const [possession, setPossession] = useState({ home: 0, away: 100 });
   const [shots, setShots] = useState({ home: 0, away: 0 });
   const [fouls, setFouls] = useState({ home: 0, away: 0 });
   const [isPlaying, setIsPlaying] = useState(true);
