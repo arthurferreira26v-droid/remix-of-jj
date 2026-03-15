@@ -1,6 +1,3 @@
-import { Star } from "lucide-react";
-import { Card } from "@/components/ui/card";
-
 interface TeamCardProps {
   name: string;
   logo: string;
@@ -8,38 +5,40 @@ interface TeamCardProps {
   onClick: () => void;
 }
 
+const PointedStar = ({ filled }: { filled: boolean }) => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M12 2L14.9 8.6L22 9.3L16.8 14L18.2 21L12 17.3L5.8 21L7.2 14L2 9.3L9.1 8.6L12 2Z"
+      fill={filled ? "#facc15" : "rgba(255,255,255,0.12)"}
+      stroke={filled ? "#facc15" : "rgba(255,255,255,0.12)"}
+      strokeWidth="0.5"
+    />
+  </svg>
+);
+
 export const TeamCard = ({ name, logo, rating, onClick }: TeamCardProps) => {
   return (
-    <Card
+    <button
       onClick={onClick}
-      className="group relative cursor-pointer overflow-hidden border-border bg-card hover:bg-card/80 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_hsl(var(--neon-green)/0.3)]"
+      className="flex flex-col items-center bg-card rounded-xl p-3 py-4 active:scale-[0.97] transition-transform duration-150 cursor-pointer border border-border/50"
     >
-      <div className="flex flex-col items-center gap-4 p-6">
-        <div className="relative h-24 w-24 flex items-center justify-center bg-secondary rounded-full p-4 group-hover:bg-secondary/80 transition-colors">
-          <img
-            src={logo}
-            alt={name}
-            className="h-full w-full object-contain"
-          />
-        </div>
-        
-        <h3 className="text-lg font-bold text-center text-foreground group-hover:text-primary transition-colors">
-          {name}
-        </h3>
-        
-        <div className="flex gap-1">
-          {[...Array(5)].map((_, i) => (
-            <Star
-              key={i}
-              className={`h-4 w-4 ${
-                i < rating
-                  ? "fill-accent text-accent"
-                  : "fill-muted text-muted"
-              }`}
-            />
-          ))}
-        </div>
+      <div className="w-14 h-14 flex items-center justify-center mb-2">
+        <img
+          src={logo}
+          alt={name}
+          className="max-w-full max-h-full object-contain"
+        />
       </div>
-    </Card>
+
+      <span className="text-[11px] font-bold text-foreground text-center uppercase leading-tight tracking-wide line-clamp-1 w-full mb-1.5">
+        {name}
+      </span>
+
+      <div className="flex gap-0.5">
+        {[...Array(5)].map((_, i) => (
+          <PointedStar key={i} filled={i < rating} />
+        ))}
+      </div>
+    </button>
   );
 };

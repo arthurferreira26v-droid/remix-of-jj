@@ -4,7 +4,6 @@ import { TeamCard } from "@/components/TeamCard";
 import { teams } from "@/data/teams";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -21,51 +20,34 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-black">
-        <div className="container mx-auto px-4 py-3 flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/")}
-            className="text-muted-foreground hover:text-white"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-xl font-bold text-white">Gerenciador</h1>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#0a0a0b] flex flex-col">
+      <div className="flex-1 px-4 pt-6 pb-8">
+        {/* Back button */}
+        <button
+          onClick={() => navigate("/")}
+          className="mb-4 p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-12 max-w-7xl">
+        {/* Title */}
+        <h1 className="text-3xl font-extrabold text-foreground mb-6 italic">
+          Escolha seu time
+        </h1>
 
-        <div className="mb-8">
-          <h3 className="text-2xl font-bold text-foreground mb-6 text-center">
-            Escolha seu Time
-          </h3>
-          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-            {filteredTeams.map((team) => (
-              <TeamCard
-                key={team.id}
-                name={team.name}
-                logo={team.logo}
-                rating={team.rating}
-                onClick={() => handleTeamSelect(team.name)}
-              />
-            ))}
-          </div>
+        {/* Team grid */}
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5">
+          {filteredTeams.map((team) => (
+            <TeamCard
+              key={team.id}
+              name={team.name}
+              logo={team.logo}
+              rating={team.rating}
+              onClick={() => handleTeamSelect(team.name)}
+            />
+          ))}
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="border-t border-border py-8 mt-16">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-muted-foreground">
-            © 2025 Gerenciador de Futebol
-          </p>
-        </div>
-      </footer>
     </div>
   );
 };
