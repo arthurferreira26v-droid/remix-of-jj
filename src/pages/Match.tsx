@@ -701,13 +701,13 @@ const Match = () => {
               <span className="text-sm font-medium text-white">Posse de bola</span>
               <span className="text-sm text-muted-foreground">{possession.away}%</span>
             </div>
-            <div className="h-2 rounded-full overflow-hidden flex">
+            <div className="h-2 rounded-full overflow-hidden flex w-full">
               <div 
-                className="bg-white transition-all duration-300" 
+                className="bg-accent transition-all duration-1000" 
                 style={{ width: `${possession.home}%` }}
               />
               <div 
-                className="bg-accent transition-all duration-300" 
+                className="bg-white transition-all duration-1000" 
                 style={{ width: `${possession.away}%` }}
               />
             </div>
