@@ -68,16 +68,7 @@ const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, s
         {hasRed && (
           <div className="absolute -top-2 -right-2 text-sm drop-shadow-lg">🟥</div>
         )}
-        {hasYellow && !hasRed && (
-          <div className="absolute -top-2 -right-2 flex items-center gap-0.5 drop-shadow-lg">
-            <span className="text-sm">🟨</span>
-            {(player.accumulatedYellows || 0) > 0 && !(player.matchYellowCards || 0) && (
-              <span className="text-[8px] font-black text-yellow-400 bg-black/80 rounded-full w-3.5 h-3.5 flex items-center justify-center">
-                {player.accumulatedYellows}
-              </span>
-            )}
-          </div>
-        )}
+        {/* Yellow card: only the ring border, no emoji/counter */}
       </div>
 
       {/* Name */}
