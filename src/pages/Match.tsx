@@ -556,10 +556,11 @@ const Match = () => {
           }
         }
         
-        // Atualizar posse
+        // Atualizar posse (sempre soma 100%)
+        const homePoss = Math.floor(35 + Math.random() * 30);
         setPossession({
-          home: Math.floor(40 + Math.random() * 20),
-          away: Math.floor(40 + Math.random() * 20)
+          home: homePoss,
+          away: 100 - homePoss
         });
         
         if (next >= 90) {
