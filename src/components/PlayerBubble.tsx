@@ -28,11 +28,17 @@ const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, s
   const hasYellow = yellowCard || (player.matchYellowCards || 0) >= 1 || (player.accumulatedYellows || 0) > 0;
   const hasRed = redCard || player.matchRedCard || (player.suspensionMatches || 0) > 0;
 
+  // During a match, red-carded players are fully disabled
+  // On home screen, suspended players can be selected for substitution
+  const isSuspendedOnly = !redCard && !player.matchRedCard && (player.suspensionMatches || 0) > 0;
+  const isMatchRedCard = redCard || player.matchRedCard;
+  const isDisabled = isMatchRedCard; // only disable during match red cards
+
   return (
     <div
-      className={`flex flex-col items-center gap-0.5 transition-all duration-300 ${onClick && !hasRed ? "cursor-pointer" : ""} ${isSelected ? "scale-110 z-10" : ""}`}
-      onClick={hasRed ? undefined : onClick}
-      style={hasRed ? { opacity: 0.25, pointerEvents: 'none', filter: 'grayscale(100%)' } : {}}
+      className={`flex flex-col items-center gap-0.5 transition-all duration-300 ${onClick ? "cursor-pointer" : ""} ${isSelected ? "scale-110 z-10" : ""}`}
+      onClick={onClick}
+      style={isDisabled ? { opacity: 0.25, pointerEvents: 'none', filter: 'grayscale(100%)' } : isSuspendedOnly ? { opacity: 0.5 } : {}}
     >
       {/* OVR circle */}
       <div className="relative">
