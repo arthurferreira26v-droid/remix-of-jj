@@ -704,11 +704,11 @@ const Match = () => {
             </div>
             <div className="h-2 rounded-full overflow-hidden flex w-full">
               <div 
-                className="bg-accent transition-all duration-1000" 
+                className="bg-white transition-all duration-1000" 
                 style={{ width: `${possession.home}%` }}
               />
               <div 
-                className="bg-white transition-all duration-1000" 
+                className="bg-accent transition-all duration-1000" 
                 style={{ width: `${possession.away}%` }}
               />
             </div>
