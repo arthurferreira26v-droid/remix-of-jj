@@ -14,7 +14,7 @@ export const PlayerValueModal = ({ player, onClose, canSell = false, onSell }: P
   const sellValue = Math.floor(marketValue * 0.8); // Vende por 80% do valor
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
       <div className="bg-zinc-900 rounded-xl w-full max-w-sm mx-4 overflow-hidden border border-zinc-700 animate-scale-in">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-zinc-700">
