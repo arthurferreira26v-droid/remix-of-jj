@@ -587,7 +587,7 @@ const Game = () => {
         </div>
 
         {/* Page 1: Gerenciar Elenco */}
-        <div className="w-screen h-full overflow-y-auto">
+        <div className="relative w-screen h-full overflow-y-auto overflow-x-hidden">
           <SquadManager
             players={players}
             onClose={() => swipe.goToPage(0)}
