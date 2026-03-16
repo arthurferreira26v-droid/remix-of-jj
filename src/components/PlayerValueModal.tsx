@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Player } from "@/data/players";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { X, DollarSign, TrendingDown } from "lucide-react";
@@ -10,66 +12,71 @@ interface PlayerValueModalProps {
 }
 
 export const PlayerValueModal = ({ player, onClose, canSell = false, onSell }: PlayerValueModalProps) => {
-  const marketValue = calculateMarketValue(player.overall);
-  const sellValue = Math.floor(marketValue * 0.8); // Vende por 80% do valor
+  const marketValue = calculateMarketValue(player);
+  const sellValue = Math.floor(marketValue * 0.8);
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="bg-zinc-900 rounded-xl w-full max-w-sm mx-4 overflow-hidden border border-zinc-700 animate-scale-in">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-zinc-700">
-          <h3 className="text-lg font-bold text-white">Valor de Mercado</h3>
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
+  const modalContent = (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center overflow-x-hidden bg-background/80 px-4 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-[20rem] max-h-[85vh] overflow-y-auto overflow-x-hidden rounded-xl border border-border bg-card shadow-2xl animate-scale-in">
+        <div className="flex items-center justify-between border-b border-border p-4">
+          <h3 className="text-lg font-bold text-foreground">Valor de Mercado</h3>
           <button
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-zinc-700 transition-colors"
+            className="rounded-full p-1 transition-colors hover:bg-muted"
           >
-            <X className="w-5 h-5 text-zinc-400" />
+            <X className="h-5 w-5 text-muted-foreground" />
           </button>
         </div>
 
-        {/* Player Info */}
-        <div className="p-6">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 bg-black border-2 border-white/60 rounded-full flex items-center justify-center">
-              <span className="text-white text-2xl font-bold">{player.number}</span>
+        <div className="p-5">
+          <div className="mb-5 flex items-center gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-border bg-background">
+              <span className="text-2xl font-bold text-foreground">{player.number}</span>
             </div>
-            <div className="flex-1">
-              <h4 className="text-xl font-bold text-white">{player.name}</h4>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-sm text-zinc-400">{player.position}</span>
-                <span className="px-2 py-0.5 bg-blue-800 rounded text-xs font-bold text-white">
+            <div className="min-w-0 flex-1">
+              <h4 className="truncate text-xl font-bold text-foreground">{player.name}</h4>
+              <div className="mt-1 flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">{player.position}</span>
+                <span className="rounded bg-primary/15 px-2 py-0.5 text-xs font-bold text-primary">
                   {player.overall} OVR
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Market Value */}
-          <div className="bg-zinc-800/80 border border-zinc-600/50 rounded-lg p-4 mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <DollarSign className="w-5 h-5 text-white/70" />
-              <span className="text-sm text-white/60 font-medium">Valor de Mercado</span>
+          <div className="mb-4 rounded-lg border border-border bg-muted/60 p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground">Valor de Mercado</span>
             </div>
-            <span className="text-3xl font-bold text-white">
+            <span className="text-3xl font-bold text-foreground">
               {formatMarketValue(marketValue)}
             </span>
           </div>
 
-          {/* Sell Option */}
           {canSell && onSell && (
-            <div className="bg-zinc-800 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
+            <div className="rounded-lg border border-border bg-muted/60 p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <TrendingDown className="w-4 h-4 text-red-400" />
-                  <span className="text-sm text-zinc-400">Valor de Venda</span>
+                  <TrendingDown className="h-4 w-4 text-destructive" />
+                  <span className="text-sm text-muted-foreground">Valor de Venda</span>
                 </div>
-                <span className="text-lg font-bold text-white">
+                <span className="text-lg font-bold text-foreground">
                   {formatMarketValue(sellValue)}
                 </span>
               </div>
               <button
                 onClick={() => onSell(player)}
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-colors"
+                className="w-full rounded-lg bg-destructive py-3 font-bold text-destructive-foreground transition-opacity hover:opacity-90"
               >
                 Vender Jogador
               </button>
@@ -79,4 +86,6 @@ export const PlayerValueModal = ({ player, onClose, canSell = false, onSell }: P
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
