@@ -597,8 +597,8 @@ const Game = () => {
         </div>
       </div>
 
-      {/* Player Value Modal */}
-      {selectedPlayerForValue && (
+      {/* Player Value Modal - only on main page */}
+      {selectedPlayerForValue && swipe.currentPage === 0 && (
         <PlayerValueModal
           player={selectedPlayerForValue}
           onClose={() => setSelectedPlayerForValue(null)}
