@@ -141,7 +141,7 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
   const [activeTab, setActiveTab] = useState<"squad" | "scout">("squad");
 
   return (
-    <div className="bg-black min-h-full">
+    <div className="bg-black min-h-full relative">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-white text-2xl font-bold">Elenco</h2>
