@@ -43,7 +43,7 @@ export const teams: Team[] = [
   { id: "bragantino", name: "Bragantino", league: "brasileiro", rating: 3, logo: bragantinoLogo, playable: true },
   { id: "vitoria", name: "Vitória", league: "brasileiro", rating: 2, logo: vitoriaLogo, playable: true },
   { id: "coritiba", name: "Coritiba", league: "brasileiro", rating: 2, logo: coritibaLogo, playable: true },
-  { id: "chapecoense", name: "Chapecoense", league: "brasileiro", rating: 2, logo: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Associacao_Chapecoense_de_Futebol_logo.svg", playable: true },
+  { id: "chapecoense", name: "Chapecoense", league: "brasileiro", rating: 2, logo: chapecoenseLogo, playable: true },
   { id: "mirassol", name: "Mirassol", league: "brasileiro", rating: 2, logo: mirassolLogo, playable: true },
   { id: "remo", name: "Remo", league: "brasileiro", rating: 2, logo: remoLogo, playable: true },
 
