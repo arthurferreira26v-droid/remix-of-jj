@@ -40,14 +40,14 @@ export const PlayerValueModal = ({ player, onClose, canSell = false, onSell }: P
         <div className="p-5">
           <div className="mb-5 flex items-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-border bg-background">
-              <span className="text-2xl font-bold text-foreground">{player.number}</span>
+              <span className="text-2xl font-bold text-foreground">{player.overall}</span>
             </div>
             <div className="min-w-0 flex-1">
               <h4 className="truncate text-xl font-bold text-foreground">{player.name}</h4>
               <div className="mt-1 flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">{player.position}</span>
                 <span className="rounded bg-primary/15 px-2 py-0.5 text-xs font-bold text-primary">
-                  {player.overall} OVR
+                  #{player.number}
                 </span>
               </div>
             </div>

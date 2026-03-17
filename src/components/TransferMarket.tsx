@@ -149,14 +149,14 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onBuyPlayer }: T
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-black border-2 border-white rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold">{player.number}</span>
+                        <span className="text-white font-bold text-lg">{player.overall}</span>
                       </div>
                       <div>
                         <h4 className="font-bold text-white">{player.name}</h4>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-sm text-zinc-400">{player.position}</span>
                           <span className="px-2 py-0.5 bg-blue-600 rounded text-xs font-bold text-white">
-                            {player.overall}
+                            #{player.number}
                           </span>
                           <span className="text-xs text-zinc-500">{player.age} anos</span>
                           {player.age < 24 && (

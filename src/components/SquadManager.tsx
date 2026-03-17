@@ -206,9 +206,11 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
                             style={isSuspended ? { opacity: 0.6 } : {}}
                           >
                             <div className="flex items-center gap-3">
-                              <span className={`font-bold text-lg w-8 text-center ${isSelected ? 'text-black' : isSuspended ? 'text-red-400' : 'text-blue-400'}`}>
-                                {player.overall}
-                              </span>
+                              <div className="w-10 h-10 rounded-full border-2 flex items-center justify-center flex-shrink-0" style={{ borderColor: isSelected ? 'black' : isSuspended ? '#f87171' : '#60a5fa', background: isSelected ? 'black' : 'rgba(0,0,0,0.5)' }}>
+                                <span className={`font-bold text-sm ${isSelected ? 'text-[#c8ff00]' : isSuspended ? 'text-red-400' : 'text-white'}`}>
+                                  {player.overall}
+                                </span>
+                              </div>
                               <div className="text-left">
                                 <div className="flex items-center gap-2">
                                   <span className={`font-medium text-[14px] ${isSuspended ? 'line-through' : ''}`}>{player.name}</span>
