@@ -639,102 +639,14 @@ const Match = () => {
             <span className="text-6xl font-bold text-white">{awayScore}</span>
           </div>
 
-          {/* Away Team */}
-          <Sheet>
+          {/* Away Team (User) - opens full squad management */}
+          <Sheet onOpenChange={(open) => handleSquadSheetChange(open)}>
             <SheetTrigger asChild>
               <button className="flex flex-col items-center gap-3 hover:opacity-80 transition-opacity">
                 <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center p-4">
                   <img src={selectedTeam?.logo} alt={teamName} className="w-full h-full object-contain" />
                 </div>
                 <span className="text-sm font-medium text-white">{teamName.slice(0, 3).toUpperCase()}</span>
-              </button>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-black border-border w-full sm:max-w-lg">
-              <VisuallyHidden>
-                <SheetTitle>Táticas do {teamName}</SheetTitle>
-              </VisuallyHidden>
-              <div className="mt-8">
-                <TacticsManager teamName={teamName} players={userStarters} />
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-
-        {/* Match Events - fixed height to prevent pushing stats */}
-        <div className="max-w-2xl mx-auto mb-4" style={{ minHeight: 0, maxHeight: '120px' }}>
-          {matchEvents.length > 0 && (
-            <div className="bg-zinc-900 rounded-lg p-3 max-h-[120px] overflow-y-auto">
-              <div className="space-y-2">
-                {matchEvents.slice().reverse().map((event, index) => (
-                  <div 
-                    key={index} 
-                    className={`flex items-center gap-3 text-sm ${
-                      event.team === 'away' ? 'justify-end' : 'justify-start'
-                    }`}
-                  >
-                    {event.team === 'home' && (
-                      <>
-                        <span className="text-muted-foreground">{event.minute}'</span>
-                        <span>{getEventIcon(event.type)}</span>
-                        <span className="text-white">{getEventText(event)}</span>
-                      </>
-                    )}
-                    {event.team === 'away' && (
-                      <>
-                        <span className="text-white">{getEventText(event)}</span>
-                        <span>{getEventIcon(event.type)}</span>
-                        <span className="text-muted-foreground">{event.minute}'</span>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Stats */}
-        <div className="max-w-2xl mx-auto space-y-6 mt-8">
-          {/* Possession */}
-          <div>
-            <div className="flex justify-between mb-2">
-              <span className="text-sm text-muted-foreground">{possession.home}%</span>
-              <span className="text-sm font-medium text-white">Posse de bola</span>
-              <span className="text-sm text-muted-foreground">{possession.away}%</span>
-            </div>
-            <div className="h-2 rounded-full overflow-hidden flex w-full">
-              <div 
-                className="bg-white transition-all duration-1000" 
-                style={{ width: `${possession.home}%` }}
-              />
-              <div 
-                className="bg-accent transition-all duration-1000" 
-                style={{ width: `${possession.away}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Shots */}
-          <div className="flex justify-between items-center">
-            <span className="text-2xl font-bold text-white">{shots.home}</span>
-            <span className="text-sm font-medium text-white">Chutes a gol</span>
-            <span className="text-2xl font-bold text-white">{shots.away}</span>
-          </div>
-
-          {/* Fouls */}
-          <div className="flex justify-between items-center">
-            <span className="text-2xl font-bold text-white">{fouls.home}</span>
-            <span className="text-sm font-medium text-white">Faltas</span>
-            <span className="text-2xl font-bold text-white">{fouls.away}</span>
-          </div>
-        </div>
-
-        {/* Botão fixo de Gerenciar Time */}
-        <div className="fixed bottom-6 left-4 right-4 z-40 max-w-2xl mx-auto">
-          <Sheet onOpenChange={(open) => handleSquadSheetChange(open)}>
-            <SheetTrigger asChild>
-              <button className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center justify-center backdrop-blur-sm">
-                <span className="text-lg font-bold">GERENCIAR TIME</span>
               </button>
             </SheetTrigger>
             <SheetContent side="bottom" className="bg-black border-border h-[90vh]">
@@ -785,8 +697,74 @@ const Match = () => {
           </Sheet>
         </div>
 
-        {/* Spacer para evitar sobreposição com botão fixo */}
-        <div className="h-24" />
+        {/* Match Events - fixed height to prevent pushing stats */}
+        <div className="max-w-2xl mx-auto mb-4" style={{ minHeight: 0, maxHeight: '120px' }}>
+          {matchEvents.length > 0 && (
+            <div className="bg-zinc-900 rounded-lg p-3 max-h-[120px] overflow-y-auto">
+              <div className="space-y-2">
+                {matchEvents.slice().reverse().map((event, index) => (
+                  <div 
+                    key={index} 
+                    className={`flex items-center gap-3 text-sm ${
+                      event.team === 'away' ? 'justify-end' : 'justify-start'
+                    }`}
+                  >
+                    {event.team === 'home' && (
+                      <>
+                        <span className="text-muted-foreground">{event.minute}'</span>
+                        <span>{getEventIcon(event.type)}</span>
+                        <span className="text-white">{getEventText(event)}</span>
+                      </>
+                    )}
+                    {event.team === 'away' && (
+                      <>
+                        <span className="text-white">{getEventText(event)}</span>
+                        <span>{getEventIcon(event.type)}</span>
+                        <span className="text-muted-foreground">{event.minute}'</span>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Stats */}
+        <div className="max-w-2xl mx-auto space-y-6 mt-12">
+          {/* Possession */}
+          <div>
+            <div className="flex justify-between mb-2">
+              <span className="text-sm text-muted-foreground">{possession.home}%</span>
+              <span className="text-sm font-medium text-white">Posse de bola</span>
+              <span className="text-sm text-muted-foreground">{possession.away}%</span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden flex w-full">
+              <div 
+                className="bg-white transition-all duration-1000" 
+                style={{ width: `${possession.home}%` }}
+              />
+              <div 
+                className="bg-accent transition-all duration-1000" 
+                style={{ width: `${possession.away}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Shots */}
+          <div className="flex justify-between items-center">
+            <span className="text-2xl font-bold text-white">{shots.home}</span>
+            <span className="text-sm font-medium text-white">Chutes a gol</span>
+            <span className="text-2xl font-bold text-white">{shots.away}</span>
+          </div>
+
+          {/* Fouls */}
+          <div className="flex justify-between items-center">
+            <span className="text-2xl font-bold text-white">{fouls.home}</span>
+            <span className="text-sm font-medium text-white">Faltas</span>
+            <span className="text-2xl font-bold text-white">{fouls.away}</span>
+          </div>
+        </div>
 
         {/* Pause overlay when other player is managing squad (Quick Match) */}
         {isPausedBySquad && pausedByRole !== quickMatchRole && (
