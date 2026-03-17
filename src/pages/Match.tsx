@@ -685,10 +685,10 @@ const Match = () => {
           </Sheet>
         </div>
 
-        {/* Match Events - fixed height to prevent pushing stats */}
-        <div className="max-w-2xl mx-auto mb-4" style={{ minHeight: 0, maxHeight: '120px' }}>
-          {matchEvents.length > 0 && (
-            <div className="bg-zinc-900 rounded-lg p-3 max-h-[120px] overflow-y-auto">
+        {/* Match Events - fixed height for 3 events */}
+        <div className="max-w-2xl mx-auto mb-4">
+          <div className="bg-zinc-900 rounded-lg p-3 h-[100px] overflow-y-auto">
+            {matchEvents.length > 0 ? (
               <div className="space-y-2">
                 {matchEvents.slice().reverse().map((event, index) => (
                   <div 
@@ -714,8 +714,12 @@ const Match = () => {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <span className="text-zinc-600 text-xs">Sem eventos</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Stats */}
