@@ -731,7 +731,7 @@ const Match = () => {
         </div>
 
         {/* Stats */}
-        <div className="max-w-2xl mx-auto space-y-6 mt-8">
+        <div className="max-w-2xl mx-auto space-y-6 mt-12">
           {/* Possession */}
           <div>
             <div className="flex justify-between mb-2">
@@ -765,9 +765,6 @@ const Match = () => {
             <span className="text-2xl font-bold text-white">{fouls.away}</span>
           </div>
         </div>
-
-        {/* Stats */}
-        <div className="max-w-2xl mx-auto space-y-6 mt-12">
 
         {/* Pause overlay when other player is managing squad (Quick Match) */}
         {isPausedBySquad && pausedByRole !== quickMatchRole && (
