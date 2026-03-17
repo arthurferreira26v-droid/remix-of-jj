@@ -612,25 +612,13 @@ const Match = () => {
 
         {/* Score Board */}
         <div className="flex items-center justify-center gap-8 mb-4">
-          {/* Home Team */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <button className="flex flex-col items-center gap-3 hover:opacity-80 transition-opacity">
-                <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center p-4">
-                  <img src={opponent?.logo} alt={opponentName} className="w-full h-full object-contain" />
-                </div>
-                <span className="text-sm font-medium text-white">{opponentName.slice(0, 3).toUpperCase()}</span>
-              </button>
-            </SheetTrigger>
-            <SheetContent side="left" className="bg-black border-border w-full sm:max-w-lg">
-              <VisuallyHidden>
-                <SheetTitle>Táticas do {opponentName}</SheetTitle>
-              </VisuallyHidden>
-              <div className="mt-8">
-                <TacticsManager teamName={opponentName} players={opponentStarters} />
-              </div>
-            </SheetContent>
-          </Sheet>
+          {/* Home Team (Opponent) - not clickable */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center p-4">
+              <img src={opponent?.logo} alt={opponentName} className="w-full h-full object-contain" />
+            </div>
+            <span className="text-sm font-medium text-white">{opponentName.slice(0, 3).toUpperCase()}</span>
+          </div>
 
           {/* Score */}
           <div className="flex items-center gap-6">
