@@ -860,7 +860,7 @@ const Match = () => {
         {minute >= 90 && (
           <div className="fixed inset-0 bg-black z-50 overflow-y-auto">
             {/* Header: Score with logos */}
-            <div className="bg-[#0a1540] py-6 px-4">
+            <div className="bg-zinc-900 py-6 px-4">
               <div className="flex items-center justify-between max-w-md mx-auto">
                 <div className="flex items-center gap-3">
                   <img src={opponent?.logo} alt={opponentName} className="w-12 h-12 object-contain" />
