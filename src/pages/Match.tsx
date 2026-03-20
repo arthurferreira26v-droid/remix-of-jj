@@ -204,6 +204,15 @@ const Match = () => {
       );
       saveStarterOrder(newOrder);
 
+      // Log substitution event
+      setMatchEvents(events => [...events, {
+        minute,
+        type: 'substitution' as const,
+        team: 'away' as const,
+        playerName: selectedReserve.name,
+        substituteOut: starter.name,
+      }]);
+
       setUserPlayers(updatedPlayers);
       localStorage.setItem(`players_${teamName}`, JSON.stringify(updatedPlayers));
       setSelectedReserve(null);
