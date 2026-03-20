@@ -137,11 +137,8 @@ const ModeSelection = () => {
 
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col">
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Title & description — Apple-style centered */}
-        <div className="px-10 text-center mb-6">
+        {/* Center: title & description */}
+        <div className="flex-1 flex items-center justify-center px-10">
           <AnimatePresence mode="wait">
             <motion.div
               key={mode.id}
@@ -149,6 +146,7 @@ const ModeSelection = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.3 }}
+              className="text-center"
             >
               <h1 className="text-[34px] font-bold text-white leading-[1.1] tracking-tight mb-2">
                 {mode.label}
