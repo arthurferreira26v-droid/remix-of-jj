@@ -20,9 +20,10 @@ import { getYellowCardChance, applyCardToPlayer, finalizeCardsAfterMatch } from 
 
 interface MatchEvent {
   minute: number;
-  type: 'goal' | 'yellow_card' | 'red_card' | 'penalty' | 'penalty_missed';
+  type: 'goal' | 'yellow_card' | 'red_card' | 'penalty' | 'penalty_missed' | 'substitution';
   team: 'home' | 'away';
   playerName: string;
+  substituteOut?: string;
 }
 
 const Match = () => {
@@ -202,6 +203,15 @@ const Match = () => {
         p.id === starter.id ? { ...selectedReserve, isStarter: true } : p
       );
       saveStarterOrder(newOrder);
+
+      // Log substitution event
+      setMatchEvents(events => [...events, {
+        minute,
+        type: 'substitution' as const,
+        team: 'away' as const,
+        playerName: selectedReserve.name,
+        substituteOut: starter.name,
+      }]);
 
       setUserPlayers(updatedPlayers);
       localStorage.setItem(`players_${teamName}`, JSON.stringify(updatedPlayers));
@@ -587,12 +597,17 @@ const Match = () => {
         return '🟨';
       case 'red_card':
         return '🟥';
+      case 'substitution':
+        return '🔄';
       default:
         return '';
     }
   };
 
   const getEventText = (event: MatchEvent) => {
+    if (event.type === 'substitution') {
+      return `${event.playerName} → ${event.substituteOut || ''}`;
+    }
     return event.playerName;
   };
 
@@ -843,18 +858,67 @@ const Match = () => {
 
         {/* End Match Message */}
         {minute >= 90 && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-card border border-border rounded-lg p-8 max-w-md mx-4 text-center">
-              <h2 className="text-3xl font-bold text-white mb-4">FIM DE JOGO</h2>
-              <div className="text-6xl font-bold text-white mb-6">
-                {homeScore} - {awayScore}
+          <div className="fixed inset-0 bg-black z-50 overflow-y-auto">
+            {/* Header: Score with logos */}
+            <div className="bg-[#0a1540] py-6 px-4">
+              <div className="flex items-center justify-between max-w-md mx-auto">
+                <div className="flex items-center gap-3">
+                  <img src={opponent?.logo} alt={opponentName} className="w-12 h-12 object-contain" />
+                  <span className="text-4xl font-bold text-white">{homeScore}</span>
+                </div>
+                <div className="flex items-center justify-center">
+                  {awayScore > homeScore ? (
+                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-2xl">✓</span>
+                    </div>
+                  ) : homeScore > awayScore ? (
+                    <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-2xl">✗</span>
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-2xl">−</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-4xl font-bold text-white">{awayScore}</span>
+                  <img src={selectedTeam?.logo} alt={teamName} className="w-12 h-12 object-contain" />
+                </div>
               </div>
+            </div>
+
+            {/* Event list */}
+            <div className="px-4 py-6 max-w-md mx-auto space-y-3">
+              {matchEvents.slice().reverse().map((event, index) => {
+                const teamLogo = event.team === 'home' ? opponent?.logo : selectedTeam?.logo;
+                return (
+                  <div 
+                    key={index}
+                    className="flex items-center gap-3 bg-[#1a2340] rounded-xl px-4 py-3"
+                  >
+                    <span className="text-sm text-muted-foreground font-medium min-w-[30px]">{event.minute}'</span>
+                    <span className="text-lg">{getEventIcon(event.type)}</span>
+                    <img src={teamLogo} alt="" className="w-6 h-6 object-contain" />
+                    <span className="text-white text-sm font-medium truncate">{getEventText(event)}</span>
+                  </div>
+                );
+              })}
+              {matchEvents.length === 0 && (
+                <div className="text-center py-8">
+                  <span className="text-zinc-500">Nenhum evento na partida</span>
+                </div>
+              )}
+            </div>
+
+            {/* Continue button fixed at bottom */}
+            <div className="sticky bottom-0 px-4 pb-6 pt-2 bg-gradient-to-t from-black via-black to-transparent">
               <button
                 onClick={saveMatchResult}
                 disabled={isSavingMatch}
-                className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50"
+                className="w-full max-w-md mx-auto block bg-[#1a2340] hover:bg-[#243060] text-white font-bold py-4 px-6 rounded-xl transition-colors disabled:opacity-50 text-lg"
               >
-                {isSavingMatch ? "Salvando..." : "Continuar"}
+                {isSavingMatch ? "Salvando..." : "CONTINUAR"}
               </button>
             </div>
           </div>
