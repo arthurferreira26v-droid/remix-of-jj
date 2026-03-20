@@ -135,34 +135,34 @@ const ModeSelection = () => {
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/40" />
 
       {/* Content */}
-      <div className="relative z-10 h-full flex flex-col justify-between">
+      <div className="relative z-10 h-full flex flex-col">
         {/* Spacer */}
-        <div />
+        <div className="flex-1" />
 
-        {/* Title & description */}
-        <div className="px-8">
+        {/* Title & description — Apple-style centered */}
+        <div className="px-10 text-center mb-6">
           <AnimatePresence mode="wait">
             <motion.div
               key={mode.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.35 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.3 }}
             >
-              <h1 className="text-[32px] font-bold text-white leading-tight mb-2">
+              <h1 className="text-[34px] font-bold text-white leading-[1.1] tracking-tight mb-2">
                 {mode.label}
               </h1>
-              <p className="text-white/60 text-[16px] font-normal">
+              <p className="text-white/50 text-[15px] font-normal leading-relaxed">
                 {mode.description}
               </p>
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* Bottom fixed: dots + button */}
-        <div className="px-8 pb-8 flex flex-col items-center gap-4">
+        {/* Bottom: dots + button */}
+        <div className="px-10 pb-10 flex flex-col items-center gap-5">
           {/* Dots */}
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-[10px]">
             {modes.map((_, i) => (
               <button
                 key={i}
@@ -170,7 +170,7 @@ const ModeSelection = () => {
                 className={`rounded-full transition-all duration-300 ${
                   i === currentIndex
                     ? "w-[8px] h-[8px] bg-white"
-                    : "w-[7px] h-[7px] bg-white/35"
+                    : "w-[6px] h-[6px] bg-white/30"
                 }`}
               />
             ))}
@@ -179,7 +179,7 @@ const ModeSelection = () => {
           {/* CTA button */}
           <button
             onClick={() => navigate(mode.route)}
-            className="w-full py-4 rounded-full bg-white/95 text-black font-semibold text-[17px] active:scale-95 transition-transform duration-150"
+            className="w-full max-w-[320px] py-[15px] rounded-full bg-white text-black font-semibold text-[17px] active:scale-[0.97] transition-transform duration-150 shadow-lg"
           >
             {currentIndex === 0 ? "Iniciar Campanha" : currentIndex === 1 ? "Jogar Agora" : "Abrir Loja"}
           </button>
