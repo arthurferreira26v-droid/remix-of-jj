@@ -135,45 +135,54 @@ const ModeSelection = () => {
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/40" />
 
       {/* Content */}
-      <div className="relative z-10 h-full flex flex-col justify-end pb-20 px-8">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={mode.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.35 }}
-          >
-            <h1 className="text-[32px] font-bold text-white leading-tight mb-2">
-              {mode.label}
-            </h1>
-            <p className="text-white/60 text-[16px] font-normal mb-8">
-              {mode.description}
-            </p>
+      <div className="relative z-10 h-full flex flex-col justify-between">
+        {/* Spacer */}
+        <div />
 
-            {/* CTA button */}
-            <button
-              onClick={() => navigate(mode.route)}
-              className="w-full py-4 rounded-full bg-white/95 text-black font-semibold text-[17px] active:scale-95 transition-transform duration-150"
+        {/* Title & description */}
+        <div className="px-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={mode.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.35 }}
             >
-              {currentIndex === 0 ? "Iniciar Campanha" : currentIndex === 1 ? "Jogar Agora" : "Abrir Loja"}
-            </button>
-          </motion.div>
-        </AnimatePresence>
+              <h1 className="text-[32px] font-bold text-white leading-tight mb-2">
+                {mode.label}
+              </h1>
+              <p className="text-white/60 text-[16px] font-normal">
+                {mode.description}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
-        {/* Dots */}
-        <div className="flex items-center justify-center gap-2 mt-8">
-          {modes.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentIndex(i)}
-              className={`rounded-full transition-all duration-300 ${
-                i === currentIndex
-                  ? "w-[8px] h-[8px] bg-white"
-                  : "w-[7px] h-[7px] bg-white/35"
-              }`}
-            />
-          ))}
+        {/* Bottom fixed: dots + button */}
+        <div className="px-8 pb-8 flex flex-col items-center gap-4">
+          {/* Dots */}
+          <div className="flex items-center justify-center gap-2">
+            {modes.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentIndex(i)}
+                className={`rounded-full transition-all duration-300 ${
+                  i === currentIndex
+                    ? "w-[8px] h-[8px] bg-white"
+                    : "w-[7px] h-[7px] bg-white/35"
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* CTA button */}
+          <button
+            onClick={() => navigate(mode.route)}
+            className="w-full py-4 rounded-full bg-white/95 text-black font-semibold text-[17px] active:scale-95 transition-transform duration-150"
+          >
+            {currentIndex === 0 ? "Iniciar Campanha" : currentIndex === 1 ? "Jogar Agora" : "Abrir Loja"}
+          </button>
         </div>
       </div>
 
