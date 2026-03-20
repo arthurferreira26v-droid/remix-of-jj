@@ -916,7 +916,7 @@ const Match = () => {
               <button
                 onClick={saveMatchResult}
                 disabled={isSavingMatch}
-                className="w-full max-w-md mx-auto block bg-[#1a2340] hover:bg-[#243060] text-white font-bold py-4 px-6 rounded-xl transition-colors disabled:opacity-50 text-lg"
+                className="w-full max-w-md mx-auto block bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 px-6 rounded-xl transition-colors disabled:opacity-50 text-lg"
               >
                 {isSavingMatch ? "Salvando..." : "CONTINUAR"}
               </button>
