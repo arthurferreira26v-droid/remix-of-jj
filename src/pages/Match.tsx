@@ -840,18 +840,24 @@ const Match = () => {
                 {isQMGuest ? (
                   <p className="text-center text-muted-foreground animate-pulse text-lg py-4">Aguardando o anfitrião iniciar o 2º tempo...</p>
                 ) : (
-                  <button
-                    onClick={() => {
-                      setIsHalftime(false);
-                      setHalftimeDone(true);
-                      setIsPlaying(true);
-                    }}
-                    className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-4 px-6 rounded-xl transition-all text-lg"
-                  >
-                    INICIAR 2º TEMPO
-                  </button>
+                  <div className="h-20" />
                 )}
               </div>
+            </div>
+            {!isQMGuest && (
+              <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 bg-gradient-to-t from-black via-black/90 to-transparent">
+                <button
+                  onClick={() => {
+                    setIsHalftime(false);
+                    setHalftimeDone(true);
+                    setIsPlaying(true);
+                  }}
+                  className="w-full max-w-md mx-auto block bg-accent hover:bg-accent/90 text-black font-bold py-4 px-6 rounded-xl transition-all text-lg"
+                >
+                  INICIAR 2º TEMPO
+                </button>
+              </div>
+            )}
             </div>
           </div>
         )}
