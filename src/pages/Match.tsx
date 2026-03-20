@@ -860,7 +860,7 @@ const Match = () => {
         {minute >= 90 && (
           <div className="fixed inset-0 bg-black z-50 overflow-y-auto">
             {/* Header: Score with logos */}
-            <div className="bg-[#0a1540] py-6 px-4">
+            <div className="bg-zinc-900 py-6 px-4">
               <div className="flex items-center justify-between max-w-md mx-auto">
                 <div className="flex items-center gap-3">
                   <img src={opponent?.logo} alt={opponentName} className="w-12 h-12 object-contain" />
@@ -895,7 +895,7 @@ const Match = () => {
                 return (
                   <div 
                     key={index}
-                    className="flex items-center gap-3 bg-[#1a2340] rounded-xl px-4 py-3"
+                    className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3"
                   >
                     <span className="text-sm text-muted-foreground font-medium min-w-[30px]">{event.minute}'</span>
                     <span className="text-lg">{getEventIcon(event.type)}</span>
@@ -916,7 +916,7 @@ const Match = () => {
               <button
                 onClick={saveMatchResult}
                 disabled={isSavingMatch}
-                className="w-full max-w-md mx-auto block bg-[#1a2340] hover:bg-[#243060] text-white font-bold py-4 px-6 rounded-xl transition-colors disabled:opacity-50 text-lg"
+                className="w-full max-w-md mx-auto block bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 px-6 rounded-xl transition-colors disabled:opacity-50 text-lg"
               >
                 {isSavingMatch ? "Salvando..." : "CONTINUAR"}
               </button>
