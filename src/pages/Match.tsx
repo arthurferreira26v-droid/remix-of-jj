@@ -858,7 +858,6 @@ const Match = () => {
                 </button>
               </div>
             )}
-            </div>
           </div>
         )}
 
