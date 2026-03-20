@@ -160,8 +160,16 @@ const ModeSelection = () => {
           </AnimatePresence>
         </div>
 
-        {/* Bottom: dots + button */}
-        <div className="px-10 pb-10 flex flex-col items-center gap-5">
+        {/* Bottom: button + dots */}
+        <div className="px-10 pb-10 flex flex-col items-center gap-4">
+          {/* CTA button */}
+          <button
+            onClick={() => navigate(mode.route)}
+            className="w-full max-w-[320px] py-[15px] rounded-full bg-white text-black font-semibold text-[17px] active:scale-[0.97] transition-transform duration-150 shadow-lg"
+          >
+            {currentIndex === 0 ? "Iniciar Campanha" : currentIndex === 1 ? "Jogar Agora" : "Abrir Loja"}
+          </button>
+
           {/* Dots */}
           <div className="flex items-center justify-center gap-[10px]">
             {modes.map((_, i) => (
@@ -176,14 +184,6 @@ const ModeSelection = () => {
               />
             ))}
           </div>
-
-          {/* CTA button */}
-          <button
-            onClick={() => navigate(mode.route)}
-            className="w-full max-w-[320px] py-[15px] rounded-full bg-white text-black font-semibold text-[17px] active:scale-[0.97] transition-transform duration-150 shadow-lg"
-          >
-            {currentIndex === 0 ? "Iniciar Campanha" : currentIndex === 1 ? "Jogar Agora" : "Abrir Loja"}
-          </button>
         </div>
       </div>
 
