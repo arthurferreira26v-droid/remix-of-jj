@@ -895,7 +895,7 @@ const Match = () => {
                 return (
                   <div 
                     key={index}
-                    className="flex items-center gap-3 bg-[#1a2340] rounded-xl px-4 py-3"
+                    className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3"
                   >
                     <span className="text-sm text-muted-foreground font-medium min-w-[30px]">{event.minute}'</span>
                     <span className="text-lg">{getEventIcon(event.type)}</span>
