@@ -20,9 +20,10 @@ import { getYellowCardChance, applyCardToPlayer, finalizeCardsAfterMatch } from 
 
 interface MatchEvent {
   minute: number;
-  type: 'goal' | 'yellow_card' | 'red_card' | 'penalty' | 'penalty_missed';
+  type: 'goal' | 'yellow_card' | 'red_card' | 'penalty' | 'penalty_missed' | 'substitution';
   team: 'home' | 'away';
   playerName: string;
+  substituteOut?: string;
 }
 
 const Match = () => {
