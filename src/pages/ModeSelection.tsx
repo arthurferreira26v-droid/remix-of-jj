@@ -130,7 +130,7 @@ const ModeSelection = () => {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="absolute inset-0 w-full h-full object-cover"
           style={{
-            opacity: isDragging ? contentOpacity : undefined,
+            opacity: dragOffset !== 0 ? contentOpacity : undefined,
             transform: `translateX(${dragOffset * 0.04}px)`,
           }}
         />
