@@ -118,23 +118,19 @@ const ModeSelection = () => {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Fullscreen background images */}
-      <AnimatePresence mode="popLayout">
-        <motion.img
-          key={mode.id}
-          src={mode.bg}
-          alt={mode.label}
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.97 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="absolute inset-0 w-full h-full object-cover"
+      {/* Fullscreen background images — all mounted, toggle opacity */}
+      {modes.map((m, i) => (
+        <img
+          key={m.id}
+          src={m.bg}
+          alt={m.label}
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-out"
           style={{
-            opacity: dragOffset !== 0 ? contentOpacity : undefined,
-            transform: `translateX(${dragOffset * 0.04}px)`,
+            opacity: i === currentIndex ? (dragOffset !== 0 ? contentOpacity : 1) : 0,
+            transform: i === currentIndex ? `translateX(${dragOffset * 0.04}px)` : undefined,
           }}
         />
-      </AnimatePresence>
+      ))}
 
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/40" />
