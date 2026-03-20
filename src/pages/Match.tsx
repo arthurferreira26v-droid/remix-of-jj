@@ -597,12 +597,17 @@ const Match = () => {
         return '🟨';
       case 'red_card':
         return '🟥';
+      case 'substitution':
+        return '🔄';
       default:
         return '';
     }
   };
 
   const getEventText = (event: MatchEvent) => {
+    if (event.type === 'substitution') {
+      return `${event.playerName} → ${event.substituteOut || ''}`;
+    }
     return event.playerName;
   };
 
