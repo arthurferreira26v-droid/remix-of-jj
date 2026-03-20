@@ -787,65 +787,65 @@ const Match = () => {
 
         {/* Halftime Overlay */}
         {isHalftime && (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 overflow-y-auto">
-            <div className="container mx-auto px-4 py-8">
-              <div className="text-center mb-6">
-                <h2 className="text-3xl font-bold text-white mb-2">INTERVALO</h2>
-                <div className="text-5xl font-bold text-white mb-1">
-                  {homeScore} - {awayScore}
-                </div>
-                <span className="text-muted-foreground text-sm">45'</span>
-              </div>
-
-              <div className="max-w-lg mx-auto space-y-6">
-                <TacticsManager
-                  teamName={teamName}
-                  players={userStarters}
-                  orderedPlayers={orderedStarters}
-                  onStarterClick={handleStarterClick}
-                  canSubstitute={!!selectedReserve || !!selectedStarter}
-                  selectedStarterId={selectedReserve?.id || selectedStarter?.id}
-                />
-
-                <div className="bg-zinc-900 rounded-lg p-4">
-                  <h3 className="text-white text-xl font-bold mb-4">Reservas</h3>
-                  <div className="space-y-2">
-                    {userReserves.map((player) => (
-                      <button
-                        key={player.id}
-                        onClick={() => handleReserveClick(player)}
-                        className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
-                          selectedReserve?.id === player.id
-                            ? "bg-accent text-black"
-                            : "bg-zinc-800 text-white hover:bg-zinc-700"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={`font-bold text-lg w-8 ${selectedReserve?.id === player.id ? 'text-black' : 'text-blue-400'}`}>{player.overall}</span>
-                          <div className="text-left">
-                            <div className="font-medium">{player.name}</div>
-                            <div className="text-sm opacity-70">{player.position}</div>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex flex-col">
+            <div className="flex-1 overflow-y-auto px-4 py-8 pb-24">
+              <div className="container mx-auto">
+                <div className="text-center mb-6">
+                  <h2 className="text-3xl font-bold text-white mb-2">INTERVALO</h2>
+                  <div className="text-5xl font-bold text-white mb-1">
+                    {homeScore} - {awayScore}
                   </div>
-                  {selectedReserve && (
-                    <p className="mt-3 text-xs text-accent">
-                      Selecione um titular no campo para substituir.
-                    </p>
+                  <span className="text-muted-foreground text-sm">45'</span>
+                </div>
+
+                <div className="max-w-lg mx-auto space-y-6">
+                  <TacticsManager
+                    teamName={teamName}
+                    players={userStarters}
+                    orderedPlayers={orderedStarters}
+                    onStarterClick={handleStarterClick}
+                    canSubstitute={!!selectedReserve || !!selectedStarter}
+                    selectedStarterId={selectedReserve?.id || selectedStarter?.id}
+                  />
+
+                  <div className="bg-zinc-900 rounded-lg p-4">
+                    <h3 className="text-white text-xl font-bold mb-4">Reservas</h3>
+                    <div className="space-y-2">
+                      {userReserves.map((player) => (
+                        <button
+                          key={player.id}
+                          onClick={() => handleReserveClick(player)}
+                          className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                            selectedReserve?.id === player.id
+                              ? "bg-accent text-black"
+                              : "bg-zinc-800 text-white hover:bg-zinc-700"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className={`font-bold text-lg w-8 ${selectedReserve?.id === player.id ? 'text-black' : 'text-blue-400'}`}>{player.overall}</span>
+                            <div className="text-left">
+                              <div className="font-medium">{player.name}</div>
+                              <div className="text-sm opacity-70">{player.position}</div>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                    {selectedReserve && (
+                      <p className="mt-3 text-xs text-accent">
+                        Selecione um titular no campo para substituir.
+                      </p>
+                    )}
+                  </div>
+
+                  {isQMGuest && (
+                    <p className="text-center text-muted-foreground animate-pulse text-lg py-4">Aguardando o anfitrião iniciar o 2º tempo...</p>
                   )}
                 </div>
-
-                {isQMGuest ? (
-                  <p className="text-center text-muted-foreground animate-pulse text-lg py-4">Aguardando o anfitrião iniciar o 2º tempo...</p>
-                ) : (
-                  <div className="h-20" />
-                )}
               </div>
             </div>
             {!isQMGuest && (
-              <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 bg-gradient-to-t from-black via-black/90 to-transparent">
+              <div className="shrink-0 p-4 bg-gradient-to-t from-black via-black/90 to-transparent">
                 <button
                   onClick={() => {
                     setIsHalftime(false);
