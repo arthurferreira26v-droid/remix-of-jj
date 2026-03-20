@@ -107,6 +107,10 @@ const ModeSelection = () => {
 
   const mode = modes[currentIndex];
 
+  // Fade out content as user drags
+  const dragProgress = Math.min(Math.abs(dragOffset) / (window.innerWidth * 0.3), 1);
+  const contentOpacity = 1 - dragProgress * 0.6;
+
   return (
     <div
       className="h-screen w-screen overflow-hidden relative bg-background select-none"
@@ -120,13 +124,14 @@ const ModeSelection = () => {
           key={mode.id}
           src={mode.bg}
           alt={mode.label}
-          initial={{ opacity: 0, scale: 1.08 }}
+          initial={{ opacity: 0, scale: 1.05 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          exit={{ opacity: 0, scale: 0.97 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           className="absolute inset-0 w-full h-full object-cover"
           style={{
-            transform: `translateX(${dragOffset * 0.05}px)`,
+            opacity: isDragging ? contentOpacity : undefined,
+            transform: `translateX(${dragOffset * 0.04}px)`,
           }}
         />
       </AnimatePresence>
