@@ -27,8 +27,8 @@ const modes = [
   },
   {
     id: "campaign2p",
-    label: "Campanha 2 Players",
-    description: "Disputa com um amigo no mesmo campeonato",
+    label: "Modo Campanha 2P",
+    description: "Modo campanha em dupla",
     route: "/campanha-2p",
     bg: heroCampaign2p,
     cta: "Jogar com Amigo",
