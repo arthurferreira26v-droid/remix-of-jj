@@ -21,6 +21,7 @@ import QuickMatchJoinTeamSelect from "./pages/QuickMatchJoinTeamSelect";
 import Store from "./pages/Store";
 import Campaign2PSelectPlayer1 from "./pages/Campaign2PSelectPlayer1";
 import Campaign2PSelectPlayer2 from "./pages/Campaign2PSelectPlayer2";
+import PostMatch2P from "./pages/PostMatch2P";
 
 const GameRouter = () => {
   const [params] = useSearchParams();
