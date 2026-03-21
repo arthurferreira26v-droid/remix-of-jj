@@ -2,9 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useSearchParams } from "react-router-dom";
 import Index from "./pages/Index";
 import Game from "./pages/Game";
+import Game2P from "./pages/Game2P";
 import Match from "./pages/Match";
 import Standings from "./pages/Standings";
 import Calendar from "./pages/Calendar";
@@ -20,7 +21,11 @@ import QuickMatchJoinTeamSelect from "./pages/QuickMatchJoinTeamSelect";
 import Store from "./pages/Store";
 import Campaign2PSelectPlayer1 from "./pages/Campaign2PSelectPlayer1";
 import Campaign2PSelectPlayer2 from "./pages/Campaign2PSelectPlayer2";
-import Game2P from "./pages/Game2P";
+
+const GameRouter = () => {
+  const [params] = useSearchParams();
+  return params.get("modo") === "2p" ? <Game2P /> : <Game />;
+};
 
 const queryClient = new QueryClient();
 
@@ -45,7 +50,7 @@ const App = () => (
           <Route path="/jogo-rapido/entrar/time" element={<QuickMatchJoinTeamSelect />} />
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/admin-panel" element={<AdminPanel />} />
-          <Route path="/jogo" element={<Game />} />
+          <Route path="/jogo" element={<GameRouter />} />
           <Route path="/partida" element={<Match />} />
           <Route path="/classificacao" element={<Standings />} />
           <Route path="/calendario" element={<Calendar />} />
