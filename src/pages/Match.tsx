@@ -271,7 +271,9 @@ const Match = () => {
       const dbAwayScore = userIsHome ? homeScore : awayScore;
 
       // Save match result locally (also simulates other matches and updates standings)
-      saveMatchResultLocal(teamName, nextMatch.id, dbHomeScore, dbAwayScore);
+      // In 2P mode, exclude the other player's team from simulation
+      const excludeTeams = (is2PMode && player2Team2P) ? [player2Team2P] : undefined;
+      saveMatchResultLocal(teamName, nextMatch.id, dbHomeScore, dbAwayScore, excludeTeams);
 
       // Handle investment earnings
       const hasInvestment = localStorage.getItem(`investment_${teamName}`) === 'true';
