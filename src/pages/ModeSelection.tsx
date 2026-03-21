@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import heroCampaign from "@/assets/hero-campaign.jpg";
 import heroQuickmatch from "@/assets/hero-quickmatch.jpg";
+import heroCampaign2p from "@/assets/hero-campaign2p.jpg";
 import heroStore from "@/assets/hero-store.jpg";
 
-const allImages = [heroCampaign, heroQuickmatch, heroStore];
+const allImages = [heroCampaign, heroQuickmatch, heroCampaign2p, heroStore];
 
 const modes = [
   {
@@ -14,6 +15,7 @@ const modes = [
     description: "Gerencie seu time rumo à glória",
     route: "/selecionar-time",
     bg: heroCampaign,
+    cta: "Iniciar Campanha",
   },
   {
     id: "quickmatch",
@@ -21,6 +23,15 @@ const modes = [
     description: "Desafie amigos em tempo real",
     route: "/jogo-rapido",
     bg: heroQuickmatch,
+    cta: "Jogar Agora",
+  },
+  {
+    id: "campaign2p",
+    label: "Campanha 2 Players",
+    description: "Disputa com um amigo no mesmo campeonato",
+    route: "/campanha-2p",
+    bg: heroCampaign2p,
+    cta: "Jogar com Amigo",
   },
   {
     id: "store",
@@ -28,6 +39,7 @@ const modes = [
     description: "Jogadores premium e reforços",
     route: "/loja",
     bg: heroStore,
+    cta: "Abrir Loja",
   },
 ];
 
@@ -165,7 +177,7 @@ const ModeSelection = () => {
             onClick={() => navigate(mode.route)}
             className="w-full max-w-[320px] py-[15px] rounded-full bg-white text-black font-semibold text-[17px] active:scale-[0.97] transition-transform duration-150 shadow-lg"
           >
-            {currentIndex === 0 ? "Iniciar Campanha" : currentIndex === 1 ? "Jogar Agora" : "Abrir Loja"}
+            {mode.cta}
           </button>
 
           {/* Dots */}
