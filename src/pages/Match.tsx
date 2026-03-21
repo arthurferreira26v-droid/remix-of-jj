@@ -295,6 +295,20 @@ const Match = () => {
       flushPendingWrites();
 
       toast.success("Resultado salvo com sucesso!");
+      
+      // Sync championship data between players in 2P mode (before setTimeout)
+      if ((is2PMode || is2PReturn) && player2Team2P) {
+        const srcTeam = teamName;
+        const destTeam = player2Team2P;
+        const syncMatches = getLocalMatches(srcTeam);
+        const syncStandings = getLocalStandings(srcTeam);
+        const syncChamp = getLocalChampionship(srcTeam);
+        saveLocalMatches(destTeam, syncMatches);
+        saveLocalStandings(destTeam, syncStandings);
+        if (syncChamp) saveLocalChampionship(destTeam, syncChamp);
+        flushPendingWrites();
+      }
+      
       setTimeout(() => {
         if (is2PMode && player2Team2P) {
           // P1 just finished — save post-match data, then load P2's match
@@ -305,16 +319,6 @@ const Match = () => {
             awayScore,
             matchEvents,
           }));
-          
-          // Sync P1's updated championship data to P2
-          const { getLocalMatches, getLocalStandings, getLocalChampionship, saveLocalMatches, saveLocalStandings, saveLocalChampionship } = await import("@/utils/localChampionship");
-          const p1Matches = getLocalMatches(teamName);
-          const p1Standings = getLocalStandings(teamName);
-          const p1Champ = getLocalChampionship(teamName);
-          saveLocalMatches(player2Team2P, p1Matches);
-          saveLocalStandings(player2Team2P, p1Standings);
-          if (p1Champ) saveLocalChampionship(player2Team2P, p1Champ);
-          flushPendingWrites();
           
           const p2Pending = localStorage.getItem('2p_p2_match_pending');
           if (p2Pending) {
@@ -338,17 +342,6 @@ const Match = () => {
             awayScore,
             matchEvents,
           }));
-          
-          // Sync P2's updated championship data back to P1
-          const { getLocalMatches: gm2, getLocalStandings: gs2, getLocalChampionship: gc2, saveLocalMatches: sm2, saveLocalStandings: ss2, saveLocalChampionship: sc2 } = await import("@/utils/localChampionship");
-          const p2Matches = gm2(teamName);
-          const p2Standings = gs2(teamName);
-          const p2Champ = gc2(teamName);
-          sm2(player2Team2P, p2Matches);
-          ss2(player2Team2P, p2Standings);
-          if (p2Champ) sc2(player2Team2P, p2Champ);
-          flushPendingWrites();
-          
           // player2Team2P here is P1's team (passed as time2 in 2preturn)
           navigate(`/pos-jogo-2p?time=${encodeURIComponent(player2Team2P)}&time2=${encodeURIComponent(teamName)}`);
         } else {
