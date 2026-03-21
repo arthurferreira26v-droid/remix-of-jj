@@ -246,14 +246,8 @@ const Match = () => {
     setSelectedStarter(starter);
   };
 
-  // In 2P mode, auto-save when match ends (skip post-match overlay)
-  const autoSavedRef = useRef(false);
-  useEffect(() => {
-    if ((is2PMode || is2PReturn) && minute >= 90 && !isSavingMatch && !autoSavedRef.current) {
-      autoSavedRef.current = true;
-      saveMatchResult();
-    }
-  }, [minute, is2PMode, is2PReturn]);
+  // Auto-save removed — each player sees their post-match screen individually
+
 
   const saveMatchResult = async () => {
     if (isSavingMatch) return;
@@ -320,15 +314,7 @@ const Match = () => {
       
       setTimeout(() => {
         if (is2PMode && player2Team2P) {
-          // P1 just finished — save post-match data, then load P2's match
-          localStorage.setItem('2p_postmatch_p1', JSON.stringify({
-            teamName,
-            opponentName,
-            homeScore,
-            awayScore,
-            matchEvents,
-          }));
-          
+          // P1 just finished — go straight to P2's match
           const p2Pending = localStorage.getItem('2p_p2_match_pending');
           if (p2Pending) {
             const p2Data = JSON.parse(p2Pending);
@@ -343,16 +329,8 @@ const Match = () => {
             navigate(`/jogo?time=${encodeURIComponent(teamName)}&time2=${encodeURIComponent(player2Team2P)}&modo=2p`);
           }
         } else if (is2PReturn && player2Team2P) {
-          // P2 just finished — save post-match data, go to sequential post-match review
-          localStorage.setItem('2p_postmatch_p2', JSON.stringify({
-            teamName,
-            opponentName,
-            homeScore,
-            awayScore,
-            matchEvents,
-          }));
-          // player2Team2P here is P1's team (passed as time2 in 2preturn)
-          navigate(`/pos-jogo-2p?time=${encodeURIComponent(player2Team2P)}&time2=${encodeURIComponent(teamName)}`);
+          // P2 just finished — go back to P1's hub
+          navigate(`/jogo?time=${encodeURIComponent(player2Team2P)}&time2=${encodeURIComponent(teamName)}&modo=2p`);
         } else {
           navigate(`/jogo?time=${teamName}`);
         }
@@ -925,8 +903,8 @@ const Match = () => {
           </div>
         )}
 
-        {/* End Match Message — skip overlay in 2P, auto-save instead */}
-        {minute >= 90 && !is2PMode && !is2PReturn && (
+        {/* End Match Message */}
+        {minute >= 90 && (
           <div className="fixed inset-0 bg-black z-50 overflow-y-auto">
             {/* Header: Score with logos */}
             <div className="bg-zinc-900 py-6 px-4">
