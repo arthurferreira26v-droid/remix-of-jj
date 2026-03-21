@@ -37,6 +37,9 @@ export const MatchCard = ({
   opponentForm,
   isHome,
   championshipId,
+  mode2p,
+  onPlay2P,
+  turn2PLabel,
 }: MatchCardProps) => {
   const navigate = useNavigate();
   const [isSimulating, setIsSimulating] = useState(false);
