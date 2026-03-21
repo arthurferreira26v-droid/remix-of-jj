@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Users } from "lucide-react";
 import Game2PInner from "./Game2PInner";
+import { deleteLocalChampionship } from "@/utils/localChampionship";
 
 const Game2P = () => {
   const navigate = useNavigate();
@@ -42,7 +42,6 @@ const Game2P = () => {
   };
 
   const handleExit = () => {
-    const { deleteLocalChampionship } = require("@/utils/localChampionship");
     deleteLocalChampionship(player1Team);
     deleteLocalChampionship(player2Team);
     [player1Team, player2Team].forEach(t => {
