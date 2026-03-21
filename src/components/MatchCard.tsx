@@ -20,6 +20,9 @@ interface MatchCardProps {
   opponentForm: MatchResult[];
   isHome: boolean;
   championshipId?: string;
+  mode2p?: boolean;
+  onPlay2P?: () => void;
+  turn2PLabel?: string;
 }
 
 export const MatchCard = ({
@@ -34,6 +37,9 @@ export const MatchCard = ({
   opponentForm,
   isHome,
   championshipId,
+  mode2p,
+  onPlay2P,
+  turn2PLabel,
 }: MatchCardProps) => {
   const navigate = useNavigate();
   const [isSimulating, setIsSimulating] = useState(false);
@@ -233,10 +239,10 @@ export const MatchCard = ({
       </div>
 
       <Button 
-        onClick={handlePlayMatch}
+        onClick={mode2p && onPlay2P ? onPlay2P : handlePlayMatch}
         className="w-full h-12 sm:h-14 text-base sm:text-lg font-bold bg-white hover:bg-white/90 text-black rounded-xl"
       >
-        JOGAR
+        {mode2p && turn2PLabel ? turn2PLabel : "JOGAR"}
       </Button>
 
       {instantaneo && (
