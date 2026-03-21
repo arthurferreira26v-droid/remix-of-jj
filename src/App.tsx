@@ -20,6 +20,7 @@ import QuickMatchJoinTeamSelect from "./pages/QuickMatchJoinTeamSelect";
 import Store from "./pages/Store";
 import Campaign2PSelectPlayer1 from "./pages/Campaign2PSelectPlayer1";
 import Campaign2PSelectPlayer2 from "./pages/Campaign2PSelectPlayer2";
+import Game2P from "./pages/Game2P";
 
 const queryClient = new QueryClient();
 
