@@ -919,8 +919,8 @@ const Match = () => {
           </div>
         )}
 
-        {/* End Match Message — skip overlay in 2P, auto-save instead */}
-        {minute >= 90 && !is2PMode && !is2PReturn && (
+        {/* End Match Message */}
+        {minute >= 90 && (
           <div className="fixed inset-0 bg-black z-50 overflow-y-auto">
             {/* Header: Score with logos */}
             <div className="bg-zinc-900 py-6 px-4">
