@@ -246,6 +246,15 @@ const Match = () => {
     setSelectedStarter(starter);
   };
 
+  // In 2P mode, auto-save when match ends (skip post-match overlay)
+  const autoSavedRef = useRef(false);
+  useEffect(() => {
+    if ((is2PMode || is2PReturn) && minute >= 90 && !isSavingMatch && !autoSavedRef.current) {
+      autoSavedRef.current = true;
+      saveMatchResult();
+    }
+  }, [minute, is2PMode, is2PReturn]);
+
   const saveMatchResult = async () => {
     if (isSavingMatch) return;
     
@@ -916,8 +925,8 @@ const Match = () => {
           </div>
         )}
 
-        {/* End Match Message */}
-        {minute >= 90 && (
+        {/* End Match Message — skip overlay in 2P, auto-save instead */}
+        {minute >= 90 && !is2PMode && !is2PReturn && (
           <div className="fixed inset-0 bg-black z-50 overflow-y-auto">
             {/* Header: Score with logos */}
             <div className="bg-zinc-900 py-6 px-4">
