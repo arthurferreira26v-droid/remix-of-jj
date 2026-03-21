@@ -259,7 +259,7 @@ const Match = () => {
 
     try {
       // Import local championship utilities
-      const { getNextUserMatch, saveMatchResultLocal, getLocalMatches } = await import("@/utils/localChampionship");
+      const { getNextUserMatch, saveMatchResultLocal, getLocalMatches, getLocalStandings, getLocalChampionship, saveLocalMatches, saveLocalStandings, saveLocalChampionship } = await import("@/utils/localChampionship");
       
       // Find the current match from local storage
       const nextMatch = getNextUserMatch(teamName);
