@@ -295,27 +295,22 @@ const Match = () => {
       toast.success("Resultado salvo com sucesso!");
       setTimeout(() => {
         if (is2PMode && player2Team2P) {
-          // Check if there's a P2 match pending
+          // P1 just finished — load P2's match
           const p2Pending = localStorage.getItem('2p_p2_match_pending');
           if (p2Pending) {
             const p2Data = JSON.parse(p2Pending);
-            // Load P2 players for match
             const p2Players = localStorage.getItem('match_players_p2');
-            if (p2Players) {
-              localStorage.setItem('match_players', p2Players);
-            }
+            if (p2Players) localStorage.setItem('match_players', p2Players);
             localStorage.removeItem('2p_p2_match_pending');
             localStorage.removeItem('2p_p1_match_pending');
             localStorage.removeItem('match_players_p1');
             localStorage.removeItem('match_players_p2');
-            // Navigate to P2's match (without modo=2p to avoid loop, use 2preturn flag)
             navigate(`/partida?time=${encodeURIComponent(p2Data.team)}&adversario=${encodeURIComponent(p2Data.opponent)}&modo=2preturn&time2=${encodeURIComponent(teamName)}`);
           } else {
-            // P2's match done (2preturn), go back to Game2P
             navigate(`/jogo?time=${encodeURIComponent(teamName)}&time2=${encodeURIComponent(player2Team2P)}&modo=2p`);
           }
-        } else if (is2PMode || searchParams.get("modo") === "2preturn") {
-          // After P2's match, go back to Game2P
+        } else if (is2PReturn && player2Team2P) {
+          // P2 just finished — back to Game2P (P1 team first in URL)
           navigate(`/jogo?time=${encodeURIComponent(player2Team2P)}&time2=${encodeURIComponent(teamName)}&modo=2p`);
         } else {
           navigate(`/jogo?time=${teamName}`);
