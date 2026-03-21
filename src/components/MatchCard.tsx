@@ -20,6 +20,9 @@ interface MatchCardProps {
   opponentForm: MatchResult[];
   isHome: boolean;
   championshipId?: string;
+  mode2p?: boolean;
+  onPlay2P?: () => void;
+  turn2PLabel?: string;
 }
 
 export const MatchCard = ({
