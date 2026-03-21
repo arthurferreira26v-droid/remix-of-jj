@@ -295,7 +295,14 @@ const Match = () => {
       toast.success("Resultado salvo com sucesso!");
       setTimeout(() => {
         if (is2PMode && player2Team2P) {
-          // P1 just finished — load P2's match
+          // P1 just finished — save post-match data, then load P2's match
+          localStorage.setItem('2p_postmatch_p1', JSON.stringify({
+            teamName,
+            opponentName,
+            homeScore,
+            awayScore,
+            matchEvents,
+          }));
           const p2Pending = localStorage.getItem('2p_p2_match_pending');
           if (p2Pending) {
             const p2Data = JSON.parse(p2Pending);
@@ -310,8 +317,16 @@ const Match = () => {
             navigate(`/jogo?time=${encodeURIComponent(teamName)}&time2=${encodeURIComponent(player2Team2P)}&modo=2p`);
           }
         } else if (is2PReturn && player2Team2P) {
-          // P2 just finished — back to Game2P (P1 team first in URL)
-          navigate(`/jogo?time=${encodeURIComponent(player2Team2P)}&time2=${encodeURIComponent(teamName)}&modo=2p`);
+          // P2 just finished — save post-match data, go to sequential post-match review
+          localStorage.setItem('2p_postmatch_p2', JSON.stringify({
+            teamName,
+            opponentName,
+            homeScore,
+            awayScore,
+            matchEvents,
+          }));
+          // player2Team2P here is P1's team (passed as time2 in 2preturn)
+          navigate(`/pos-jogo-2p?time=${encodeURIComponent(player2Team2P)}&time2=${encodeURIComponent(teamName)}`);
         } else {
           navigate(`/jogo?time=${teamName}`);
         }

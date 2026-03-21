@@ -21,6 +21,7 @@ import QuickMatchJoinTeamSelect from "./pages/QuickMatchJoinTeamSelect";
 import Store from "./pages/Store";
 import Campaign2PSelectPlayer1 from "./pages/Campaign2PSelectPlayer1";
 import Campaign2PSelectPlayer2 from "./pages/Campaign2PSelectPlayer2";
+import PostMatch2P from "./pages/PostMatch2P";
 
 const GameRouter = () => {
   const [params] = useSearchParams();
@@ -54,6 +55,7 @@ const App = () => (
           <Route path="/partida" element={<Match />} />
           <Route path="/classificacao" element={<Standings />} />
           <Route path="/calendario" element={<Calendar />} />
+          <Route path="/pos-jogo-2p" element={<PostMatch2P />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
