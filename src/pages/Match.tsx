@@ -246,6 +246,15 @@ const Match = () => {
     setSelectedStarter(starter);
   };
 
+  // In 2P mode, auto-save when match ends (skip post-match overlay)
+  const autoSavedRef = useRef(false);
+  useEffect(() => {
+    if ((is2PMode || is2PReturn) && minute >= 90 && !isSavingMatch && !autoSavedRef.current) {
+      autoSavedRef.current = true;
+      saveMatchResult();
+    }
+  }, [minute, is2PMode, is2PReturn]);
+
   const saveMatchResult = async () => {
     if (isSavingMatch) return;
     
