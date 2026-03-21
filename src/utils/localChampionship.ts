@@ -261,7 +261,8 @@ export function saveMatchResultLocal(
   teamName: string,
   matchId: string,
   homeScore: number,
-  awayScore: number
+  awayScore: number,
+  excludeTeams?: string[]
 ) {
   // ── Anti-loop guard ──
   if (saveLock) {
