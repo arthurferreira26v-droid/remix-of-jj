@@ -239,10 +239,10 @@ export const MatchCard = ({
       </div>
 
       <Button 
-        onClick={handlePlayMatch}
+        onClick={mode2p && onPlay2P ? onPlay2P : handlePlayMatch}
         className="w-full h-12 sm:h-14 text-base sm:text-lg font-bold bg-white hover:bg-white/90 text-black rounded-xl"
       >
-        JOGAR
+        {mode2p && turn2PLabel ? turn2PLabel : "JOGAR"}
       </Button>
 
       {instantaneo && (
