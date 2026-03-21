@@ -338,6 +338,17 @@ const Match = () => {
             awayScore,
             matchEvents,
           }));
+          
+          // Sync P2's updated championship data back to P1
+          const { getLocalMatches: gm2, getLocalStandings: gs2, getLocalChampionship: gc2, saveLocalMatches: sm2, saveLocalStandings: ss2, saveLocalChampionship: sc2 } = await import("@/utils/localChampionship");
+          const p2Matches = gm2(teamName);
+          const p2Standings = gs2(teamName);
+          const p2Champ = gc2(teamName);
+          sm2(player2Team2P, p2Matches);
+          ss2(player2Team2P, p2Standings);
+          if (p2Champ) sc2(player2Team2P, p2Champ);
+          flushPendingWrites();
+          
           // player2Team2P here is P1's team (passed as time2 in 2preturn)
           navigate(`/pos-jogo-2p?time=${encodeURIComponent(player2Team2P)}&time2=${encodeURIComponent(teamName)}`);
         } else {
