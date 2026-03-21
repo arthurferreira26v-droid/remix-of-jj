@@ -28,6 +28,12 @@ const GameRouter = () => {
   return params.get("modo") === "2p" ? <Game2P /> : <Game />;
 };
 
+const MatchRouter = () => {
+  const [params] = useSearchParams();
+  const key = `${params.get("time")}-${params.get("modo")}`;
+  return <Match key={key} />;
+};
+
 const queryClient = new QueryClient();
 
 const App = () => (
