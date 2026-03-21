@@ -1,4 +1,3 @@
-// App.tsx (final)
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +18,8 @@ import QuickMatchRoom from "./pages/QuickMatchRoom";
 import QuickMatchJoinRoom from "./pages/QuickMatchJoinRoom";
 import QuickMatchJoinTeamSelect from "./pages/QuickMatchJoinTeamSelect";
 import Store from "./pages/Store";
+import Campaign2PSelectPlayer1 from "./pages/Campaign2PSelectPlayer1";
+import Campaign2PSelectPlayer2 from "./pages/Campaign2PSelectPlayer2";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,9 @@ const App = () => (
           <Route path="/" element={<ModeSelection />} />
           <Route path="/loja" element={<Store />} />
           <Route path="/selecionar-time" element={<Index />} />
+          
+          <Route path="/campanha-2p/jogador1" element={<Campaign2PSelectPlayer1 />} />
+          <Route path="/campanha-2p/jogador2" element={<Campaign2PSelectPlayer2 />} />
           
           <Route path="/jogo-rapido" element={<QuickMatchMenu />} />
           <Route path="/jogo-rapido/criar" element={<QuickMatchTeamSelect />} />
