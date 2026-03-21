@@ -28,8 +28,22 @@ const Game2P = () => {
   const [searchParams] = useSearchParams();
   const player1Team = searchParams.get("time") || "";
   const player2Team = searchParams.get("time2") || "";
-  // Turn: 1 = Player 1 managing, 2 = Player 2 managing
   const [currentTurn, setCurrentTurn] = useState(1);
+
+  // Sync championship data: P2 uses the same championship as P1
+  useEffect(() => {
+    const syncChampionship = () => {
+      const p1Champ = localStorage.getItem(`local_championship_${player1Team}`);
+      const p1Matches = localStorage.getItem(`local_matches_${player1Team}`);
+      const p1Standings = localStorage.getItem(`local_standings_${player1Team}`);
+      if (p1Champ && p1Matches && p1Standings) {
+        localStorage.setItem(`local_championship_${player2Team}`, p1Champ);
+        localStorage.setItem(`local_matches_${player2Team}`, p1Matches);
+        localStorage.setItem(`local_standings_${player2Team}`, p1Standings);
+      }
+    };
+    syncChampionship();
+  }, [player1Team, player2Team, currentTurn]);
 
   const activeTeam = currentTurn === 1 ? player1Team : player2Team;
   const otherTeam = currentTurn === 1 ? player2Team : player1Team;
