@@ -33,6 +33,8 @@ const Match = () => {
   const teamName = searchParams.get("time") || "Seu Time";
   const opponentName = searchParams.get("adversario") || "Adversário";
   const isQuickMatch = searchParams.get("quick") === "true";
+  const is2PMode = searchParams.get("modo") === "2p";
+  const player2Team2P = searchParams.get("time2") || "";
   const quickMatchCode = searchParams.get("code");
   const quickMatchRole = searchParams.get("role");
   const isQMHost = isQuickMatch && quickMatchRole === "host";
