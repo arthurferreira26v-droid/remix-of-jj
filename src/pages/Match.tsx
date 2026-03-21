@@ -259,7 +259,7 @@ const Match = () => {
 
     try {
       // Import local championship utilities
-      const { getNextUserMatch, saveMatchResultLocal, getLocalMatches } = await import("@/utils/localChampionship");
+      const { getNextUserMatch, saveMatchResultLocal, getLocalMatches, getLocalStandings, getLocalChampionship, saveLocalMatches, saveLocalStandings, saveLocalChampionship } = await import("@/utils/localChampionship");
       
       // Find the current match from local storage
       const nextMatch = getNextUserMatch(teamName);
@@ -271,7 +271,9 @@ const Match = () => {
       const dbAwayScore = userIsHome ? homeScore : awayScore;
 
       // Save match result locally (also simulates other matches and updates standings)
-      saveMatchResultLocal(teamName, nextMatch.id, dbHomeScore, dbAwayScore);
+      // In 2P mode, exclude the other player's team from simulation
+      const excludeTeams = (is2PMode && player2Team2P) ? [player2Team2P] : undefined;
+      saveMatchResultLocal(teamName, nextMatch.id, dbHomeScore, dbAwayScore, excludeTeams);
 
       // Handle investment earnings
       const hasInvestment = localStorage.getItem(`investment_${teamName}`) === 'true';
@@ -293,6 +295,20 @@ const Match = () => {
       flushPendingWrites();
 
       toast.success("Resultado salvo com sucesso!");
+      
+      // Sync championship data between players in 2P mode (before setTimeout)
+      if ((is2PMode || is2PReturn) && player2Team2P) {
+        const srcTeam = teamName;
+        const destTeam = player2Team2P;
+        const syncMatches = getLocalMatches(srcTeam);
+        const syncStandings = getLocalStandings(srcTeam);
+        const syncChamp = getLocalChampionship(srcTeam);
+        saveLocalMatches(destTeam, syncMatches);
+        saveLocalStandings(destTeam, syncStandings);
+        if (syncChamp) saveLocalChampionship(destTeam, syncChamp);
+        flushPendingWrites();
+      }
+      
       setTimeout(() => {
         if (is2PMode && player2Team2P) {
           // P1 just finished — save post-match data, then load P2's match
@@ -303,6 +319,7 @@ const Match = () => {
             awayScore,
             matchEvents,
           }));
+          
           const p2Pending = localStorage.getItem('2p_p2_match_pending');
           if (p2Pending) {
             const p2Data = JSON.parse(p2Pending);

@@ -28,6 +28,12 @@ const GameRouter = () => {
   return params.get("modo") === "2p" ? <Game2P /> : <Game />;
 };
 
+const MatchRouter = () => {
+  const [params] = useSearchParams();
+  const key = `${params.get("time")}-${params.get("modo")}`;
+  return <Match key={key} />;
+};
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -52,7 +58,7 @@ const App = () => (
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="/jogo" element={<GameRouter />} />
-          <Route path="/partida" element={<Match />} />
+          <Route path="/partida" element={<MatchRouter />} />
           <Route path="/classificacao" element={<Standings />} />
           <Route path="/calendario" element={<Calendar />} />
           <Route path="/pos-jogo-2p" element={<PostMatch2P />} />
