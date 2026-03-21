@@ -305,6 +305,17 @@ const Match = () => {
             awayScore,
             matchEvents,
           }));
+          
+          // Sync P1's updated championship data to P2
+          const { getLocalMatches, getLocalStandings, getLocalChampionship, saveLocalMatches, saveLocalStandings, saveLocalChampionship } = await import("@/utils/localChampionship");
+          const p1Matches = getLocalMatches(teamName);
+          const p1Standings = getLocalStandings(teamName);
+          const p1Champ = getLocalChampionship(teamName);
+          saveLocalMatches(player2Team2P, p1Matches);
+          saveLocalStandings(player2Team2P, p1Standings);
+          if (p1Champ) saveLocalChampionship(player2Team2P, p1Champ);
+          flushPendingWrites();
+          
           const p2Pending = localStorage.getItem('2p_p2_match_pending');
           if (p2Pending) {
             const p2Data = JSON.parse(p2Pending);
