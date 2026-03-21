@@ -55,6 +55,7 @@ const App = () => (
           <Route path="/partida" element={<Match />} />
           <Route path="/classificacao" element={<Standings />} />
           <Route path="/calendario" element={<Calendar />} />
+          <Route path="/pos-jogo-2p" element={<PostMatch2P />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
