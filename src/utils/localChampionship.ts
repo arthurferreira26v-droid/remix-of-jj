@@ -288,6 +288,10 @@ export function saveMatchResultLocal(
     const roundUpdatedIndices: number[] = [matchIndex];
     for (let i = 0; i < matches.length; i++) {
       if (matches[i].round === round && !matches[i].is_played && matches[i].id !== matchId) {
+        // In 2P mode, skip matches involving excluded teams (the other player's team)
+        if (excludeTeams && excludeTeams.some(t => matches[i].home_team_name === t || matches[i].away_team_name === t)) {
+          continue;
+        }
         matches[i] = {
           ...matches[i],
           home_score: Math.floor(Math.random() * 4),
