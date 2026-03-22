@@ -39,12 +39,15 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted }: ReceivedO
 
   const handleAcceptCounter = (offer: TransferOffer) => {
     if (!offer.counterValue) return;
-    // Verificar caixa
-    const budgetRaw = localStorage.getItem(`budget_${teamName}`);
-    const budget = budgetRaw ? parseFloat(budgetRaw) : 0;
-    if (offer.counterValue > budget) {
-      toast.error("Você não tem caixa suficiente para essa contraproposta!");
-      return;
+    // O valor original já foi deduzido como escrow. Verificar se o jogador tem caixa para a diferença.
+    if (offer.counterValue > offer.offerValue) {
+      const budgetRaw = localStorage.getItem(`budget_${teamName}`);
+      const budget = budgetRaw ? parseFloat(budgetRaw) : 0;
+      const extraNeeded = offer.counterValue - offer.offerValue;
+      if (extraNeeded > budget) {
+        toast.error("Você não tem caixa suficiente para essa contraproposta!");
+        return;
+      }
     }
 
     const result = acceptCounterOffer(offer.id, (accepted) => {

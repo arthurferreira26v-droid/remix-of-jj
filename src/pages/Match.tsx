@@ -17,6 +17,7 @@ import { applySuspensions } from "@/utils/cardSystem";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { flushPendingWrites } from "@/utils/localChampionship";
 import { getYellowCardChance, applyCardToPlayer, finalizeCardsAfterMatch } from "@/utils/cardSystem";
+import { tickOffers } from "@/utils/transferOffers";
 
 interface MatchEvent {
   minute: number;
@@ -296,6 +297,12 @@ const Match = () => {
 
       // Flush all pending async writes before navigating
       flushPendingWrites();
+
+      // Tick transfer offers (incrementa contador de partidas, expira ofertas antigas)
+      const { expired } = tickOffers(teamName);
+      if (expired.length > 0) {
+        expired.forEach(e => toast.info(`Oferta por ${e.playerName} expirou. Dinheiro devolvido ao caixa.`));
+      }
 
       toast.success("Resultado salvo com sucesso!");
       
