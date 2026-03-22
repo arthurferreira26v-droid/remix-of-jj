@@ -403,6 +403,7 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
           onClose={() => setShowTransferMarket(false)}
           onOpenOffers={() => setShowReceivedOffers(true)}
           onOfferSent={refreshOffersCount}
+          onBudgetChanged={(newBudget) => setBudget(newBudget)}
         />
       )}
 
