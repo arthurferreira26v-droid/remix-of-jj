@@ -393,7 +393,21 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
       )}
 
       {showTransferMarket && (
-        <TransferMarket budget={budget} userTeamName={activeTeam} onClose={() => setShowTransferMarket(false)} onBuyPlayer={handleBuyPlayer} />
+        <TransferMarket
+          budget={budget}
+          userTeamName={activeTeam}
+          onClose={() => setShowTransferMarket(false)}
+          onOpenOffers={() => setShowReceivedOffers(true)}
+          onOfferSent={refreshOffersCount}
+        />
+      )}
+
+      {showReceivedOffers && (
+        <ReceivedOffersModal
+          teamName={activeTeam}
+          onClose={() => setShowReceivedOffers(false)}
+          onAccepted={handleOfferAccepted}
+        />
       )}
 
       {showFinances && (
