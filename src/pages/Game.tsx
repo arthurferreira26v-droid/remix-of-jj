@@ -619,7 +619,17 @@ const Game = () => {
           budget={budget}
           userTeamName={teamName}
           onClose={() => setShowTransferMarket(false)}
-          onBuyPlayer={handleBuyPlayer}
+          onOpenOffers={() => setShowReceivedOffers(true)}
+          onOfferSent={refreshOffersCount}
+        />
+      )}
+
+      {/* Received Offers */}
+      {showReceivedOffers && (
+        <ReceivedOffersModal
+          teamName={teamName}
+          onClose={() => setShowReceivedOffers(false)}
+          onAccepted={handleOfferAccepted}
         />
       )}
 
