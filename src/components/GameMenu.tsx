@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, Users, TrendingUp, Briefcase, Calendar, Trophy, LogOut, X } from "lucide-react";
+import { Menu, Users, TrendingUp, Briefcase, Calendar, Trophy, LogOut, X, Inbox } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
