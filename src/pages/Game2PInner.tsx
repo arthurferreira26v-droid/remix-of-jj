@@ -38,7 +38,19 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
   useEffect(() => { document.title = `Jogador ${currentTurn} - ${activeTeam} | Campanha 2P`; }, [currentTurn, activeTeam]);
 
   const [showTransferMarket, setShowTransferMarket] = useState(false);
+  const [showReceivedOffers, setShowReceivedOffers] = useState(false);
   const [showFinances, setShowFinances] = useState(false);
+  const [offersCount, setOffersCount] = useState(0);
+
+  useEffect(() => {
+    // In 2P, get both human team names to avoid CPU processing their offers
+    const params = new URLSearchParams(window.location.search);
+    const team2 = params.get("time2") || "";
+    processCpuOffers([activeTeam, team2].filter(Boolean));
+    setOffersCount(countPendingOffers(activeTeam));
+  }, [activeTeam]);
+
+  const refreshOffersCount = () => setOffersCount(countPendingOffers(activeTeam));
   const [totalSales, setTotalSales] = useState(0);
   const [totalPurchases, setTotalPurchases] = useState(0);
   const [hasActiveInvestment, setHasActiveInvestment] = useState(() =>
