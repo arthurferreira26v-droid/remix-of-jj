@@ -91,7 +91,10 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
     setSentOfferIds(prev => new Set([...prev, offerModal.player.id]));
     setOfferModal(null);
     setOfferValue("");
-    toast.success("Oferta enviada!");
+    toast.success("Oferta enviada! Valor reservado do caixa.");
+    // Atualizar budget no componente pai
+    const newBudget = parseFloat(localStorage.getItem(`budget_${userTeamName}`) || "0");
+    onBudgetChanged?.(newBudget);
     onOfferSent?.();
   };
 
