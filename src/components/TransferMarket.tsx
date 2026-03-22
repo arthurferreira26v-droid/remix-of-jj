@@ -13,9 +13,10 @@ interface TransferMarketProps {
   onClose: () => void;
   onOpenOffers?: () => void;
   onOfferSent?: () => void;
+  onBudgetChanged?: (newBudget: number) => void;
 }
 
-export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, onOfferSent }: TransferMarketProps) => {
+export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, onOfferSent, onBudgetChanged }: TransferMarketProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterPosition, setFilterPosition] = useState<string>("ALL");
   const [marketPlayers, setMarketPlayers] = useState<{ player: Player; ownerTeam: string }[]>([]);
@@ -90,7 +91,10 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
     setSentOfferIds(prev => new Set([...prev, offerModal.player.id]));
     setOfferModal(null);
     setOfferValue("");
-    toast.success("Oferta enviada!");
+    toast.success("Oferta enviada! Valor reservado do caixa.");
+    // Atualizar budget no componente pai
+    const newBudget = parseFloat(localStorage.getItem(`budget_${userTeamName}`) || "0");
+    onBudgetChanged?.(newBudget);
     onOfferSent?.();
   };
 

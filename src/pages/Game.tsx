@@ -625,6 +625,7 @@ const Game = () => {
           onClose={() => setShowTransferMarket(false)}
           onOpenOffers={() => setShowReceivedOffers(true)}
           onOfferSent={refreshOffersCount}
+          onBudgetChanged={(newBudget) => setBudget(newBudget)}
         />
       )}
 

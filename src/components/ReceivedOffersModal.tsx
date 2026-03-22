@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { X, Inbox, Check, XIcon, DollarSign, ArrowRight, MessageSquare } from "lucide-react";
-import { getReceivedOffers, getCounterOffers, acceptOffer, acceptCounterOffer, rejectOffer, TransferOffer } from "@/utils/transferOffers";
+import { X, Inbox, Check, XIcon, DollarSign, ArrowRight, MessageSquare, Send, Clock } from "lucide-react";
+import { getReceivedOffers, getCounterOffers, getSentOffers, acceptOffer, acceptCounterOffer, rejectOffer, TransferOffer } from "@/utils/transferOffers";
 import { formatMarketValue } from "@/utils/marketValue";
 import { toast } from "sonner";
 
@@ -13,11 +13,13 @@ interface ReceivedOffersModalProps {
 export const ReceivedOffersModal = ({ teamName, onClose, onAccepted }: ReceivedOffersModalProps) => {
   const [offers, setOffers] = useState<TransferOffer[]>([]);
   const [counterOffers, setCounterOffers] = useState<TransferOffer[]>([]);
-  const [tab, setTab] = useState<"received" | "counter">("received");
+  const [sentOffers, setSentOffers] = useState<TransferOffer[]>([]);
+  const [tab, setTab] = useState<"received" | "sent" | "counter">("received");
 
   useEffect(() => {
     setOffers(getReceivedOffers(teamName));
     setCounterOffers(getCounterOffers(teamName));
+    setSentOffers(getSentOffers(teamName));
   }, [teamName]);
 
   const handleAccept = (offer: TransferOffer) => {
@@ -32,14 +34,14 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted }: ReceivedO
 
   const handleReject = (offer: TransferOffer) => {
     rejectOffer(offer.id);
-    toast("Oferta recusada.");
+    toast("Oferta recusada. Valor devolvido ao comprador.");
     setOffers(prev => prev.filter(o => o.id !== offer.id));
     setCounterOffers(prev => prev.filter(o => o.id !== offer.id));
+    setSentOffers(prev => prev.filter(o => o.id !== offer.id));
   };
 
   const handleAcceptCounter = (offer: TransferOffer) => {
     if (!offer.counterValue) return;
-    // O valor original já foi deduzido como escrow. Verificar se o jogador tem caixa para a diferença.
     if (offer.counterValue > offer.offerValue) {
       const budgetRaw = localStorage.getItem(`budget_${teamName}`);
       const budget = budgetRaw ? parseFloat(budgetRaw) : 0;
@@ -56,6 +58,7 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted }: ReceivedO
     if (result) {
       toast.success(`${result.playerName} comprado de ${result.toTeam} por ${formatMarketValue(result.offerValue)}!`);
       setCounterOffers(prev => prev.filter(o => o.id !== offer.id));
+      setSentOffers(prev => prev.filter(o => o.id !== offer.id));
     }
   };
 
@@ -68,6 +71,7 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted }: ReceivedO
 
   const totalReceived = offers.length;
   const totalCounters = counterOffers.length;
+  const totalSent = sentOffers.length;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/95 overflow-y-auto">
@@ -86,19 +90,27 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted }: ReceivedO
         <div className="flex px-4 pb-3 gap-2">
           <button
             onClick={() => setTab("received")}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors ${
               tab === "received" ? "bg-[#c8ff00] text-black" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
             }`}
           >
             Recebidas {totalReceived > 0 && `(${totalReceived})`}
           </button>
           <button
+            onClick={() => setTab("sent")}
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors ${
+              tab === "sent" ? "bg-[#c8ff00] text-black" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+            }`}
+          >
+            Enviadas {totalSent > 0 && `(${totalSent})`}
+          </button>
+          <button
             onClick={() => setTab("counter")}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors ${
               tab === "counter" ? "bg-[#c8ff00] text-black" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
             }`}
           >
-            Contrapropostas {totalCounters > 0 && `(${totalCounters})`}
+            Contra {totalCounters > 0 && `(${totalCounters})`}
           </button>
         </div>
       </div>
@@ -176,6 +188,56 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted }: ReceivedO
           </>
         )}
 
+        {tab === "sent" && (
+          <>
+            {sentOffers.length === 0 ? (
+              <div className="text-center py-16 text-zinc-400">
+                <Send className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p>Nenhuma oferta enviada</p>
+              </div>
+            ) : (
+              sentOffers.map((offer) => {
+                const maxMatches = offer.isFromCpu ? 1 : 3;
+                const remaining = maxMatches - (offer.matchesPassed || 0);
+
+                return (
+                  <div key={offer.id} className="bg-zinc-900 rounded-lg border border-zinc-800 p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-black border-2 border-white rounded-full flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">{offer.playerOverall}</span>
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-white text-sm">{offer.playerName}</h4>
+                          <span className="text-xs text-zinc-400">{offer.playerPosition} • {offer.toTeam}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-bold text-green-400">{formatMarketValue(offer.offerValue)}</div>
+                        <div className="flex items-center gap-1 mt-1 justify-end">
+                          <Clock className="w-3 h-3 text-zinc-500" />
+                          <span className="text-[10px] text-zinc-500">
+                            {offer.status === "pending" ? `${remaining} jogo${remaining !== 1 ? 's' : ''} restante${remaining !== 1 ? 's' : ''}` : offer.status === "counter" ? "Contraproposta" : offer.status}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                        offer.status === "pending" 
+                          ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" 
+                          : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                      }`}>
+                        {offer.status === "pending" ? "Aguardando resposta" : "Contraproposta recebida"}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </>
+        )}
+
         {tab === "counter" && (
           <>
             {counterOffers.length === 0 ? (
@@ -197,7 +259,6 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted }: ReceivedO
                   </div>
 
                   <div className="p-4 space-y-3">
-                    {/* Original offer vs Counter */}
                     <div className="flex items-center gap-3">
                       <div className="flex-1 bg-zinc-800 rounded-lg p-3 text-center">
                         <span className="text-[10px] text-zinc-500 block">Sua oferta</span>
