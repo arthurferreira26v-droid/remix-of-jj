@@ -9,6 +9,8 @@ interface GameMenuProps {
   onTransferMarket?: () => void;
   onFinances?: () => void;
   onExit?: () => void;
+  offersCount?: number;
+  onReceivedOffers?: () => void;
 }
 
 const menuItemsData = (
