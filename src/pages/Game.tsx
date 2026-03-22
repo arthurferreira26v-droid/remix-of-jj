@@ -37,7 +37,17 @@ const Game = () => {
   useEffect(() => { document.title = `${teamName} - Painel | Gerenciador`; }, [teamName]);
 
   const [showTransferMarket, setShowTransferMarket] = useState(false);
+  const [showReceivedOffers, setShowReceivedOffers] = useState(false);
   const [showFinances, setShowFinances] = useState(false);
+  const [offersCount, setOffersCount] = useState(0);
+
+  // Process CPU offers on mount and refresh count
+  useEffect(() => {
+    processCpuOffers([teamName]);
+    setOffersCount(countPendingOffers(teamName));
+  }, [teamName]);
+
+  const refreshOffersCount = () => setOffersCount(countPendingOffers(teamName));
   const [totalSales, setTotalSales] = useState(0);
   const [hasActiveInvestment, setHasActiveInvestment] = useState(() => {
     return localStorage.getItem(`investment_${teamName}`) === 'true';
