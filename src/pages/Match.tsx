@@ -298,6 +298,12 @@ const Match = () => {
       // Flush all pending async writes before navigating
       flushPendingWrites();
 
+      // Tick transfer offers (incrementa contador de partidas, expira ofertas antigas)
+      const { expired } = tickOffers(teamName);
+      if (expired.length > 0) {
+        expired.forEach(e => toast.info(`Oferta por ${e.playerName} expirou. Dinheiro devolvido ao caixa.`));
+      }
+
       toast.success("Resultado salvo com sucesso!");
       
       // Sync championship data between players in 2P mode (before setTimeout)
