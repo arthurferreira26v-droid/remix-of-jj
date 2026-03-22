@@ -6,7 +6,9 @@ import { TacticsManager } from "@/components/TacticsManager";
 import { SquadManager } from "@/components/SquadManager";
 import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { TransferMarket } from "@/components/TransferMarket";
+import { ReceivedOffersModal } from "@/components/ReceivedOffersModal";
 import { FinancesModal } from "@/components/FinancesModal";
+import { processCpuOffers, countPendingOffers } from "@/utils/transferOffers";
 import { teams } from "@/data/teams";
 import { generateTeamPlayers, type Player } from "@/data/players";
 import { Loader2, Zap, ShoppingCart, Users } from "lucide-react";
@@ -36,7 +38,19 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
   useEffect(() => { document.title = `Jogador ${currentTurn} - ${activeTeam} | Campanha 2P`; }, [currentTurn, activeTeam]);
 
   const [showTransferMarket, setShowTransferMarket] = useState(false);
+  const [showReceivedOffers, setShowReceivedOffers] = useState(false);
   const [showFinances, setShowFinances] = useState(false);
+  const [offersCount, setOffersCount] = useState(0);
+
+  useEffect(() => {
+    // In 2P, get both human team names to avoid CPU processing their offers
+    const params = new URLSearchParams(window.location.search);
+    const team2 = params.get("time2") || "";
+    processCpuOffers([activeTeam, team2].filter(Boolean));
+    setOffersCount(countPendingOffers(activeTeam));
+  }, [activeTeam]);
+
+  const refreshOffersCount = () => setOffersCount(countPendingOffers(activeTeam));
   const [totalSales, setTotalSales] = useState(0);
   const [totalPurchases, setTotalPurchases] = useState(0);
   const [hasActiveInvestment, setHasActiveInvestment] = useState(() =>
@@ -194,11 +208,10 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
     toast.success(`${player.name} vendido por ${formatMarketValue(sellValue)}!`);
   };
 
-  const handleBuyPlayer = (player: Player, price: number) => {
-    updatePlayers([...players, { ...player, id: `bought-${Date.now()}`, isStarter: false }]);
-    setBudget(budget - price);
-    setTotalPurchases(prev => prev + price);
-    toast.success(`${player.name} contratado por ${formatMarketValue(price)}!`);
+  const handleOfferAccepted = () => {
+    const saved = localStorage.getItem(`players_${activeTeam}`);
+    if (saved) setPlayers(JSON.parse(saved));
+    refreshOffersCount();
   };
 
   const handleInvest = () => {
@@ -284,6 +297,8 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
         onManageSquad={() => swipe.goToPage(1)}
         onTransferMarket={() => setShowTransferMarket(true)}
         onFinances={() => setShowFinances(true)}
+        offersCount={offersCount}
+        onReceivedOffers={() => setShowReceivedOffers(true)}
         onExit={onExit}
       />
 
@@ -380,7 +395,21 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
       )}
 
       {showTransferMarket && (
-        <TransferMarket budget={budget} userTeamName={activeTeam} onClose={() => setShowTransferMarket(false)} onBuyPlayer={handleBuyPlayer} />
+        <TransferMarket
+          budget={budget}
+          userTeamName={activeTeam}
+          onClose={() => setShowTransferMarket(false)}
+          onOpenOffers={() => setShowReceivedOffers(true)}
+          onOfferSent={refreshOffersCount}
+        />
+      )}
+
+      {showReceivedOffers && (
+        <ReceivedOffersModal
+          teamName={activeTeam}
+          onClose={() => setShowReceivedOffers(false)}
+          onAccepted={handleOfferAccepted}
+        />
       )}
 
       {showFinances && (

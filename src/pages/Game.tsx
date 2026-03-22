@@ -7,7 +7,9 @@ import { SquadManager } from "@/components/SquadManager";
 import { TeamBudget } from "@/components/TeamBudget";
 import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { TransferMarket } from "@/components/TransferMarket";
+import { ReceivedOffersModal } from "@/components/ReceivedOffersModal";
 import { FinancesModal } from "@/components/FinancesModal";
+import { processCpuOffers, countPendingOffers } from "@/utils/transferOffers";
 
 import { teams } from "@/data/teams";
 import {
@@ -35,7 +37,17 @@ const Game = () => {
   useEffect(() => { document.title = `${teamName} - Painel | Gerenciador`; }, [teamName]);
 
   const [showTransferMarket, setShowTransferMarket] = useState(false);
+  const [showReceivedOffers, setShowReceivedOffers] = useState(false);
   const [showFinances, setShowFinances] = useState(false);
+  const [offersCount, setOffersCount] = useState(0);
+
+  // Process CPU offers on mount and refresh count
+  useEffect(() => {
+    processCpuOffers([teamName]);
+    setOffersCount(countPendingOffers(teamName));
+  }, [teamName]);
+
+  const refreshOffersCount = () => setOffersCount(countPendingOffers(teamName));
   const [totalSales, setTotalSales] = useState(0);
   const [hasActiveInvestment, setHasActiveInvestment] = useState(() => {
     return localStorage.getItem(`investment_${teamName}`) === 'true';
@@ -326,17 +338,11 @@ const Game = () => {
     toast.success(`${player.name} vendido por ${formatMarketValue(sellValue)}!`);
   };
 
-  const handleBuyPlayer = (player: Player, price: number) => {
-    // Adiciona o jogador como reserva
-    const newPlayer: Player = {
-      ...player,
-      id: `bought-${Date.now()}`,
-      isStarter: false,
-    };
-    updatePlayers([...players, newPlayer]);
-    setBudget(budget - price);
-    setTotalPurchases(prev => prev + price);
-    toast.success(`${player.name} contratado por ${formatMarketValue(price)}!`);
+  const handleOfferAccepted = () => {
+    // Reload players from localStorage after transfer
+    const saved = localStorage.getItem(`players_${teamName}`);
+    if (saved) setPlayers(JSON.parse(saved));
+    refreshOffersCount();
   };
 
   const handleInvest = () => {
@@ -452,6 +458,8 @@ const Game = () => {
         onManageSquad={() => swipe.goToPage(1)} 
         onTransferMarket={() => setShowTransferMarket(true)}
         onFinances={() => setShowFinances(true)}
+        offersCount={offersCount}
+        onReceivedOffers={() => setShowReceivedOffers(true)}
         onExit={() => {
           deleteLocalChampionship(teamName);
           localStorage.removeItem(`players_${teamName}`);
@@ -613,7 +621,17 @@ const Game = () => {
           budget={budget}
           userTeamName={teamName}
           onClose={() => setShowTransferMarket(false)}
-          onBuyPlayer={handleBuyPlayer}
+          onOpenOffers={() => setShowReceivedOffers(true)}
+          onOfferSent={refreshOffersCount}
+        />
+      )}
+
+      {/* Received Offers */}
+      {showReceivedOffers && (
+        <ReceivedOffersModal
+          teamName={teamName}
+          onClose={() => setShowReceivedOffers(false)}
+          onAccepted={handleOfferAccepted}
         />
       )}
 
