@@ -34,10 +34,12 @@ export const GameMenu = ({
   onTransferMarket,
   onFinances,
   onExit,
+  offersCount = 0,
+  onReceivedOffers,
 }: GameMenuProps) => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const items = menuItemsData(teamName, navigate, { onManageSquad, onTransferMarket, onFinances, onExit });
+  const items = menuItemsData(teamName, navigate, { onManageSquad, onTransferMarket, onFinances, onExit, onReceivedOffers }, offersCount);
 
   const handleItemClick = (onClick?: () => void) => {
     setOpen(false);
