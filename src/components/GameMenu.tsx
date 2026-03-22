@@ -16,11 +16,13 @@ interface GameMenuProps {
 const menuItemsData = (
   teamName: string,
   navigate: ReturnType<typeof useNavigate>,
-  handlers: Pick<GameMenuProps, "onManageSquad" | "onTransferMarket" | "onFinances" | "onExit">
+  handlers: Pick<GameMenuProps, "onManageSquad" | "onTransferMarket" | "onFinances" | "onExit" | "onReceivedOffers">,
+  offersCount: number
 ) => [
   { icon: Trophy, label: "Classificação", onClick: () => navigate(`/classificacao?time=${teamName}`) },
   { icon: Users, label: "Elenco", onClick: handlers.onManageSquad },
   { icon: TrendingUp, label: "Transferências", onClick: handlers.onTransferMarket },
+  { icon: Inbox, label: "Ofertas", onClick: handlers.onReceivedOffers, badge: offersCount },
   { icon: Calendar, label: "Calendário", onClick: () => navigate(`/calendario?time=${teamName}`) },
   { icon: Briefcase, label: "Finanças", onClick: handlers.onFinances },
   { icon: LogOut, label: "Sair", onClick: handlers.onExit, isDestructive: true },
