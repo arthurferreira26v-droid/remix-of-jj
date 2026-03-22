@@ -88,12 +88,17 @@ export const GameMenu = ({
             {/* Circle icon */}
             <button
               onClick={() => handleItemClick(item.onClick)}
-              className="w-11 h-11 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+              className="relative w-11 h-11 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
               style={{
                 background: item.isDestructive ? 'hsl(0 70% 50%)' : 'hsl(0 0% 7%)',
               }}
             >
               <item.icon className="w-[18px] h-[18px] text-white" />
+              {(item as any).badge > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {(item as any).badge}
+                </span>
+              )}
             </button>
           </motion.div>
         ))}
