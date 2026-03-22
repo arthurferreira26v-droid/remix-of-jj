@@ -8,7 +8,7 @@ import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { TransferMarket } from "@/components/TransferMarket";
 import { ReceivedOffersModal } from "@/components/ReceivedOffersModal";
 import { FinancesModal } from "@/components/FinancesModal";
-import { processCpuOffers, countPendingOffers } from "@/utils/transferOffers";
+import { processCpuOffers, countPendingOffers, generateCpuOffers } from "@/utils/transferOffers";
 import { teams } from "@/data/teams";
 import { generateTeamPlayers, type Player } from "@/data/players";
 import { Loader2, Zap, ShoppingCart, Users } from "lucide-react";
