@@ -13,9 +13,10 @@ interface TransferMarketProps {
   onClose: () => void;
   onOpenOffers?: () => void;
   onOfferSent?: () => void;
+  onBudgetChanged?: (newBudget: number) => void;
 }
 
-export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, onOfferSent }: TransferMarketProps) => {
+export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, onOfferSent, onBudgetChanged }: TransferMarketProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterPosition, setFilterPosition] = useState<string>("ALL");
   const [marketPlayers, setMarketPlayers] = useState<{ player: Player; ownerTeam: string }[]>([]);
