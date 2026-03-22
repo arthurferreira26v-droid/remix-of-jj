@@ -41,9 +41,11 @@ const Game = () => {
   const [showFinances, setShowFinances] = useState(false);
   const [offersCount, setOffersCount] = useState(0);
 
-  // Process CPU offers on mount and refresh count
+  // Process CPU offers + generate active CPU offers on mount
   useEffect(() => {
+    const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
     processCpuOffers([teamName]);
+    generateCpuOffers([teamName], brazilianTeams);
     setOffersCount(countPendingOffers(teamName));
   }, [teamName]);
 

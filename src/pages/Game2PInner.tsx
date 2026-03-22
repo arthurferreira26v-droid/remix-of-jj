@@ -43,10 +43,12 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
   const [offersCount, setOffersCount] = useState(0);
 
   useEffect(() => {
-    // In 2P, get both human team names to avoid CPU processing their offers
     const params = new URLSearchParams(window.location.search);
     const team2 = params.get("time2") || "";
-    processCpuOffers([activeTeam, team2].filter(Boolean));
+    const humanTeams = [activeTeam, team2].filter(Boolean);
+    const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
+    processCpuOffers(humanTeams);
+    generateCpuOffers(humanTeams, brazilianTeams);
     setOffersCount(countPendingOffers(activeTeam));
   }, [activeTeam]);
 
