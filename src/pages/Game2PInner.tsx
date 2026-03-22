@@ -297,6 +297,8 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
         onManageSquad={() => swipe.goToPage(1)}
         onTransferMarket={() => setShowTransferMarket(true)}
         onFinances={() => setShowFinances(true)}
+        offersCount={offersCount}
+        onReceivedOffers={() => setShowReceivedOffers(true)}
         onExit={onExit}
       />
 

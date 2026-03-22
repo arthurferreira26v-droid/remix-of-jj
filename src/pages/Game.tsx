@@ -458,6 +458,8 @@ const Game = () => {
         onManageSquad={() => swipe.goToPage(1)} 
         onTransferMarket={() => setShowTransferMarket(true)}
         onFinances={() => setShowFinances(true)}
+        offersCount={offersCount}
+        onReceivedOffers={() => setShowReceivedOffers(true)}
         onExit={() => {
           deleteLocalChampionship(teamName);
           localStorage.removeItem(`players_${teamName}`);
