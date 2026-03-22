@@ -7,7 +7,9 @@ import { SquadManager } from "@/components/SquadManager";
 import { TeamBudget } from "@/components/TeamBudget";
 import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { TransferMarket } from "@/components/TransferMarket";
+import { ReceivedOffersModal } from "@/components/ReceivedOffersModal";
 import { FinancesModal } from "@/components/FinancesModal";
+import { processCpuOffers, countPendingOffers } from "@/utils/transferOffers";
 
 import { teams } from "@/data/teams";
 import {
