@@ -208,11 +208,10 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
     toast.success(`${player.name} vendido por ${formatMarketValue(sellValue)}!`);
   };
 
-  const handleBuyPlayer = (player: Player, price: number) => {
-    updatePlayers([...players, { ...player, id: `bought-${Date.now()}`, isStarter: false }]);
-    setBudget(budget - price);
-    setTotalPurchases(prev => prev + price);
-    toast.success(`${player.name} contratado por ${formatMarketValue(price)}!`);
+  const handleOfferAccepted = () => {
+    const saved = localStorage.getItem(`players_${activeTeam}`);
+    if (saved) setPlayers(JSON.parse(saved));
+    refreshOffersCount();
   };
 
   const handleInvest = () => {
