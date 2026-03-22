@@ -17,6 +17,7 @@ import { applySuspensions } from "@/utils/cardSystem";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { flushPendingWrites } from "@/utils/localChampionship";
 import { getYellowCardChance, applyCardToPlayer, finalizeCardsAfterMatch } from "@/utils/cardSystem";
+import { tickOffers } from "@/utils/transferOffers";
 
 interface MatchEvent {
   minute: number;
