@@ -338,17 +338,11 @@ const Game = () => {
     toast.success(`${player.name} vendido por ${formatMarketValue(sellValue)}!`);
   };
 
-  const handleBuyPlayer = (player: Player, price: number) => {
-    // Adiciona o jogador como reserva
-    const newPlayer: Player = {
-      ...player,
-      id: `bought-${Date.now()}`,
-      isStarter: false,
-    };
-    updatePlayers([...players, newPlayer]);
-    setBudget(budget - price);
-    setTotalPurchases(prev => prev + price);
-    toast.success(`${player.name} contratado por ${formatMarketValue(price)}!`);
+  const handleOfferAccepted = () => {
+    // Reload players from localStorage after transfer
+    const saved = localStorage.getItem(`players_${teamName}`);
+    if (saved) setPlayers(JSON.parse(saved));
+    refreshOffersCount();
   };
 
   const handleInvest = () => {
