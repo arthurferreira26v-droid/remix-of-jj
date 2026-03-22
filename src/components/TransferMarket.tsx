@@ -1,72 +1,100 @@
 import { useState, useEffect } from "react";
-import { X, Search, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Minus, Loader2 } from "lucide-react";
+import { X, Search, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Minus, Loader2, Send, Inbox } from "lucide-react";
 import { Player } from "@/data/players";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers } from "@/hooks/useAdminData";
 import { teams } from "@/data/teams";
+import { sendOffer, getSentOffers, countPendingOffers } from "@/utils/transferOffers";
+import { toast } from "sonner";
 
 interface TransferMarketProps {
   budget: number;
   userTeamName: string;
   onClose: () => void;
-  onBuyPlayer: (player: Player, price: number) => void;
+  onOpenOffers?: () => void;
+  onOfferSent?: () => void;
 }
 
-export const TransferMarket = ({ budget, userTeamName, onClose, onBuyPlayer }: TransferMarketProps) => {
+export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, onOfferSent }: TransferMarketProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterPosition, setFilterPosition] = useState<string>("ALL");
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-  const [marketPlayers, setMarketPlayers] = useState<Player[]>([]);
+  const [marketPlayers, setMarketPlayers] = useState<{ player: Player; ownerTeam: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [offerModal, setOfferModal] = useState<{ player: Player; ownerTeam: string } | null>(null);
+  const [offerValue, setOfferValue] = useState("");
+  const [sentOfferIds, setSentOfferIds] = useState<Set<string>>(new Set());
 
   const positions = ["ALL", "GOL", "ZAG", "LD", "LE", "VOL", "MC", "MEI", "PD", "PE", "ATA"];
 
-  // Fetch all admin players from Brazilian teams, excluding user's team
   useEffect(() => {
     (async () => {
       setLoading(true);
       const adminPlayers = await fetchAdminPlayers(true);
-
-      // Get Brazilian team IDs
-      const brazilianTeams = teams
-        .filter(t => t.league === "brasileiro")
-        .map(t => t.name);
-
-      const allPlayers: Player[] = [];
+      const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
+      const all: { player: Player; ownerTeam: string }[] = [];
 
       for (const [teamId, players] of Object.entries(adminPlayers)) {
-        // Skip user's team
         if (teamId.toLowerCase() === userTeamName.toLowerCase()) continue;
-        // Only include Brazilian teams
         if (!brazilianTeams.some(name => name.toLowerCase() === teamId.toLowerCase())) continue;
 
-        players.forEach(p => {
-          allPlayers.push({ ...p, id: `market_${teamId}_${p.id}` });
+        // Check localStorage for current roster (handles transfers)
+        const localRaw = localStorage.getItem(`players_${teamId}`);
+        const localPlayers: Player[] = localRaw ? JSON.parse(localRaw) : players;
+
+        localPlayers.forEach(p => {
+          all.push({ player: p, ownerTeam: teamId });
         });
       }
 
-      // Sort by overall descending
-      allPlayers.sort((a, b) => b.overall - a.overall);
-      setMarketPlayers(allPlayers);
+      all.sort((a, b) => b.player.overall - a.player.overall);
+      setMarketPlayers(all);
+
+      // Track sent offers
+      const sent = getSentOffers(userTeamName);
+      setSentOfferIds(new Set(sent.map(o => o.playerId)));
+
       setLoading(false);
     })();
   }, [userTeamName]);
 
-  const filteredPlayers = marketPlayers.filter((player) => {
+  const filteredPlayers = marketPlayers.filter(({ player }) => {
     const matchesSearch = player.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPosition = filterPosition === "ALL" || player.position === filterPosition;
     return matchesSearch && matchesPosition;
   });
 
-  const handleBuy = (player: Player) => {
-    const price = calculateMarketValue(player);
-    if (budget >= price) {
-      onBuyPlayer(player, price);
-      // Remove from market list
-      setMarketPlayers(prev => prev.filter(p => p.id !== player.id));
-      setSelectedPlayer(null);
+  const handleSendOffer = () => {
+    if (!offerModal) return;
+    const value = parseFloat(offerValue.replace(/[^0-9.]/g, ""));
+    if (isNaN(value) || value <= 0) {
+      toast.error("Informe um valor válido!");
+      return;
     }
+
+    const valueInUnits = value * 1000000; // Input em milhões
+    if (valueInUnits > budget) {
+      toast.error("Você não tem caixa suficiente!");
+      return;
+    }
+
+    sendOffer(
+      offerModal.player.id,
+      offerModal.player.name,
+      offerModal.player.overall,
+      offerModal.player.position,
+      userTeamName,
+      offerModal.ownerTeam,
+      valueInUnits
+    );
+
+    setSentOfferIds(prev => new Set([...prev, offerModal.player.id]));
+    setOfferModal(null);
+    setOfferValue("");
+    toast.success("Oferta enviada!");
+    onOfferSent?.();
   };
+
+  const pendingCount = countPendingOffers(userTeamName);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/95 overflow-y-auto">
@@ -75,24 +103,34 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onBuyPlayer }: T
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <ShoppingCart className="w-6 h-6 text-[#c8ff00]" />
-            <h2 className="text-xl font-bold text-white">Mercado de Transferências</h2>
+            <h2 className="text-xl font-bold text-white">Mercado</h2>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-zinc-800 transition-colors"
-          >
-            <X className="w-6 h-6 text-white" />
-          </button>
+          <div className="flex items-center gap-2">
+            {onOpenOffers && (
+              <button
+                onClick={() => { onClose(); onOpenOffers(); }}
+                className="relative p-2 rounded-full hover:bg-zinc-800 transition-colors"
+              >
+                <Inbox className="w-6 h-6 text-white" />
+                {pendingCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                    {pendingCount}
+                  </span>
+                )}
+              </button>
+            )}
+            <button onClick={onClose} className="p-2 rounded-full hover:bg-zinc-800 transition-colors">
+              <X className="w-6 h-6 text-white" />
+            </button>
+          </div>
         </div>
 
-        {/* Budget Display */}
+        {/* Budget */}
         <div className="px-4 pb-4">
           <div className="flex items-center justify-center gap-3 bg-gradient-to-r from-green-900/40 via-green-800/40 to-green-900/40 border border-green-700/50 rounded-lg px-6 py-3">
             <DollarSign className="w-5 h-5 text-green-400" />
-            <span className="text-sm text-green-300/80 font-medium">Caixa Disponível:</span>
-            <span className="text-xl font-bold text-green-400">
-              {formatMarketValue(budget)}
-            </span>
+            <span className="text-sm text-green-300/80 font-medium">Caixa:</span>
+            <span className="text-xl font-bold text-green-400">{formatMarketValue(budget)}</span>
           </div>
         </div>
 
@@ -110,16 +148,14 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onBuyPlayer }: T
           </div>
         </div>
 
-        {/* Position Filter */}
+        {/* Positions */}
         <div className="px-4 pb-4 flex gap-2 overflow-x-auto">
           {positions.map((pos) => (
             <button
               key={pos}
               onClick={() => setFilterPosition(pos)}
               className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                filterPosition === pos
-                  ? "bg-[#c8ff00] text-black"
-                  : "bg-zinc-800 text-white hover:bg-zinc-700"
+                filterPosition === pos ? "bg-[#c8ff00] text-black" : "bg-zinc-800 text-white hover:bg-zinc-700"
               }`}
             >
               {pos === "ALL" ? "Todos" : pos}
@@ -137,15 +173,12 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onBuyPlayer }: T
           </div>
         ) : (
           <>
-            {filteredPlayers.map((player) => {
+            {filteredPlayers.map(({ player, ownerTeam }) => {
               const price = calculateMarketValue(player);
-              const canAfford = budget >= price;
+              const hasSentOffer = sentOfferIds.has(player.id);
 
               return (
-                <div
-                  key={player.id}
-                  className="bg-zinc-900 rounded-lg p-4 border border-zinc-800"
-                >
+                <div key={player.id} className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-black border-2 border-white rounded-full flex items-center justify-center">
@@ -155,44 +188,36 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onBuyPlayer }: T
                         <h4 className="font-bold text-white">{player.name}</h4>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-sm text-zinc-400">{player.position}</span>
-                          <span className="px-2 py-0.5 bg-blue-600 rounded text-xs font-bold text-white">
-                            #{player.number}
-                          </span>
+                          <span className="px-2 py-0.5 bg-blue-600 rounded text-xs font-bold text-white">#{player.number}</span>
                           <span className="text-xs text-zinc-500">{player.age} anos</span>
-                          {player.age < 24 && (
-                            <span className="flex items-center text-green-400 text-xs" title="Potencial de evolução">
-                              <TrendingUp className="w-3 h-3" />
-                            </span>
-                          )}
-                          {player.age >= 24 && player.age <= 30 && (
-                            <span className="flex items-center text-yellow-400 text-xs" title="Estável">
-                              <Minus className="w-3 h-3" />
-                            </span>
-                          )}
-                          {player.age > 30 && (
-                            <span className="flex items-center text-red-400 text-xs" title="Em declínio">
-                              <TrendingDown className="w-3 h-3" />
-                            </span>
-                          )}
+                          {player.age < 24 && <TrendingUp className="w-3 h-3 text-green-400" />}
+                          {player.age >= 24 && player.age <= 30 && <Minus className="w-3 h-3 text-yellow-400" />}
+                          {player.age > 30 && <TrendingDown className="w-3 h-3 text-red-400" />}
                         </div>
+                        <span className="text-[11px] text-zinc-500 mt-0.5 block">
+                          Clube: <span className="text-zinc-300">{ownerTeam}</span>
+                        </span>
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <div className="text-lg font-bold text-green-400">
-                        {formatMarketValue(price)}
-                      </div>
-                      <button
-                        onClick={() => handleBuy(player)}
-                        disabled={!canAfford}
-                        className={`mt-2 px-4 py-2 rounded-lg font-bold text-sm transition-colors ${
-                          canAfford
-                            ? "bg-[#c8ff00] text-black hover:bg-[#b8ef00]"
-                            : "bg-zinc-700 text-zinc-400 cursor-not-allowed"
-                        }`}
-                      >
-                        {canAfford ? "Comprar" : "Sem Fundos"}
-                      </button>
+                      <div className="text-sm font-bold text-green-400">{formatMarketValue(price)}</div>
+                      {hasSentOffer ? (
+                        <span className="mt-2 inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-yellow-600/20 text-yellow-400 border border-yellow-600/30">
+                          Oferta Enviada
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setOfferModal({ player, ownerTeam });
+                            setOfferValue((price / 1000000).toFixed(1));
+                          }}
+                          className="mt-2 px-4 py-2 rounded-lg font-bold text-sm bg-[#c8ff00] text-black hover:bg-[#b8ef00] transition-colors flex items-center gap-1.5"
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                          Ofertar
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -200,13 +225,60 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onBuyPlayer }: T
             })}
 
             {filteredPlayers.length === 0 && (
-              <div className="text-center py-12 text-zinc-400">
-                Nenhum jogador encontrado
-              </div>
+              <div className="text-center py-12 text-zinc-400">Nenhum jogador encontrado</div>
             )}
           </>
         )}
       </div>
+
+      {/* Offer Modal */}
+      {offerModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 px-6">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-sm">
+            <h3 className="text-white font-bold text-lg mb-1">Fazer Oferta</h3>
+            <p className="text-zinc-400 text-sm mb-4">
+              {offerModal.player.name} ({offerModal.player.overall} OVR) — {offerModal.ownerTeam}
+            </p>
+
+            <div className="mb-2">
+              <span className="text-xs text-zinc-500">Valor de mercado: {formatMarketValue(calculateMarketValue(offerModal.player))}</span>
+            </div>
+
+            <div className="relative mb-4">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm font-bold">$</span>
+              <input
+                type="number"
+                step="0.1"
+                value={offerValue}
+                onChange={(e) => setOfferValue(e.target.value)}
+                className="w-full bg-zinc-800 text-white pl-8 pr-12 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c8ff00] text-lg font-bold"
+                placeholder="0.0"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm">M</span>
+            </div>
+
+            <p className="text-xs text-zinc-500 mb-4">
+              Seu caixa: {formatMarketValue(budget)}
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setOfferModal(null); setOfferValue(""); }}
+                className="flex-1 py-3 rounded-lg font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSendOffer}
+                className="flex-1 py-3 rounded-lg font-bold text-sm bg-[#c8ff00] text-black hover:bg-[#b8ef00] transition-colors flex items-center justify-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                Enviar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
