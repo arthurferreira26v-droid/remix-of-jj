@@ -1,4 +1,5 @@
 import { Player } from "@/data/players";
+import { getLocalBudget, saveLocalBudget } from "@/utils/localChampionship";
 import { calculateMarketValue } from "@/utils/marketValue";
 
 // ==================== TYPES ====================
@@ -6,6 +7,7 @@ import { calculateMarketValue } from "@/utils/marketValue";
 export interface TransferOffer {
   id: string;
   playerId: string;
+  playerUniqueKey: string;
   playerName: string;
   playerOverall: number;
   playerPosition: string;
@@ -25,11 +27,19 @@ export interface TransferOffer {
 
 const OFFERS_KEY = "transfer_offers";
 
+const getPlayerUniqueKey = (playerId: string, ownerTeam: string) => `${ownerTeam.toLowerCase()}::${playerId}`;
+
 // ==================== HELPERS ====================
 
 const getOffers = (): TransferOffer[] => {
   const raw = localStorage.getItem(OFFERS_KEY);
-  return raw ? JSON.parse(raw) : [];
+  if (!raw) return [];
+
+  const offers = JSON.parse(raw) as TransferOffer[];
+  return offers.map((offer) => ({
+    ...offer,
+    playerUniqueKey: offer.playerUniqueKey || getPlayerUniqueKey(offer.playerId, offer.toTeam),
+  }));
 };
 
 const saveOffers = (offers: TransferOffer[]) => {
@@ -38,16 +48,17 @@ const saveOffers = (offers: TransferOffer[]) => {
 
 /** Deduz valor do caixa do comprador (escrow) */
 const deductBudget = (teamName: string, amount: number) => {
-  const key = `local_budget_${teamName}`;
-  const current = parseFloat(localStorage.getItem(key) || "0");
-  localStorage.setItem(key, String(current - amount));
+  const current = getLocalBudget(teamName);
+  if (amount > current) {
+    throw new Error("insufficient_budget");
+  }
+  saveLocalBudget(teamName, current - amount);
 };
 
 /** Adiciona valor ao caixa */
 const addBudget = (teamName: string, amount: number) => {
-  const key = `local_budget_${teamName}`;
-  const current = parseFloat(localStorage.getItem(key) || "0");
-  localStorage.setItem(key, String(current + amount));
+  const current = getLocalBudget(teamName);
+  saveLocalBudget(teamName, current + amount);
 };
 
 // ==================== PUBLIC API ====================
@@ -63,9 +74,12 @@ export const sendOffer = (
   offerValue: number,
   isFromCpu: boolean = false
 ): TransferOffer => {
+  deductBudget(fromTeam, offerValue);
+
   const offer: TransferOffer = {
     id: `offer_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
     playerId,
+    playerUniqueKey: getPlayerUniqueKey(playerId, toTeam),
     playerName,
     playerOverall,
     playerPosition,
@@ -79,9 +93,6 @@ export const sendOffer = (
     matchesPassed: 0,
     escrowDeducted: true,
   };
-
-  // Deduzir dinheiro do comprador imediatamente (escrow)
-  deductBudget(fromTeam, offerValue);
 
   const offers = getOffers();
   offers.push(offer);
@@ -130,10 +141,11 @@ export const acceptOffer = (
   // Remove todas as outras ofertas pendentes pelo mesmo jogador e reembolsa
   const filtered = offers.filter((o) => {
     if (o.id === offerId) return true;
-    if (o.playerId === offer.playerId && (o.status === "pending" || o.status === "counter")) {
+    if (o.playerUniqueKey === offer.playerUniqueKey && (o.status === "pending" || o.status === "counter")) {
       // Reembolsar quem fez essas outras ofertas
       if (o.escrowDeducted) {
         addBudget(o.fromTeam, o.offerValue);
+        o.escrowDeducted = false;
       }
       return false;
     }
@@ -173,8 +185,11 @@ export const acceptCounterOffer = (
 
   const filtered = offers.filter((o) => {
     if (o.id === offerId) return true;
-    if (o.playerId === offer.playerId && (o.status === "pending" || o.status === "counter")) {
-      if (o.escrowDeducted) addBudget(o.fromTeam, o.offerValue);
+    if (o.playerUniqueKey === offer.playerUniqueKey && (o.status === "pending" || o.status === "counter")) {
+      if (o.escrowDeducted) {
+        addBudget(o.fromTeam, o.offerValue);
+        o.escrowDeducted = false;
+      }
       return false;
     }
     return true;
@@ -198,6 +213,7 @@ export const rejectOffer = (offerId: string): void => {
     // Reembolsar o comprador
     if (offer.escrowDeducted) {
       addBudget(offer.fromTeam, offer.offerValue);
+      offer.escrowDeducted = false;
     }
     offers[idx].status = "rejected";
     saveOffers(offers);
@@ -295,11 +311,14 @@ export const processCpuOffers = (
   });
 
   // Remove ofertas pendentes para jogadores que foram aceitos
-  const acceptedPlayerIds = accepted.map((a) => a.playerId);
+  const acceptedPlayerKeys = accepted.map((a) => a.playerUniqueKey);
   const cleaned = updated.filter((o) => {
-    if (acceptedPlayerIds.includes(o.playerId) && (o.status === "pending" || o.status === "counter")) {
+    if (acceptedPlayerKeys.includes(o.playerUniqueKey) && (o.status === "pending" || o.status === "counter")) {
       // Reembolsar outras ofertas pelo mesmo jogador
-      if (o.escrowDeducted) addBudget(o.fromTeam, o.offerValue);
+      if (o.escrowDeducted) {
+        addBudget(o.fromTeam, o.offerValue);
+        o.escrowDeducted = false;
+      }
       return false;
     }
     return true;
@@ -335,6 +354,7 @@ export const tickOffers = (teamName: string): { expired: TransferOffer[] } => {
         // Reembolsar o comprador
         if (o.escrowDeducted) {
           addBudget(o.fromTeam, o.offerValue);
+            o.escrowDeducted = false;
         }
         expired.push(o);
       }
@@ -379,9 +399,10 @@ export const generateCpuOffers = (
     const sorted = [...players].sort((a, b) => b.overall - a.overall);
     const topPlayers = sorted.slice(0, Math.min(5, sorted.length));
     const target = topPlayers[Math.floor(Math.random() * topPlayers.length)];
+    const targetKey = getPlayerUniqueKey(target.id, targetTeam);
 
     const alreadyHasOffer = existingOffers.some(
-      (o) => o.playerId === target.id && (o.status === "pending" || o.status === "counter") && o.fromTeam.toLowerCase() === buyerTeam.toLowerCase()
+      (o) => o.playerUniqueKey === targetKey && (o.status === "pending" || o.status === "counter") && o.fromTeam.toLowerCase() === buyerTeam.toLowerCase()
     );
     if (alreadyHasOffer) continue;
 

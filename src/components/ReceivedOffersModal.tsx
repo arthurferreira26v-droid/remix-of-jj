@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Inbox, Check, XIcon, DollarSign, ArrowRight, MessageSquare, Send, Clock } from "lucide-react";
 import { getReceivedOffers, getCounterOffers, getSentOffers, acceptOffer, acceptCounterOffer, rejectOffer, TransferOffer } from "@/utils/transferOffers";
+import { getLocalBudget } from "@/utils/localChampionship";
 import { formatMarketValue } from "@/utils/marketValue";
 import { toast } from "sonner";
 
@@ -8,9 +9,10 @@ interface ReceivedOffersModalProps {
   teamName: string;
   onClose: () => void;
   onAccepted?: (offer: TransferOffer) => void;
+  onBudgetChanged?: (newBudget: number) => void;
 }
 
-export const ReceivedOffersModal = ({ teamName, onClose, onAccepted }: ReceivedOffersModalProps) => {
+export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetChanged }: ReceivedOffersModalProps) => {
   const [offers, setOffers] = useState<TransferOffer[]>([]);
   const [counterOffers, setCounterOffers] = useState<TransferOffer[]>([]);
   const [sentOffers, setSentOffers] = useState<TransferOffer[]>([]);
@@ -29,6 +31,7 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted }: ReceivedO
     if (result) {
       toast.success(`${result.playerName} transferido para ${result.fromTeam} por ${formatMarketValue(result.offerValue)}!`);
       setOffers(prev => prev.filter(o => o.id !== offer.id));
+      onBudgetChanged?.(getLocalBudget(teamName));
     }
   };
 
@@ -43,8 +46,7 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted }: ReceivedO
   const handleAcceptCounter = (offer: TransferOffer) => {
     if (!offer.counterValue) return;
     // Escrow já foi devolvido, então precisa ter o valor total da contraproposta
-    const budgetRaw = localStorage.getItem(`local_budget_${teamName}`);
-    const budget = budgetRaw ? parseFloat(budgetRaw) : 0;
+    const budget = getLocalBudget(teamName);
     if (offer.counterValue > budget) {
       toast.error("Você não tem caixa suficiente para essa contraproposta!");
       return;
@@ -57,13 +59,14 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted }: ReceivedO
       toast.success(`${result.playerName} comprado de ${result.toTeam} por ${formatMarketValue(result.offerValue)}!`);
       setCounterOffers(prev => prev.filter(o => o.id !== offer.id));
       setSentOffers(prev => prev.filter(o => o.id !== offer.id));
+      onBudgetChanged?.(getLocalBudget(teamName));
     }
   };
 
   // Group received offers by player
   const grouped = offers.reduce<Record<string, TransferOffer[]>>((acc, o) => {
-    if (!acc[o.playerId]) acc[o.playerId] = [];
-    acc[o.playerId].push(o);
+    if (!acc[o.playerUniqueKey]) acc[o.playerUniqueKey] = [];
+    acc[o.playerUniqueKey].push(o);
     return acc;
   }, {});
 

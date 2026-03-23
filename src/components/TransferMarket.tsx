@@ -5,6 +5,7 @@ import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers } from "@/hooks/useAdminData";
 import { teams } from "@/data/teams";
 import { sendOffer, getSentOffers, countPendingOffers } from "@/utils/transferOffers";
+import { getLocalBudget } from "@/utils/localChampionship";
 import { toast } from "sonner";
 
 interface TransferMarketProps {
@@ -23,7 +24,9 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
   const [loading, setLoading] = useState(true);
   const [offerModal, setOfferModal] = useState<{ player: Player; ownerTeam: string } | null>(null);
   const [offerValue, setOfferValue] = useState("");
-  const [sentOfferIds, setSentOfferIds] = useState<Set<string>>(new Set());
+  const [sentOfferKeys, setSentOfferKeys] = useState<Set<string>>(new Set());
+
+  const getMarketKey = (playerId: string, ownerTeam: string) => `${ownerTeam.toLowerCase()}::${playerId}`;
 
   const positions = ["ALL", "GOL", "ZAG", "LD", "LE", "VOL", "MC", "MEI", "PD", "PE", "ATA"];
 
@@ -52,7 +55,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
 
       // Track sent offers
       const sent = getSentOffers(userTeamName);
-      setSentOfferIds(new Set(sent.map(o => o.playerId)));
+      setSentOfferKeys(new Set(sent.map(o => o.playerUniqueKey)));
 
       setLoading(false);
     })();
@@ -78,22 +81,27 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
       return;
     }
 
-    sendOffer(
-      offerModal.player.id,
-      offerModal.player.name,
-      offerModal.player.overall,
-      offerModal.player.position,
-      userTeamName,
-      offerModal.ownerTeam,
-      valueInUnits
-    );
+    try {
+      sendOffer(
+        offerModal.player.id,
+        offerModal.player.name,
+        offerModal.player.overall,
+        offerModal.player.position,
+        userTeamName,
+        offerModal.ownerTeam,
+        valueInUnits
+      );
+    } catch (error) {
+      toast.error("Você não tem caixa suficiente!");
+      return;
+    }
 
-    setSentOfferIds(prev => new Set([...prev, offerModal.player.id]));
+    setSentOfferKeys(prev => new Set([...prev, getMarketKey(offerModal.player.id, offerModal.ownerTeam)]));
     setOfferModal(null);
     setOfferValue("");
     toast.success("Oferta enviada! Valor reservado do caixa.");
     // Atualizar budget no componente pai
-    const newBudget = parseFloat(localStorage.getItem(`local_budget_${userTeamName}`) || "0");
+    const newBudget = getLocalBudget(userTeamName);
     onBudgetChanged?.(newBudget);
     onOfferSent?.();
   };
@@ -179,10 +187,11 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
           <>
             {filteredPlayers.map(({ player, ownerTeam }) => {
               const price = calculateMarketValue(player);
-              const hasSentOffer = sentOfferIds.has(player.id);
+              const marketKey = getMarketKey(player.id, ownerTeam);
+              const hasSentOffer = sentOfferKeys.has(marketKey);
 
               return (
-                <div key={player.id} className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
+                <div key={marketKey} className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-black border-2 border-white rounded-full flex items-center justify-center">

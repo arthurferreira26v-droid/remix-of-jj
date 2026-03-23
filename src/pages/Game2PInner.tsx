@@ -412,6 +412,7 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
           teamName={activeTeam}
           onClose={() => setShowReceivedOffers(false)}
           onAccepted={handleOfferAccepted}
+          onBudgetChanged={(newBudget) => setBudget(newBudget)}
         />
       )}
 
