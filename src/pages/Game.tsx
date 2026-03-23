@@ -224,6 +224,10 @@ const Game = () => {
     if (savedPlayers) setPlayers(JSON.parse(savedPlayers));
     refreshChampionship();
     setBudget(getLocalBudget(teamName));
+    // Process transfers after match
+    const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
+    processCpuOffers([teamName]);
+    generateCpuOffers([teamName], brazilianTeams);
     refreshOffersCount();
   }, [teamName, refreshChampionship, setBudget]);
 
