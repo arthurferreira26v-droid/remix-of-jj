@@ -160,7 +160,9 @@ const Match = () => {
   const opponentPlayers = generateTeamPlayers(opponentName);
   
   const userStarters = userPlayers.filter((p) => p.isStarter);
-  const userReserves = userPlayers.filter((p) => !p.isStarter);
+  // Reservas: exclui jogadores expulsos (expulso NUNCA volta ao banco)
+  const userReserves = userPlayers.filter((p) => !p.isStarter && !p.matchRedCard);
+  const userActiveStarters = userStarters.filter(p => !p.matchRedCard); // jogadores efetivamente em campo
   const opponentStarters = opponentPlayers.filter((p) => p.isStarter);
 
   // Ordenar titulares respeitando a ordem salva no localStorage
@@ -196,6 +198,13 @@ const Match = () => {
   const handleStarterClick = (starter: Player) => {
     // Se tem reserva selecionado, troca reserva <-> titular
     if (selectedReserve) {
+      // REGRA: jogador expulso NÃO pode ser substituído por reserva
+      if (starter.matchRedCard) {
+        toast.error("Jogador expulso não pode ser substituído!");
+        setSelectedReserve(null);
+        return;
+      }
+
       const updatedPlayers = userPlayers.map((p) => {
         if (p.id === starter.id) return { ...p, isStarter: false };
         if (p.id === selectedReserve.id) return { ...p, isStarter: true };
@@ -223,14 +232,14 @@ const Match = () => {
       return;
     }
 
-    // Se já tem um titular selecionado, troca posições entre eles
+    // Se já tem um titular selecionado, troca posições entre eles (TÁTICA - permitido para expulsos)
     if (selectedStarter) {
       if (selectedStarter.id === starter.id) {
         setSelectedStarter(null);
         return;
       }
 
-      // Swap na ordem do campo
+      // Swap na ordem do campo (reorganização tática, funciona mesmo com expulsos)
       const newOrder = orderedStarters.map(p => {
         if (p.id === selectedStarter.id) return starter;
         if (p.id === starter.id) return selectedStarter;
@@ -350,7 +359,8 @@ const Match = () => {
 
   // Função para escolher jogador aleatório com peso por posição
   const getRandomPlayer = (team: 'home' | 'away'): string => {
-    const players = team === 'away' ? userStarters : opponentStarters;
+    // Only active (non-expelled) players participate
+    const players = team === 'away' ? userActiveStarters : opponentStarters;
     if (players.length === 0) return 'Jogador';
 
     // Pesos por posição para chance de marcar gol
@@ -438,11 +448,44 @@ const Match = () => {
           : 75;
         const difficultyFactor = Math.max(0.5, Math.min(1.5, (150 - opponentAvgOvr) / 75));
 
-        // Red cards reduce team strength by 22% each
+        // Position-based penalties for expelled players (user team)
+        const getExpulsionPenalty = () => {
+          const expelledStarters = userStarters.filter(p => p.matchRedCard);
+          if (expelledStarters.length === 0) return { extraGoalAgainst: 0, attackReduction: 0 };
+          
+          let extraGoalAgainst = 0;
+          let attackReduction = 0;
+          
+          for (const expelled of expelledStarters) {
+            const pos = expelled.position;
+            
+            if (pos === 'GOL') {
+              const hasOtherGOL = userActiveStarters.some(p => p.position === 'GOL');
+              if (!hasOtherGOL) extraGoalAgainst += 0.90;
+            } else if (pos === 'ZAG') {
+              extraGoalAgainst += 0.30;
+            } else if (pos === 'LD' || pos === 'LE') {
+              extraGoalAgainst += 0.15;
+            } else if (pos === 'VOL') {
+              extraGoalAgainst += 0.20;
+            } else if (pos === 'MC' || pos === 'MEI') {
+              extraGoalAgainst += 0.15;
+            } else if (pos === 'PD' || pos === 'PE') {
+              attackReduction += 0.20;
+            } else if (pos === 'ATA') {
+              attackReduction += 0.20;
+            }
+          }
+          
+          return { extraGoalAgainst: Math.min(extraGoalAgainst, 0.95), attackReduction: Math.min(attackReduction, 0.60) };
+        };
+        
+        const { extraGoalAgainst: userDefensePenalty, attackReduction: userAttackPenalty } = getExpulsionPenalty();
+        
+        // Red cards for opponent (keep flat penalty)
         const homeRedCards = matchEvents.filter(e => e.type === 'red_card' && e.team === 'home').length;
-        const awayRedCards = matchEvents.filter(e => e.type === 'red_card' && e.team === 'away').length;
         const homeStrength = Math.max(0.3, 1 - homeRedCards * 0.20);
-        const awayStrength = Math.max(0.3, 1 - awayRedCards * 0.20);
+        const awayStrength = Math.max(0.3, 1 - userAttackPenalty);
 
         // Play style bonuses
         let styleAttackBonus = 0;
@@ -464,11 +507,11 @@ const Match = () => {
           styleDefenseBonus = (oppPS.attack - myPS.defense) / 200;
         }
 
-        const baseGoalChance = 0.05;
+        const baseGoalChance = 0.05 + userDefensePenalty * 0.05; // Penalidade defensiva aumenta chance geral de gol
         
         if (Math.random() < baseGoalChance) {
-          // Chance de gol — overall, tactics, red cards affect probability
-          const homeGoalProb = (1 - (difficultyFactor * 0.5) + styleDefenseBonus) * homeStrength;
+          // Chance de gol — overall, tactics, position penalties affect probability
+          const homeGoalProb = (1 - (difficultyFactor * 0.5) + styleDefenseBonus + userDefensePenalty * 0.3) * homeStrength;
           const awayGoalProb = (difficultyFactor * 0.5 + styleAttackBonus) * awayStrength;
           const totalProb = homeGoalProb + awayGoalProb;
           const isHomeGoal = Math.random() < (homeGoalProb / totalProb);
