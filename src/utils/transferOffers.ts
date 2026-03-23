@@ -254,51 +254,45 @@ export const rejectOffer = (offerId: string): void => {
 export const cpuDecideOffer = (offer: TransferOffer): { decision: "accepted" | "rejected" | "counter"; counterValue?: number } => {
   const ratio = offer.offerValue / offer.marketValue;
 
-  if (ratio >= 1.0) {
-    if (Math.random() < 0.2) {
-      const extraPct = 1.05 + Math.random() * 0.15;
-      return { decision: "counter", counterValue: Math.round(offer.marketValue * extraPct) };
-    }
-    return { decision: "accepted" };
+  // Jogadores 80+ OVR: 20% de chance do time recusar negociar (independente do valor)
+  if (offer.playerOverall >= 80 && Math.random() < 0.20) {
+    return { decision: "rejected" };
   }
 
-  if (ratio >= 0.91) {
+  // Oferta muito abaixo do valor de mercado (< 70%): contraproposta de 115% do valor de mercado
+  if (ratio < 0.7) {
+    const counterValue = Math.round(offer.marketValue * 1.15);
+    return { decision: "counter", counterValue };
+  }
+
+  // Oferta entre 70%-90%: pode aceitar, contrapropor ou recusar
+  if (ratio < 0.9) {
     const roll = Math.random();
-    if (roll < 0.4) return { decision: "accepted" };
-    if (roll < 0.8) {
+    if (roll < 0.3) return { decision: "accepted" };
+    if (roll < 0.7) {
+      const counterPct = 1.0 + Math.random() * 0.15;
+      return { decision: "counter", counterValue: Math.round(offer.marketValue * counterPct) };
+    }
+    return { decision: "rejected" };
+  }
+
+  // Oferta entre 90%-99%: boa chance de aceitar
+  if (ratio < 1.0) {
+    const roll = Math.random();
+    if (roll < 0.6) return { decision: "accepted" };
+    if (roll < 0.85) {
       const counterPct = 1.0 + Math.random() * 0.1;
       return { decision: "counter", counterValue: Math.round(offer.marketValue * counterPct) };
     }
     return { decision: "rejected" };
   }
 
-  if (ratio >= 0.7) {
-    const roll = Math.random();
-    if (roll < 0.4) return { decision: "accepted" };
-    if (roll < 0.7) {
-      const counterPct = 0.95 + Math.random() * 0.15;
-      return { decision: "counter", counterValue: Math.round(offer.marketValue * counterPct) };
-    }
-    return { decision: "rejected" };
+  // Oferta >= 100% do valor: alta chance de aceitar
+  if (Math.random() < 0.85) {
+    return { decision: "accepted" };
   }
-
-  if (ratio >= 0.5) {
-    const roll = Math.random();
-    if (roll < 0.2) return { decision: "accepted" };
-    if (roll < 0.5) {
-      const counterPct = 0.9 + Math.random() * 0.2;
-      return { decision: "counter", counterValue: Math.round(offer.marketValue * counterPct) };
-    }
-    return { decision: "rejected" };
-  }
-
-  const roll = Math.random();
-  if (roll < 0.05) return { decision: "accepted" };
-  if (roll < 0.3) {
-    const counterPct = 0.95 + Math.random() * 0.2;
-    return { decision: "counter", counterValue: Math.round(offer.marketValue * counterPct) };
-  }
-  return { decision: "rejected" };
+  const extraPct = 1.05 + Math.random() * 0.1;
+  return { decision: "counter", counterValue: Math.round(offer.marketValue * extraPct) };
 };
 
 /** Processa ofertas pendentes para times CPU (chamado ao abrir o turno) */
