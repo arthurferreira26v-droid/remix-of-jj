@@ -787,6 +787,7 @@ const Match = () => {
                   selectedStarterId={selectedReserve?.id || selectedStarter?.id}
                   allPlayers={userPlayers}
                   onPlayersChanged={(updated) => { setUserPlayers(updated); localStorage.setItem(`players_${teamName}`, JSON.stringify(updated)); }}
+                  hideSavedFormations
                 />
 
                 <div className="px-4 mt-4">
@@ -932,6 +933,7 @@ const Match = () => {
                   selectedStarterId={selectedReserve?.id || selectedStarter?.id}
                   allPlayers={userPlayers}
                   onPlayersChanged={(updated) => { setUserPlayers(updated); localStorage.setItem(`players_${teamName}`, JSON.stringify(updated)); }}
+                  hideSavedFormations
                 />
 
                 <div className="mt-4">

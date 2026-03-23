@@ -15,9 +15,10 @@ interface TacticsManagerProps {
   selectedStarterId?: string;
   allPlayers?: Player[];
   onPlayersChanged?: (players: Player[]) => void;
+  hideSavedFormations?: boolean;
 }
 
-export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStarterClick, canSubstitute = false, selectedStarterId, allPlayers, onPlayersChanged }: TacticsManagerProps) => {
+export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStarterClick, canSubstitute = false, selectedStarterId, allPlayers, onPlayersChanged, hideSavedFormations = false }: TacticsManagerProps) => {
   const getInitialFormation = () => {
     const saved = localStorage.getItem(`tactics_formation_${teamName}`);
     return saved || "4-3-3";
@@ -213,7 +214,7 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
       </div>
 
       {/* Row 2: Estilo de Jogo (Meio/Laterais) + Formações Salvas */}
-      <div className="grid grid-cols-2 gap-3 mt-3">
+      <div className={`grid ${hideSavedFormations ? 'grid-cols-1' : 'grid-cols-2'} gap-3 mt-3`}>
         {/* Estilo de Jogo (Meio/Laterais) */}
         <div className="relative">
           <button
@@ -247,8 +248,8 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
           )}
         </div>
 
-        {/* Formações Salvas */}
-        <div className="relative">
+        {/* Formações Salvas - only on main screen */}
+        {!hideSavedFormations && (<div className="relative">
           <button
             onClick={() => toggleDropdown("saved")}
             className="w-full bg-white text-black rounded-lg px-4 py-3 flex items-center justify-between font-medium hover:bg-white/90 transition-colors"
@@ -319,7 +320,7 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
               })}
             </div>
           )}
-        </div>
+        </div>)}
       </div>
     </div>
   );
