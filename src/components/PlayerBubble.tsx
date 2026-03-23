@@ -38,7 +38,7 @@ const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, s
     <div
       className={`flex flex-col items-center gap-0.5 transition-all duration-300 ${onClick ? "cursor-pointer" : ""} ${isSelected ? "scale-110 z-10" : ""}`}
       onClick={onClick}
-      style={isDisabled ? { opacity: 0.25, pointerEvents: 'none', filter: 'grayscale(100%)' } : isSuspendedOnly ? { opacity: 0.5 } : {}}
+      style={isMatchRedCard ? { opacity: 0.25, filter: 'grayscale(100%)' } : isSuspendedOnly ? { opacity: 0.5 } : {}}
     >
       {/* OVR circle */}
       <div className="relative">
