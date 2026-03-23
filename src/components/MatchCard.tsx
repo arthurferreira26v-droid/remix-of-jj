@@ -23,6 +23,7 @@ interface MatchCardProps {
   mode2p?: boolean;
   onPlay2P?: () => void;
   turn2PLabel?: string;
+  onSimulated?: () => void;
 }
 
 export const MatchCard = ({
@@ -40,6 +41,7 @@ export const MatchCard = ({
   mode2p,
   onPlay2P,
   turn2PLabel,
+  onSimulated,
 }: MatchCardProps) => {
   const navigate = useNavigate();
   const [isSimulating, setIsSimulating] = useState(false);
@@ -137,7 +139,8 @@ export const MatchCard = ({
       flushPendingWrites();
 
       toast.success(`${userTeam} ${userScore} x ${oppScore} ${opponentTeam}`);
-      window.location.reload();
+      setIsSimulating(false);
+      onSimulated?.();
     } catch (error) {
       console.error("Erro ao simular:", error);
       toast.error("Erro ao simular partida");

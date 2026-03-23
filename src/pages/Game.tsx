@@ -22,7 +22,7 @@ import { useLibertadores } from "@/hooks/useLibertadores";
 import { useTeamForm } from "@/hooks/useTeamForm";
 import { useTeamBudget } from "@/hooks/useTeamBudget";
 import { getTeamLogo } from "@/utils/teamLogos";
-import { getLocalStandings, deleteLocalChampionship } from "@/utils/localChampionship";
+import { getLocalStandings, deleteLocalChampionship, getLocalBudget } from "@/utils/localChampionship";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
@@ -155,7 +155,8 @@ const Game = () => {
   const selectedTeam = teams.find(t => t.name === teamName);
   
   // Get championship data
-  const { championship, nextMatch, loading, isChampionComplete, userWonChampionship, resetChampionship } = useChampionship(teamName);
+  const { championship, nextMatch, loading, isChampionComplete, userWonChampionship, resetChampionship, refreshChampionship } = useChampionship(teamName);
+
   
   // Dynamic Libertadores team lists
   const PRE_LIBERTADORES_TEAMS = (() => {
@@ -216,6 +217,19 @@ const Game = () => {
   
   // Buscar o budget do time
   const { budget, setBudget, loading: budgetLoading } = useTeamBudget(teamName, championship?.id);
+
+  // Refresh all data after instant simulation (no page reload)
+  const handleSimulated = useCallback(() => {
+    const savedPlayers = localStorage.getItem(`players_${teamName}`);
+    if (savedPlayers) setPlayers(JSON.parse(savedPlayers));
+    refreshChampionship();
+    setBudget(getLocalBudget(teamName));
+    // Process transfers after match
+    const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
+    processCpuOffers([teamName]);
+    generateCpuOffers([teamName], brazilianTeams);
+    refreshOffersCount();
+  }, [teamName, refreshChampionship, setBudget]);
 
   const [selectedReserve, setSelectedReserve] = useState<Player | null>(null);
   const [selectedStarter, setSelectedStarter] = useState<Player | null>(null);
@@ -535,6 +549,7 @@ const Game = () => {
                 opponentForm={[]}
                 isHome={nextLibertadoresMatch.home_team_name === teamName}
                 championshipId={nextLibertadoresChampionshipId || undefined}
+                onSimulated={handleSimulated}
               />
             </div>
           )}
@@ -556,6 +571,7 @@ const Game = () => {
                 userForm={userForm}
                 opponentForm={opponentForm}
                 isHome={isHome}
+                onSimulated={handleSimulated}
               />
             </div>
           )}

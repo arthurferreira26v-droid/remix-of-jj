@@ -20,11 +20,7 @@ export const useChampionship = (userTeamName: string) => {
   const [userWonChampionship, setUserWonChampionship] = useState(false);
   const initRef = useRef(false);
 
-  useEffect(() => {
-    // Anti-loop: only init once per team name
-    if (initRef.current) return;
-    initRef.current = true;
-
+  const loadChampionshipData = () => {
     const userTeam = teams.find(t => t.name === userTeamName);
     if (!userTeam) {
       setLoading(false);
@@ -39,6 +35,7 @@ export const useChampionship = (userTeamName: string) => {
       if (complete) {
         setIsChampionComplete(true);
         setUserWonChampionship(winner === userTeamName);
+        setNextMatch(null);
         setLoading(false);
         return;
       }
@@ -49,7 +46,12 @@ export const useChampionship = (userTeamName: string) => {
     } finally {
       setLoading(false);
     }
+  };
 
+  useEffect(() => {
+    if (initRef.current) return;
+    initRef.current = true;
+    loadChampionshipData();
     return () => { initRef.current = false; };
   }, [userTeamName]);
 
@@ -108,5 +110,6 @@ export const useChampionship = (userTeamName: string) => {
     isChampionComplete,
     userWonChampionship,
     resetChampionship,
+    refreshChampionship: loadChampionshipData,
   };
 };
