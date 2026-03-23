@@ -214,7 +214,7 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
       </div>
 
       {/* Row 2: Estilo de Jogo (Meio/Laterais) + Formações Salvas */}
-      <div className="grid grid-cols-2 gap-3 mt-3">
+      <div className={`grid ${hideSavedFormations ? 'grid-cols-1' : 'grid-cols-2'} gap-3 mt-3`}>
         {/* Estilo de Jogo (Meio/Laterais) */}
         <div className="relative">
           <button
