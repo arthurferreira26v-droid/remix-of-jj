@@ -455,35 +455,23 @@ const Match = () => {
           let extraGoalAgainst = 0;
           let attackReduction = 0;
           
-          // Check expelled positions using orderedStarters to get their tactical role
-          const savedOrder = localStorage.getItem(`starter_order_${teamName}`);
-          const orderIds = savedOrder ? JSON.parse(savedOrder) as string[] : [];
-          const formationId = localStorage.getItem(`tactics_formation_${teamName}`) || "4-3-3";
-          const { formations: allFormations } = require("@/data/formations");
-          const currentFormation = allFormations.find((f: any) => f.id === formationId) || allFormations[0];
-          
           for (const expelled of expelledStarters) {
-            // Find position in formation
-            const orderIndex = orderIds.indexOf(expelled.id);
-            const formationRole = orderIndex >= 0 && orderIndex < currentFormation.positions.length
-              ? currentFormation.positions[orderIndex].role
-              : expelled.position;
+            const pos = expelled.position;
             
-            if (formationRole === 'GOL') {
-              // Sem goleiro válido: 90% chance extra de gol
+            if (pos === 'GOL') {
               const hasOtherGOL = userActiveStarters.some(p => p.position === 'GOL');
               if (!hasOtherGOL) extraGoalAgainst += 0.90;
-            } else if (formationRole === 'ZAG') {
+            } else if (pos === 'ZAG') {
               extraGoalAgainst += 0.30;
-            } else if (formationRole === 'LD' || formationRole === 'LE') {
+            } else if (pos === 'LD' || pos === 'LE') {
               extraGoalAgainst += 0.15;
-            } else if (formationRole === 'VOL') {
+            } else if (pos === 'VOL') {
               extraGoalAgainst += 0.20;
-            } else if (formationRole === 'MC' || formationRole === 'MEI') {
+            } else if (pos === 'MC' || pos === 'MEI') {
               extraGoalAgainst += 0.15;
-            } else if (formationRole === 'PD' || formationRole === 'PE') {
+            } else if (pos === 'PD' || pos === 'PE') {
               attackReduction += 0.20;
-            } else if (formationRole === 'ATA') {
+            } else if (pos === 'ATA') {
               attackReduction += 0.20;
             }
           }
