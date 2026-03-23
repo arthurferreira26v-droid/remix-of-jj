@@ -841,27 +841,27 @@ const Match = () => {
 
         {/* Halftime Overlay */}
         {isHalftime && (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex flex-col">
-            <div className="flex-1 overflow-y-auto px-4 py-8 pb-24">
-              <div className="container mx-auto">
+          <div className="fixed inset-0 bg-black z-50 flex flex-col">
+            <div className="flex-1 overflow-y-auto pb-24">
+              <div className="px-4 pt-8">
                 <div className="text-center mb-6">
-                  <h2 className="text-3xl font-bold text-white mb-2">INTERVALO</h2>
-                  <div className="text-5xl font-bold text-white mb-1">
+                  <h2 className="text-2xl font-bold text-white/60 tracking-widest mb-3">INTERVALO</h2>
+                  <div className="text-6xl font-bold text-white mb-1">
                     {homeScore} - {awayScore}
                   </div>
                   <span className="text-muted-foreground text-sm">45'</span>
                 </div>
 
-                <div className="max-w-lg mx-auto space-y-6">
-                  <TacticsManager
-                    teamName={teamName}
-                    players={userStarters}
-                    orderedPlayers={orderedStarters}
-                    onStarterClick={handleStarterClick}
-                    canSubstitute={!!selectedReserve || !!selectedStarter}
-                    selectedStarterId={selectedReserve?.id || selectedStarter?.id}
-                  />
+                <TacticsManager
+                  teamName={teamName}
+                  players={userStarters}
+                  orderedPlayers={orderedStarters}
+                  onStarterClick={handleStarterClick}
+                  canSubstitute={!!selectedReserve || !!selectedStarter}
+                  selectedStarterId={selectedReserve?.id || selectedStarter?.id}
+                />
 
+                <div className="mt-4">
                   <div className="bg-zinc-900 rounded-lg p-4">
                     <h3 className="text-white text-xl font-bold mb-4">Reservas</h3>
                     <div className="space-y-2">
