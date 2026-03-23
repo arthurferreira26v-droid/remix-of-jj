@@ -669,8 +669,8 @@ const Match = () => {
       {/* Match Info */}
       <div className="container mx-auto px-4 py-4">
         <div className="text-center mb-4">
-          <div className="inline-block bg-accent px-6 py-2 rounded-full mb-4">
-            <span className="text-2xl font-bold text-black">{minute}'</span>
+          <div className="inline-block bg-accent px-4 py-1 rounded-full mb-4">
+            <span className="text-base font-bold text-black">{minute}'</span>
           </div>
         </div>
 
