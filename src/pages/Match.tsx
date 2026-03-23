@@ -453,11 +453,24 @@ const Match = () => {
         }
         
         // Simular eventos aleatórios — chance de gol baseada em tática e overall adversário
+        // Apply game style bonuses to effective OVR
+        const userGameStyleId = localStorage.getItem(`tactics_gamestyle_${teamName}`) || "balanced_style";
+        const getGameStyleOvrBonus = (position: string): number => {
+          if (userGameStyleId === "through_middle") {
+            if (['MC', 'VOL', 'MEI'].includes(position)) return 3;
+            if (['PD', 'PE', 'LD', 'LE'].includes(position)) return -2;
+          } else if (userGameStyleId === "through_wings") {
+            if (['PD', 'PE', 'LD', 'LE'].includes(position)) return 3;
+            if (['MC', 'VOL', 'MEI'].includes(position)) return -2;
+          }
+          return 0;
+        };
+        
         const opponentAvgOvr = opponentStarters.length > 0
           ? opponentStarters.reduce((sum, p) => sum + p.overall, 0) / opponentStarters.length
           : 75;
         const userAvgOvr = userStarters.length > 0
-          ? userStarters.reduce((sum, p) => sum + getEffectiveOverall(p), 0) / userStarters.length
+          ? userStarters.reduce((sum, p) => sum + getEffectiveOverall(p) + getGameStyleOvrBonus(p.position), 0) / userStarters.length
           : 75;
         const difficultyFactor = Math.max(0.5, Math.min(1.5, (150 - opponentAvgOvr) / 75));
 
@@ -772,6 +785,8 @@ const Match = () => {
                   onStarterClick={handleStarterClick}
                   canSubstitute={!!selectedReserve || !!selectedStarter}
                   selectedStarterId={selectedReserve?.id || selectedStarter?.id}
+                  allPlayers={userPlayers}
+                  onPlayersChanged={(updated) => { setUserPlayers(updated); localStorage.setItem(`players_${teamName}`, JSON.stringify(updated)); }}
                 />
 
                 <div className="px-4 mt-4">
@@ -915,6 +930,8 @@ const Match = () => {
                   onStarterClick={handleStarterClick}
                   canSubstitute={!!selectedReserve || !!selectedStarter}
                   selectedStarterId={selectedReserve?.id || selectedStarter?.id}
+                  allPlayers={userPlayers}
+                  onPlayersChanged={(updated) => { setUserPlayers(updated); localStorage.setItem(`players_${teamName}`, JSON.stringify(updated)); }}
                 />
 
                 <div className="mt-4">
