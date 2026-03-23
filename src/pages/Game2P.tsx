@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Game2PInner from "./Game2PInner";
 import { deleteLocalChampionship } from "@/utils/localChampionship";
+import { clearAllOffers } from "@/utils/transferOffers";
+import { teams } from "@/data/teams";
 
 const Game2P = () => {
   const navigate = useNavigate();
@@ -44,15 +46,27 @@ const Game2P = () => {
   const handleExit = () => {
     deleteLocalChampionship(player1Team);
     deleteLocalChampionship(player2Team);
-    [player1Team, player2Team].forEach(t => {
+    // Limpar dados de todos os times
+    const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
+    brazilianTeams.forEach(t => {
       localStorage.removeItem(`players_${t}`);
       localStorage.removeItem(`starter_order_${t}`);
       localStorage.removeItem(`investment_${t}`);
+      localStorage.removeItem(`local_budget_${t}`);
+    });
+    // Limpar dados específicos do 2P
+    [player1Team, player2Team].forEach(t => {
+      localStorage.removeItem(`lib_championship_${t}`);
+      localStorage.removeItem(`lib_matches_${t}`);
+      localStorage.removeItem(`lib_standings_${t}`);
     });
     localStorage.removeItem('2p_p1_match_pending');
     localStorage.removeItem('2p_p2_match_pending');
     localStorage.removeItem('match_players_p1');
     localStorage.removeItem('match_players_p2');
+    localStorage.removeItem('lib_prelib_teams');
+    localStorage.removeItem('lib_direct_qualifiers');
+    clearAllOffers();
     navigate("/");
   };
 
