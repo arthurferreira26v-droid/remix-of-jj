@@ -207,6 +207,13 @@ const Match = () => {
         return;
       }
 
+      // REGRA: máximo 5 substituições por partida
+      if (substitutionCount >= 5) {
+        toast.error("As 5 substituições já foram feitas!");
+        setSelectedReserve(null);
+        return;
+      }
+
       const updatedPlayers = userPlayers.map((p) => {
         if (p.id === starter.id) return { ...p, isStarter: false };
         if (p.id === selectedReserve.id) return { ...p, isStarter: true };
@@ -227,6 +234,10 @@ const Match = () => {
         playerName: selectedReserve.name,
         substituteOut: starter.name,
       }]);
+
+      setSubstitutionCount(prev => prev + 1);
+      // Marcar jogador que saiu como não elegível para voltar
+      setSubstitutedOutIds(prev => new Set(prev).add(starter.id));
 
       setUserPlayers(updatedPlayers);
       localStorage.setItem(`players_${teamName}`, JSON.stringify(updatedPlayers));
