@@ -475,21 +475,44 @@ const transferPlayer = (offer: TransferOffer) => {
   // 1) Remover do time vendedor (toTeam = dono atual)
   const ownerKey = `players_${offer.toTeam}`;
   const ownerRaw = localStorage.getItem(ownerKey);
+  let playerData: Player | undefined;
+
   if (ownerRaw) {
     const ownerPlayers: Player[] = JSON.parse(ownerRaw);
-    const playerData = ownerPlayers.find((p) => p.id === offer.playerId);
+    playerData = ownerPlayers.find((p) => p.id === offer.playerId);
     const filtered = ownerPlayers.filter((p) => p.id !== offer.playerId);
     localStorage.setItem(ownerKey, JSON.stringify(filtered));
-
-    // 2) Adicionar ao time comprador (fromTeam)
-    if (playerData) {
-      const buyerKey = `players_${offer.fromTeam}`;
-      const buyerRaw = localStorage.getItem(buyerKey);
-      const buyerPlayers: Player[] = buyerRaw ? JSON.parse(buyerRaw) : [];
-      buyerPlayers.push({ ...playerData, isStarter: false });
-      localStorage.setItem(buyerKey, JSON.stringify(buyerPlayers));
-    }
   }
+
+  // 2) Adicionar ao time comprador (fromTeam)
+  const buyerKey = `players_${offer.fromTeam}`;
+  const buyerRaw = localStorage.getItem(buyerKey);
+  const buyerPlayers: Player[] = buyerRaw ? JSON.parse(buyerRaw) : [];
+
+  // Evitar duplicata
+  if (buyerPlayers.some((p) => p.id === offer.playerId)) {
+    addBudget(offer.toTeam, offer.offerValue);
+    return;
+  }
+
+  if (playerData) {
+    buyerPlayers.push({ ...playerData, isStarter: false });
+  } else {
+    // Jogador não encontrado no localStorage do vendedor — criar a partir dos dados da oferta
+    buyerPlayers.push({
+      id: offer.playerId,
+      name: offer.playerName,
+      number: buyerPlayers.length + 1,
+      position: offer.playerPosition,
+      overall: offer.playerOverall,
+      age: 25,
+      isStarter: false,
+      energy: 100,
+      consecutiveMatches: 0,
+    });
+  }
+
+  localStorage.setItem(buyerKey, JSON.stringify(buyerPlayers));
 
   // 3) Creditar o vendedor (comprador já pagou via escrow)
   addBudget(offer.toTeam, offer.offerValue);
