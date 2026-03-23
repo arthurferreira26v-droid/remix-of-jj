@@ -110,8 +110,12 @@ const Game = () => {
             }
             return { ...adminP, energy: adminP.energy ?? 100, consecutiveMatches: 0 };
           });
+          // Preservar jogadores transferidos de outros times (não existem no admin)
+          const adminIds = new Set(adminList.map((p: any) => p.id));
+          const transferredPlayers = prev.filter(p => !adminIds.has(p.id));
+          const allPlayers = [...merged, ...transferredPlayers];
           // Ensure exactly 11 starters and optimize positions for current formation
-          const { players: optimized, starterOrder } = optimizeStartersDefault(merged);
+          const { players: optimized, starterOrder } = optimizeStartersDefault(allPlayers);
           localStorage.setItem(`players_${teamName}`, JSON.stringify(optimized));
           localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
           return optimized;
