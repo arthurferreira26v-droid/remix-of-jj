@@ -222,11 +222,11 @@ export interface PlayStyle {
   name: string;
   description: string;
   bonuses: {
-    attack: number;  // % de bônus no ataque
-    defense: number; // % de bônus na defesa
-    possession: number; // % de bônus na posse
-    goalChance: number; // % modificador de chance de gol
-    concede: number; // % modificador de sofrer gol
+    attack: number;
+    defense: number;
+    possession: number;
+    goalChance: number;
+    concede: number;
   };
 }
 
@@ -268,3 +268,45 @@ export const playStyles: PlayStyle[] = [
     bonuses: { attack: +25, defense: -15, possession: +10, goalChance: +20, concede: +15 }
   },
 ];
+
+export interface GameStyle {
+  id: string;
+  name: string;
+  description: string;
+  bonuses: {
+    mcVolBonus: number;   // bonus for MC/VOL positions
+    wingLateralBonus: number; // bonus for PD/PE/LD/LE positions
+    mcVolPenalty: number;
+    wingLateralPenalty: number;
+  };
+}
+
+export const gameStyles: GameStyle[] = [
+  {
+    id: "balanced_style",
+    name: "Equilibrado",
+    description: "Sem bônus ou penalidade",
+    bonuses: { mcVolBonus: 0, wingLateralBonus: 0, mcVolPenalty: 0, wingLateralPenalty: 0 }
+  },
+  {
+    id: "through_middle",
+    name: "Pelo Meio",
+    description: "Aumenta força do meio-campo, reduz pontas",
+    bonuses: { mcVolBonus: 15, wingLateralBonus: 0, mcVolPenalty: 0, wingLateralPenalty: -10 }
+  },
+  {
+    id: "through_wings",
+    name: "Pelas Laterais",
+    description: "Aumenta laterais e pontas, reduz meio",
+    bonuses: { mcVolBonus: 0, wingLateralBonus: 15, mcVolPenalty: -10, wingLateralPenalty: 0 }
+  },
+];
+
+export interface SavedFormation {
+  name: string;
+  formationId: string;
+  playStyleId: string;
+  gameStyleId: string;
+  starterIds: string[];
+  starterOrder: string[];
+}
