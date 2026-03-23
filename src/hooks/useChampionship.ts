@@ -110,5 +110,6 @@ export const useChampionship = (userTeamName: string) => {
     isChampionComplete,
     userWonChampionship,
     resetChampionship,
+    refreshChampionship: loadChampionshipData,
   };
 };
