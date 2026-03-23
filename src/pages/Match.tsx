@@ -933,6 +933,7 @@ const Match = () => {
                   selectedStarterId={selectedReserve?.id || selectedStarter?.id}
                   allPlayers={userPlayers}
                   onPlayersChanged={(updated) => { setUserPlayers(updated); localStorage.setItem(`players_${teamName}`, JSON.stringify(updated)); }}
+                  hideSavedFormations
                 />
 
                 <div className="mt-4">
