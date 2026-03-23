@@ -38,16 +38,16 @@ const saveOffers = (offers: TransferOffer[]) => {
 
 /** Deduz valor do caixa do comprador (escrow) */
 const deductBudget = (teamName: string, amount: number) => {
-  const key = `budget_${teamName}`;
+  const key = `local_budget_${teamName}`;
   const current = parseFloat(localStorage.getItem(key) || "0");
-  localStorage.setItem(key, JSON.stringify(current - amount));
+  localStorage.setItem(key, String(current - amount));
 };
 
 /** Adiciona valor ao caixa */
 const addBudget = (teamName: string, amount: number) => {
-  const key = `budget_${teamName}`;
+  const key = `local_budget_${teamName}`;
   const current = parseFloat(localStorage.getItem(key) || "0");
-  localStorage.setItem(key, JSON.stringify(current + amount));
+  localStorage.setItem(key, String(current + amount));
 };
 
 // ==================== PUBLIC API ====================
