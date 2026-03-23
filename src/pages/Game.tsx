@@ -9,7 +9,7 @@ import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { TransferMarket } from "@/components/TransferMarket";
 import { ReceivedOffersModal } from "@/components/ReceivedOffersModal";
 import { FinancesModal } from "@/components/FinancesModal";
-import { processCpuOffers, countPendingOffers, generateCpuOffers } from "@/utils/transferOffers";
+import { processCpuOffers, countPendingOffers, generateCpuOffers, clearAllOffers } from "@/utils/transferOffers";
 
 import { teams } from "@/data/teams";
 import {
@@ -478,7 +478,6 @@ const Game = () => {
           localStorage.removeItem(`lib_prelib_teams`);
           localStorage.removeItem(`lib_direct_qualifiers`);
           // Limpar todas as ofertas de transferência
-          const { clearAllOffers } = require("@/utils/transferOffers");
           clearAllOffers();
           navigate("/");
         }}
