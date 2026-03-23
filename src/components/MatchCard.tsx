@@ -23,6 +23,7 @@ interface MatchCardProps {
   mode2p?: boolean;
   onPlay2P?: () => void;
   turn2PLabel?: string;
+  onSimulated?: () => void;
 }
 
 export const MatchCard = ({
