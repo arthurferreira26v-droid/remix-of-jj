@@ -61,6 +61,8 @@ const Match = () => {
   const [halftimeDone, setHalftimeDone] = useState(false);
   const [isPausedBySquad, setIsPausedBySquad] = useState(false);
   const [pausedByRole, setPausedByRole] = useState<string | null>(null);
+  const [substitutionCount, setSubstitutionCount] = useState(0);
+  const [substitutedOutIds, setSubstitutedOutIds] = useState<Set<string>>(new Set());
 
   // Quick match: channel setup for realtime sync
   useEffect(() => {
