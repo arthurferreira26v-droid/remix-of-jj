@@ -930,6 +930,8 @@ const Match = () => {
                   onStarterClick={handleStarterClick}
                   canSubstitute={!!selectedReserve || !!selectedStarter}
                   selectedStarterId={selectedReserve?.id || selectedStarter?.id}
+                  allPlayers={userPlayers}
+                  onPlayersChanged={(updated) => { setUserPlayers(updated); localStorage.setItem(`players_${teamName}`, JSON.stringify(updated)); }}
                 />
 
                 <div className="mt-4">
