@@ -73,7 +73,8 @@ export const sendOffer = (
   fromTeam: string,
   toTeam: string,
   offerValue: number,
-  isFromCpu: boolean = false
+  isFromCpu: boolean = false,
+  fullPlayerData?: Player
 ): TransferOffer => {
   deductBudget(fromTeam, offerValue);
 
@@ -84,6 +85,7 @@ export const sendOffer = (
     playerName,
     playerOverall,
     playerPosition,
+    playerData: fullPlayerData,
     fromTeam,
     toTeam,
     offerValue,

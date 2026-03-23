@@ -89,7 +89,9 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
         offerModal.player.position,
         userTeamName,
         offerModal.ownerTeam,
-        valueInUnits
+        valueInUnits,
+        false,
+        offerModal.player
       );
     } catch (error) {
       toast.error("Você não tem caixa suficiente!");
