@@ -89,6 +89,16 @@ const Game = () => {
       if (adminPlayers[teamId] && adminPlayers[teamId].length > 0) {
         const adminList = adminPlayers[teamId];
         setPlayers(prev => {
+          // Build set of admin IDs for lookup
+          const adminIds = new Set(adminList.map(p => p.id));
+          // Detect truly transferred players: not in admin list AND not a generic generated player for this team
+          const teamPrefixLower = teamId.toLowerCase() + '_';
+          const teamPrefixName = teamName + '_';
+          const transferredPlayers = prev.filter(p => 
+            !adminIds.has(p.id) && 
+            !p.id.toLowerCase().startsWith(teamPrefixLower) &&
+            !p.id.startsWith(teamPrefixName)
+          );
           // Merge: use admin data as base, overlay runtime fields from existing players
           const merged = adminList.map((adminP) => {
             const existing = prev.find(p => p.id === adminP.id);
@@ -110,9 +120,6 @@ const Game = () => {
             }
             return { ...adminP, energy: adminP.energy ?? 100, consecutiveMatches: 0 };
           });
-          // Preservar jogadores transferidos de outros times (não existem no admin)
-          const adminIds = new Set(adminList.map((p: any) => p.id));
-          const transferredPlayers = prev.filter(p => !adminIds.has(p.id));
           const allPlayers = [...merged, ...transferredPlayers];
           // Ensure exactly 11 starters and optimize positions for current formation
           const { players: optimized, starterOrder } = optimizeStartersDefault(allPlayers);
