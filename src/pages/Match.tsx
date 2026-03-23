@@ -701,11 +701,14 @@ const Match = () => {
                 <span className="text-sm font-medium text-white">{teamName.slice(0, 3).toUpperCase()}</span>
               </button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="bg-black border-border h-[90vh]">
+            <SheetContent side="bottom" className="bg-black border-none h-[100dvh] p-0">
               <VisuallyHidden>
                 <SheetTitle>Gerenciar Time</SheetTitle>
               </VisuallyHidden>
-              <div className="mt-8 overflow-y-auto h-full pb-20 space-y-6">
+              <div className="h-full overflow-y-auto pb-20">
+                <div className="px-4 pt-6 pb-2">
+                  <h2 className="text-2xl font-bold text-white text-center mb-4">GERENCIAR ELENCO</h2>
+                </div>
                 <TacticsManager
                   teamName={teamName}
                   players={userStarters}
@@ -715,34 +718,36 @@ const Match = () => {
                   selectedStarterId={selectedReserve?.id || selectedStarter?.id}
                 />
 
-                <div className="bg-zinc-900 rounded-lg p-4">
-                  <h3 className="text-white text-xl font-bold mb-4">Reservas</h3>
-                  <div className="space-y-2">
-                    {userReserves.map((player) => (
-                      <button
-                        key={player.id}
-                        onClick={() => handleReserveClick(player)}
-                        className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
-                          selectedReserve?.id === player.id
-                            ? "bg-[#c8ff00] text-black"
-                            : "bg-zinc-800 text-white hover:bg-zinc-700"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={`font-bold text-lg w-8 ${selectedReserve?.id === player.id ? 'text-black' : 'text-blue-400'}`}>{player.overall}</span>
-                          <div className="text-left">
-                            <div className="font-medium">{player.name}</div>
-                            <div className="text-sm opacity-70">{player.position}</div>
+                <div className="px-4 mt-4">
+                  <div className="bg-zinc-900 rounded-lg p-4">
+                    <h3 className="text-white text-xl font-bold mb-4">Reservas</h3>
+                    <div className="space-y-2">
+                      {userReserves.map((player) => (
+                        <button
+                          key={player.id}
+                          onClick={() => handleReserveClick(player)}
+                          className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                            selectedReserve?.id === player.id
+                              ? "bg-[#c8ff00] text-black"
+                              : "bg-zinc-800 text-white hover:bg-zinc-700"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className={`font-bold text-lg w-8 ${selectedReserve?.id === player.id ? 'text-black' : 'text-blue-400'}`}>{player.overall}</span>
+                            <div className="text-left">
+                              <div className="font-medium">{player.name}</div>
+                              <div className="text-sm opacity-70">{player.position}</div>
+                            </div>
                           </div>
-                        </div>
-                      </button>
-                    ))}
+                        </button>
+                      ))}
+                    </div>
+                    {selectedReserve && (
+                      <p className="mt-3 text-xs text-[#c8ff00]">
+                        Selecione um titular no campo para substituir.
+                      </p>
+                    )}
                   </div>
-                  {selectedReserve && (
-                    <p className="mt-3 text-xs text-[#c8ff00]">
-                      Selecione um titular no campo para substituir.
-                    </p>
-                  )}
                 </div>
               </div>
             </SheetContent>
@@ -836,27 +841,27 @@ const Match = () => {
 
         {/* Halftime Overlay */}
         {isHalftime && (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex flex-col">
-            <div className="flex-1 overflow-y-auto px-4 py-8 pb-24">
-              <div className="container mx-auto">
+          <div className="fixed inset-0 bg-black z-50 flex flex-col">
+            <div className="flex-1 overflow-y-auto pb-24">
+              <div className="px-4 pt-8">
                 <div className="text-center mb-6">
-                  <h2 className="text-3xl font-bold text-white mb-2">INTERVALO</h2>
-                  <div className="text-5xl font-bold text-white mb-1">
+                  <h2 className="text-2xl font-bold text-white/60 tracking-widest mb-3">INTERVALO</h2>
+                  <div className="text-6xl font-bold text-white mb-1">
                     {homeScore} - {awayScore}
                   </div>
                   <span className="text-muted-foreground text-sm">45'</span>
                 </div>
 
-                <div className="max-w-lg mx-auto space-y-6">
-                  <TacticsManager
-                    teamName={teamName}
-                    players={userStarters}
-                    orderedPlayers={orderedStarters}
-                    onStarterClick={handleStarterClick}
-                    canSubstitute={!!selectedReserve || !!selectedStarter}
-                    selectedStarterId={selectedReserve?.id || selectedStarter?.id}
-                  />
+                <TacticsManager
+                  teamName={teamName}
+                  players={userStarters}
+                  orderedPlayers={orderedStarters}
+                  onStarterClick={handleStarterClick}
+                  canSubstitute={!!selectedReserve || !!selectedStarter}
+                  selectedStarterId={selectedReserve?.id || selectedStarter?.id}
+                />
 
+                <div className="mt-4">
                   <div className="bg-zinc-900 rounded-lg p-4">
                     <h3 className="text-white text-xl font-bold mb-4">Reservas</h3>
                     <div className="space-y-2">
