@@ -157,16 +157,6 @@ const Game = () => {
   // Get championship data
   const { championship, nextMatch, loading, isChampionComplete, userWonChampionship, resetChampionship, refreshChampionship } = useChampionship(teamName);
 
-  // Refresh all data after instant simulation (no page reload)
-  const handleSimulated = useCallback(() => {
-    // Refresh players from localStorage
-    const savedPlayers = localStorage.getItem(`players_${teamName}`);
-    if (savedPlayers) setPlayers(JSON.parse(savedPlayers));
-    // Refresh championship (next match, standings, etc.)
-    refreshChampionship();
-    // Refresh offers count
-    refreshOffersCount();
-  }, [teamName, refreshChampionship]);
   
   // Dynamic Libertadores team lists
   const PRE_LIBERTADORES_TEAMS = (() => {
