@@ -43,7 +43,7 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted }: ReceivedO
   const handleAcceptCounter = (offer: TransferOffer) => {
     if (!offer.counterValue) return;
     // Escrow já foi devolvido, então precisa ter o valor total da contraproposta
-    const budgetRaw = localStorage.getItem(`budget_${teamName}`);
+    const budgetRaw = localStorage.getItem(`local_budget_${teamName}`);
     const budget = budgetRaw ? parseFloat(budgetRaw) : 0;
     if (offer.counterValue > budget) {
       toast.error("Você não tem caixa suficiente para essa contraproposta!");

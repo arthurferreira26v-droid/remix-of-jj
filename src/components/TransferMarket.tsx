@@ -93,7 +93,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
     setOfferValue("");
     toast.success("Oferta enviada! Valor reservado do caixa.");
     // Atualizar budget no componente pai
-    const newBudget = parseFloat(localStorage.getItem(`budget_${userTeamName}`) || "0");
+    const newBudget = parseFloat(localStorage.getItem(`local_budget_${userTeamName}`) || "0");
     onBudgetChanged?.(newBudget);
     onOfferSent?.();
   };
