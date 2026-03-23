@@ -628,7 +628,7 @@ const Match = () => {
         
         return next;
       });
-    }, 222); // 20000ms / 90 = ~222ms
+    }, 111); // 10000ms / 90 = ~111ms
 
     return () => clearInterval(interval);
   }, [isPlaying, minute, showPenaltyModal, isHalftime, halftimeDone]);
