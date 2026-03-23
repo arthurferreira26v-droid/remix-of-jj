@@ -85,7 +85,11 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
             if (existing) return { ...adminP, isStarter: existing.isStarter, energy: existing.energy, matchEnergy: existing.matchEnergy, consecutiveMatches: existing.consecutiveMatches, seasonStarterMatches: existing.seasonStarterMatches, seasonBenchMatches: existing.seasonBenchMatches, ovrChange: existing.ovrChange, accumulatedYellows: existing.accumulatedYellows, suspensionMatches: existing.suspensionMatches, matchYellowCards: 0, matchRedCard: false };
             return { ...adminP, energy: adminP.energy ?? 100, consecutiveMatches: 0 };
           });
-          const { players: optimized, starterOrder } = optimizeStartersDefault(merged);
+          // Preservar jogadores transferidos de outros times
+          const adminIds = new Set(adminPlayers[teamId].map((p: any) => p.id));
+          const transferredPlayers = prev.filter(p => !adminIds.has(p.id));
+          const allPlayers = [...merged, ...transferredPlayers];
+          const { players: optimized, starterOrder } = optimizeStartersDefault(allPlayers);
           localStorage.setItem(`players_${activeTeam}`, JSON.stringify(optimized));
           localStorage.setItem(`starter_order_${activeTeam}`, JSON.stringify(starterOrder));
           return optimized;
