@@ -18,7 +18,7 @@ interface TacticsManagerProps {
   hideSavedFormations?: boolean;
 }
 
-export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStarterClick, canSubstitute = false, selectedStarterId, allPlayers, onPlayersChanged }: TacticsManagerProps) => {
+export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStarterClick, canSubstitute = false, selectedStarterId, allPlayers, onPlayersChanged, hideSavedFormations = false }: TacticsManagerProps) => {
   const getInitialFormation = () => {
     const saved = localStorage.getItem(`tactics_formation_${teamName}`);
     return saved || "4-3-3";
