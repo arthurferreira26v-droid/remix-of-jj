@@ -61,6 +61,8 @@ const Match = () => {
   const [halftimeDone, setHalftimeDone] = useState(false);
   const [isPausedBySquad, setIsPausedBySquad] = useState(false);
   const [pausedByRole, setPausedByRole] = useState<string | null>(null);
+  const [substitutionCount, setSubstitutionCount] = useState(0);
+  const [substitutedOutIds, setSubstitutedOutIds] = useState<Set<string>>(new Set());
 
   // Quick match: channel setup for realtime sync
   useEffect(() => {
@@ -160,8 +162,8 @@ const Match = () => {
   const opponentPlayers = generateTeamPlayers(opponentName);
   
   const userStarters = userPlayers.filter((p) => p.isStarter);
-  // Reservas: exclui jogadores expulsos (expulso NUNCA volta ao banco)
-  const userReserves = userPlayers.filter((p) => !p.isStarter && !p.matchRedCard);
+  // Reservas: exclui expulsos e jogadores já substituídos (não podem voltar)
+  const userReserves = userPlayers.filter((p) => !p.isStarter && !p.matchRedCard && !substitutedOutIds.has(p.id));
   const userActiveStarters = userStarters.filter(p => !p.matchRedCard); // jogadores efetivamente em campo
   const opponentStarters = opponentPlayers.filter((p) => p.isStarter);
 
@@ -205,6 +207,13 @@ const Match = () => {
         return;
       }
 
+      // REGRA: máximo 5 substituições por partida
+      if (substitutionCount >= 5) {
+        toast.error("As 5 substituições já foram feitas!");
+        setSelectedReserve(null);
+        return;
+      }
+
       const updatedPlayers = userPlayers.map((p) => {
         if (p.id === starter.id) return { ...p, isStarter: false };
         if (p.id === selectedReserve.id) return { ...p, isStarter: true };
@@ -225,6 +234,10 @@ const Match = () => {
         playerName: selectedReserve.name,
         substituteOut: starter.name,
       }]);
+
+      setSubstitutionCount(prev => prev + 1);
+      // Marcar jogador que saiu como não elegível para voltar
+      setSubstitutedOutIds(prev => new Set(prev).add(starter.id));
 
       setUserPlayers(updatedPlayers);
       localStorage.setItem(`players_${teamName}`, JSON.stringify(updatedPlayers));
