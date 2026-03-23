@@ -152,7 +152,7 @@ export const acceptOffer = (
   return offer;
 };
 
-/** Aceitar contraproposta da CPU (pagar a diferença se counterValue > offerValue) */
+/** Aceitar contraproposta — escrow já foi devolvido, agora deduz o valor da contraproposta */
 export const acceptCounterOffer = (
   offerId: string,
   onTransferComplete: (offer: TransferOffer) => void
@@ -162,18 +162,14 @@ export const acceptCounterOffer = (
   if (offerIdx === -1) return null;
 
   const offer = offers[offerIdx];
-  const originalValue = offer.offerValue;
   const counterValue = offer.counterValue || offer.offerValue;
 
-  // Ajustar a diferença no budget do comprador
-  if (counterValue > originalValue) {
-    deductBudget(offer.fromTeam, counterValue - originalValue);
-  } else if (counterValue < originalValue) {
-    addBudget(offer.fromTeam, originalValue - counterValue);
-  }
+  // Deduzir o valor total da contraproposta (escrow já foi devolvido)
+  deductBudget(offer.fromTeam, counterValue);
 
   offer.offerValue = counterValue;
   offer.status = "accepted";
+  offer.escrowDeducted = true;
 
   const filtered = offers.filter((o) => {
     if (o.id === offerId) return true;
@@ -281,12 +277,17 @@ export const processCpuOffers = (
     } else if (decision === "counter") {
       o.status = "counter";
       o.counterValue = counterValue;
+      // Devolver o escrow original — jogador decide se paga o novo valor
+      if (o.escrowDeducted) {
+        addBudget(o.fromTeam, o.offerValue);
+        o.escrowDeducted = false;
+      }
       countered.push(o);
     } else {
       o.status = "rejected";
-      // Reembolsar o comprador
       if (o.escrowDeducted) {
         addBudget(o.fromTeam, o.offerValue);
+        o.escrowDeducted = false;
       }
       rejected.push(o);
     }
