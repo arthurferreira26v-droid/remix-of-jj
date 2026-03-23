@@ -635,6 +635,7 @@ const Game = () => {
           teamName={teamName}
           onClose={() => setShowReceivedOffers(false)}
           onAccepted={handleOfferAccepted}
+          onBudgetChanged={(newBudget) => setBudget(newBudget)}
         />
       )}
 
