@@ -506,11 +506,11 @@ const Match = () => {
           styleDefenseBonus = (oppPS.attack - myPS.defense) / 200;
         }
 
-        const baseGoalChance = 0.05;
+        const baseGoalChance = 0.05 + userDefensePenalty * 0.05; // Penalidade defensiva aumenta chance geral de gol
         
         if (Math.random() < baseGoalChance) {
-          // Chance de gol — overall, tactics, red cards affect probability
-          const homeGoalProb = (1 - (difficultyFactor * 0.5) + styleDefenseBonus) * homeStrength;
+          // Chance de gol — overall, tactics, position penalties affect probability
+          const homeGoalProb = (1 - (difficultyFactor * 0.5) + styleDefenseBonus + userDefensePenalty * 0.3) * homeStrength;
           const awayGoalProb = (difficultyFactor * 0.5 + styleAttackBonus) * awayStrength;
           const totalProb = homeGoalProb + awayGoalProb;
           const isHomeGoal = Math.random() < (homeGoalProb / totalProb);
