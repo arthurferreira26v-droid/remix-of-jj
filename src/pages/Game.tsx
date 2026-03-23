@@ -584,6 +584,8 @@ const Game = () => {
               onStarterClick={handleStarterClick}
               canSubstitute={!!selectedReserve}
               selectedStarterId={selectedStarter?.id}
+              allPlayers={players}
+              onPlayersChanged={(updated) => { setPlayers(updated); }}
             />
 
             <div className="bg-zinc-900 rounded-lg p-4">
