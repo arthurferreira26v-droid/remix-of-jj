@@ -218,6 +218,15 @@ const Game = () => {
   // Buscar o budget do time
   const { budget, setBudget, loading: budgetLoading } = useTeamBudget(teamName, championship?.id);
 
+  // Refresh all data after instant simulation (no page reload)
+  const handleSimulated = useCallback(() => {
+    const savedPlayers = localStorage.getItem(`players_${teamName}`);
+    if (savedPlayers) setPlayers(JSON.parse(savedPlayers));
+    refreshChampionship();
+    setBudget(getLocalBudget(teamName));
+    refreshOffersCount();
+  }, [teamName, refreshChampionship, setBudget]);
+
   const [selectedReserve, setSelectedReserve] = useState<Player | null>(null);
   const [selectedStarter, setSelectedStarter] = useState<Player | null>(null);
 
