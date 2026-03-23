@@ -447,11 +447,56 @@ const Match = () => {
           : 75;
         const difficultyFactor = Math.max(0.5, Math.min(1.5, (150 - opponentAvgOvr) / 75));
 
-        // Red cards reduce team strength by 22% each
+        // Position-based penalties for expelled players (user team)
+        const getExpulsionPenalty = () => {
+          const expelledStarters = userStarters.filter(p => p.matchRedCard);
+          if (expelledStarters.length === 0) return { extraGoalAgainst: 0, attackReduction: 0 };
+          
+          let extraGoalAgainst = 0;
+          let attackReduction = 0;
+          
+          // Check expelled positions using orderedStarters to get their tactical role
+          const savedOrder = localStorage.getItem(`starter_order_${teamName}`);
+          const orderIds = savedOrder ? JSON.parse(savedOrder) as string[] : [];
+          const formationId = localStorage.getItem(`tactics_formation_${teamName}`) || "4-3-3";
+          const { formations: allFormations } = require("@/data/formations");
+          const currentFormation = allFormations.find((f: any) => f.id === formationId) || allFormations[0];
+          
+          for (const expelled of expelledStarters) {
+            // Find position in formation
+            const orderIndex = orderIds.indexOf(expelled.id);
+            const formationRole = orderIndex >= 0 && orderIndex < currentFormation.positions.length
+              ? currentFormation.positions[orderIndex].role
+              : expelled.position;
+            
+            if (formationRole === 'GOL') {
+              // Sem goleiro válido: 90% chance extra de gol
+              const hasOtherGOL = userActiveStarters.some(p => p.position === 'GOL');
+              if (!hasOtherGOL) extraGoalAgainst += 0.90;
+            } else if (formationRole === 'ZAG') {
+              extraGoalAgainst += 0.30;
+            } else if (formationRole === 'LD' || formationRole === 'LE') {
+              extraGoalAgainst += 0.15;
+            } else if (formationRole === 'VOL') {
+              extraGoalAgainst += 0.20;
+            } else if (formationRole === 'MC' || formationRole === 'MEI') {
+              extraGoalAgainst += 0.15;
+            } else if (formationRole === 'PD' || formationRole === 'PE') {
+              attackReduction += 0.20;
+            } else if (formationRole === 'ATA') {
+              attackReduction += 0.20;
+            }
+          }
+          
+          return { extraGoalAgainst: Math.min(extraGoalAgainst, 0.95), attackReduction: Math.min(attackReduction, 0.60) };
+        };
+        
+        const { extraGoalAgainst: userDefensePenalty, attackReduction: userAttackPenalty } = getExpulsionPenalty();
+        
+        // Red cards for opponent (keep flat penalty)
         const homeRedCards = matchEvents.filter(e => e.type === 'red_card' && e.team === 'home').length;
-        const awayRedCards = matchEvents.filter(e => e.type === 'red_card' && e.team === 'away').length;
         const homeStrength = Math.max(0.3, 1 - homeRedCards * 0.20);
-        const awayStrength = Math.max(0.3, 1 - awayRedCards * 0.20);
+        const awayStrength = Math.max(0.3, 1 - userAttackPenalty);
 
         // Play style bonuses
         let styleAttackBonus = 0;
