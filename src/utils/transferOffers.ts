@@ -11,6 +11,7 @@ export interface TransferOffer {
   playerName: string;
   playerOverall: number;
   playerPosition: string;
+  playerData?: Player;     // dados completos do jogador para fallback
   fromTeam: string;       // quem fez a oferta
   toTeam: string;         // dono atual do jogador
   offerValue: number;
@@ -498,18 +499,22 @@ const transferPlayer = (offer: TransferOffer) => {
   if (playerData) {
     buyerPlayers.push({ ...playerData, isStarter: false });
   } else {
-    // Jogador não encontrado no localStorage do vendedor — criar a partir dos dados da oferta
-    buyerPlayers.push({
-      id: offer.playerId,
-      name: offer.playerName,
-      number: buyerPlayers.length + 1,
-      position: offer.playerPosition,
-      overall: offer.playerOverall,
-      age: 25,
-      isStarter: false,
-      energy: 100,
-      consecutiveMatches: 0,
-    });
+    // Jogador não encontrado no localStorage do vendedor — usar dados salvos na oferta
+    if (offer.playerData) {
+      buyerPlayers.push({ ...offer.playerData, isStarter: false, energy: 100, consecutiveMatches: 0 });
+    } else {
+      buyerPlayers.push({
+        id: offer.playerId,
+        name: offer.playerName,
+        number: buyerPlayers.length + 1,
+        position: offer.playerPosition,
+        overall: offer.playerOverall,
+        age: 25,
+        isStarter: false,
+        energy: 100,
+        consecutiveMatches: 0,
+      });
+    }
   }
 
   localStorage.setItem(buyerKey, JSON.stringify(buyerPlayers));
