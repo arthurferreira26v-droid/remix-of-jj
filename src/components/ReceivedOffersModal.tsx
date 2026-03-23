@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Inbox, Check, XIcon, DollarSign, ArrowRight, MessageSquare, Send, Clock } from "lucide-react";
-import { getReceivedOffers, getCounterOffers, getSentOffers, acceptOffer, acceptCounterOffer, rejectOffer, TransferOffer } from "@/utils/transferOffers";
+import { getReceivedOffers, getCounterOffers, getSentOffers, acceptOffer, acceptCounterOffer, rejectOffer, claimOffer, dismissRejectedOffer, TransferOffer } from "@/utils/transferOffers";
 import { getLocalBudget } from "@/utils/localChampionship";
 import { formatMarketValue } from "@/utils/marketValue";
 import { toast } from "sonner";
@@ -23,6 +23,8 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
     setCounterOffers(getCounterOffers(teamName));
     setSentOffers(getSentOffers(teamName));
   }, [teamName]);
+
+  const refreshSent = () => setSentOffers(getSentOffers(teamName));
 
   const handleAccept = (offer: TransferOffer) => {
     const result = acceptOffer(offer.id, (accepted) => {
@@ -61,6 +63,22 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
       setSentOffers(prev => prev.filter(o => o.id !== offer.id));
       onBudgetChanged?.(getLocalBudget(teamName));
     }
+  };
+
+  const handleClaim = (offer: TransferOffer) => {
+    const result = claimOffer(offer.id);
+    if (result) {
+      toast.success(`${result.playerName} adicionado ao elenco!`);
+      refreshSent();
+      onAccepted?.(result);
+      onBudgetChanged?.(getLocalBudget(teamName));
+    }
+  };
+
+  const handleDismissRejected = (offer: TransferOffer) => {
+    dismissRejectedOffer(offer.id);
+    toast("Oferta removida.");
+    refreshSent();
   };
 
   // Group received offers by player
@@ -200,6 +218,9 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
               sentOffers.map((offer) => {
                 const maxMatches = offer.isFromCpu ? 1 : 3;
                 const remaining = maxMatches - (offer.matchesPassed || 0);
+                const isAccepted = offer.status === "accepted";
+                const isRejected = offer.status === "rejected";
+                const isResolved = isAccepted || isRejected;
 
                 return (
                   <div key={offer.id} className="bg-zinc-900 rounded-lg border border-zinc-800 p-4">
@@ -215,23 +236,56 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
                       </div>
                       <div className="text-right">
                         <div className="text-sm font-bold text-green-400">{formatMarketValue(offer.offerValue)}</div>
-                        <div className="flex items-center gap-1 mt-1 justify-end">
+                        {!isResolved && <div className="flex items-center gap-1 mt-1 justify-end">
                           <Clock className="w-3 h-3 text-zinc-500" />
                           <span className="text-[10px] text-zinc-500">
                             {offer.status === "pending" ? `${remaining} jogo${remaining !== 1 ? 's' : ''} restante${remaining !== 1 ? 's' : ''}` : offer.status === "counter" ? "Contraproposta" : offer.status}
                           </span>
-                        </div>
+                        </div>}
                       </div>
                     </div>
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                        offer.status === "pending" 
-                          ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" 
-                          : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
-                      }`}>
-                        {offer.status === "pending" ? "Aguardando resposta" : "Contraproposta recebida"}
-                      </span>
-                    </div>
+
+                    {isAccepted ? (
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-green-500/20 text-green-400 border border-green-500/30">
+                            ✅ Oferta aceita!
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleClaim(offer)}
+                          className="w-full py-2.5 rounded-lg font-bold text-sm bg-green-500 text-white hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Check className="w-4 h-4" />
+                          Resgatar Jogador
+                        </button>
+                      </div>
+                    ) : isRejected ? (
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-red-500/20 text-red-400 border border-red-500/30">
+                            ❌ Oferta recusada
+                          </span>
+                          <span className="text-[10px] text-zinc-500">Dinheiro devolvido ao caixa</span>
+                        </div>
+                        <button
+                          onClick={() => handleDismissRejected(offer)}
+                          className="w-full py-2 rounded-lg font-bold text-xs bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
+                        >
+                          OK, Entendi
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                          offer.status === "pending" 
+                            ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" 
+                            : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                        }`}>
+                          {offer.status === "pending" ? "Aguardando resposta" : "Contraproposta recebida"}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 );
               })
