@@ -545,6 +545,7 @@ const Game = () => {
                 opponentForm={[]}
                 isHome={nextLibertadoresMatch.home_team_name === teamName}
                 championshipId={nextLibertadoresChampionshipId || undefined}
+                onSimulated={handleSimulated}
               />
             </div>
           )}
