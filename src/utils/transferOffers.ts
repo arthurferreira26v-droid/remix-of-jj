@@ -126,6 +126,8 @@ export const claimOffer = (offerId: string): TransferOffer | null => {
   const offers = getOffers();
   const idx = offers.findIndex((o) => o.id === offerId);
   if (idx === -1) return null;
+  // Transferir o jogador agora (no momento do resgate)
+  transferPlayer(offers[idx]);
   offers[idx].status = "claimed";
   saveOffers(offers);
   return offers[idx];
@@ -143,7 +145,12 @@ export const dismissRejectedOffer = (offerId: string): void => {
 
 /** Conta ofertas pendentes recebidas + contrapropostas recebidas */
 export const countPendingOffers = (teamName: string): number => {
-  return getReceivedOffers(teamName).length + getCounterOffers(teamName).length;
+  const allOffers = getOffers();
+  const tl = teamName.toLowerCase();
+  const received = allOffers.filter(o => o.toTeam.toLowerCase() === tl && o.status === "pending").length;
+  const counters = allOffers.filter(o => o.fromTeam.toLowerCase() === tl && o.status === "counter").length;
+  const pendingActions = allOffers.filter(o => o.fromTeam.toLowerCase() === tl && (o.status === "accepted" || o.status === "rejected")).length;
+  return received + counters + pendingActions;
 };
 
 /** Aceitar oferta - transfere o jogador. Dinheiro já foi deduzido do comprador; agora credita o vendedor. */
@@ -308,7 +315,6 @@ export const processCpuOffers = (
     const { decision, counterValue } = cpuDecideOffer(o);
     if (decision === "accepted") {
       o.status = "accepted";
-      transferPlayer(o);
       accepted.push(o);
     } else if (decision === "counter") {
       o.status = "counter";
