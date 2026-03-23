@@ -41,6 +41,7 @@ export const MatchCard = ({
   mode2p,
   onPlay2P,
   turn2PLabel,
+  onSimulated,
 }: MatchCardProps) => {
   const navigate = useNavigate();
   const [isSimulating, setIsSimulating] = useState(false);
