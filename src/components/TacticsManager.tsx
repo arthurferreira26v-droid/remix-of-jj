@@ -248,8 +248,8 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
           )}
         </div>
 
-        {/* Formações Salvas */}
-        <div className="relative">
+        {/* Formações Salvas - only on main screen */}
+        {!hideSavedFormations && (<div className="relative">
           <button
             onClick={() => toggleDropdown("saved")}
             className="w-full bg-white text-black rounded-lg px-4 py-3 flex items-center justify-between font-medium hover:bg-white/90 transition-colors"
