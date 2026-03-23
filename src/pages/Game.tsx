@@ -164,9 +164,6 @@ const Game = () => {
     if (savedPlayers) setPlayers(JSON.parse(savedPlayers));
     // Refresh championship (next match, standings, etc.)
     refreshChampionship();
-    // Refresh budget
-    const { getLocalBudget } = require("@/utils/localChampionship");
-    setBudget(getLocalBudget(teamName));
     // Refresh offers count
     refreshOffersCount();
   }, [teamName, refreshChampionship]);
