@@ -463,14 +463,23 @@ const Game = () => {
         offersCount={offersCount}
         onReceivedOffers={() => setShowReceivedOffers(true)}
         onExit={() => {
+          // Limpar dados de todos os times do campeonato
+          const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
+          brazilianTeams.forEach(t => {
+            localStorage.removeItem(`players_${t}`);
+            localStorage.removeItem(`starter_order_${t}`);
+            localStorage.removeItem(`investment_${t}`);
+            localStorage.removeItem(`local_budget_${t}`);
+          });
           deleteLocalChampionship(teamName);
-          localStorage.removeItem(`players_${teamName}`);
-          localStorage.removeItem(`starter_order_${teamName}`);
-          localStorage.removeItem(`investment_${teamName}`);
           localStorage.removeItem(`lib_championship_${teamName}`);
           localStorage.removeItem(`lib_matches_${teamName}`);
           localStorage.removeItem(`lib_standings_${teamName}`);
           localStorage.removeItem(`lib_prelib_teams`);
+          localStorage.removeItem(`lib_direct_qualifiers`);
+          // Limpar todas as ofertas de transferência
+          const { clearAllOffers } = require("@/utils/transferOffers");
+          clearAllOffers();
           navigate("/");
         }}
       />
