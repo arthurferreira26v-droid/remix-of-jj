@@ -46,7 +46,7 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
   };
 
   return (
-    <div className="bg-black p-4 md:p-6">
+    <div className="bg-black px-2 py-4 md:px-6">
       {/* Campo */}
       <FormationField
         formation={formation}
