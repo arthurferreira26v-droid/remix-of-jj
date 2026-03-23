@@ -281,12 +281,17 @@ export const processCpuOffers = (
     } else if (decision === "counter") {
       o.status = "counter";
       o.counterValue = counterValue;
+      // Devolver o escrow original — jogador decide se paga o novo valor
+      if (o.escrowDeducted) {
+        addBudget(o.fromTeam, o.offerValue);
+        o.escrowDeducted = false;
+      }
       countered.push(o);
     } else {
       o.status = "rejected";
-      // Reembolsar o comprador
       if (o.escrowDeducted) {
         addBudget(o.fromTeam, o.offerValue);
+        o.escrowDeducted = false;
       }
       rejected.push(o);
     }
