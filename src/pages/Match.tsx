@@ -196,6 +196,13 @@ const Match = () => {
   const handleStarterClick = (starter: Player) => {
     // Se tem reserva selecionado, troca reserva <-> titular
     if (selectedReserve) {
+      // REGRA: jogador expulso NÃO pode ser substituído por reserva
+      if (starter.matchRedCard) {
+        toast.error("Jogador expulso não pode ser substituído!");
+        setSelectedReserve(null);
+        return;
+      }
+
       const updatedPlayers = userPlayers.map((p) => {
         if (p.id === starter.id) return { ...p, isStarter: false };
         if (p.id === selectedReserve.id) return { ...p, isStarter: true };
@@ -223,14 +230,14 @@ const Match = () => {
       return;
     }
 
-    // Se já tem um titular selecionado, troca posições entre eles
+    // Se já tem um titular selecionado, troca posições entre eles (TÁTICA - permitido para expulsos)
     if (selectedStarter) {
       if (selectedStarter.id === starter.id) {
         setSelectedStarter(null);
         return;
       }
 
-      // Swap na ordem do campo
+      // Swap na ordem do campo (reorganização tática, funciona mesmo com expulsos)
       const newOrder = orderedStarters.map(p => {
         if (p.id === selectedStarter.id) return starter;
         if (p.id === starter.id) return selectedStarter;
