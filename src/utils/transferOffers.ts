@@ -390,7 +390,7 @@ export const generateCpuOffers = (
     const offerValue = Math.round(mktValue * offerPct);
 
     // Verificar budget antes de deduzir (sendOffer deduz automaticamente)
-    const budgetRaw = localStorage.getItem(`budget_${buyerTeam}`);
+    const budgetRaw = localStorage.getItem(`local_budget_${buyerTeam}`);
     const cpuBudget = budgetRaw ? parseFloat(budgetRaw) : 5000000;
     if (offerValue > cpuBudget) continue;
 
