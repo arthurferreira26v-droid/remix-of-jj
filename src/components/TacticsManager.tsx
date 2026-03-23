@@ -15,6 +15,7 @@ interface TacticsManagerProps {
   selectedStarterId?: string;
   allPlayers?: Player[];
   onPlayersChanged?: (players: Player[]) => void;
+  hideSavedFormations?: boolean;
 }
 
 export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStarterClick, canSubstitute = false, selectedStarterId, allPlayers, onPlayersChanged }: TacticsManagerProps) => {
