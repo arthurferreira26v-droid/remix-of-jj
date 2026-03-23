@@ -160,7 +160,9 @@ const Match = () => {
   const opponentPlayers = generateTeamPlayers(opponentName);
   
   const userStarters = userPlayers.filter((p) => p.isStarter);
-  const userReserves = userPlayers.filter((p) => !p.isStarter);
+  // Reservas: exclui jogadores expulsos (expulso NUNCA volta ao banco)
+  const userReserves = userPlayers.filter((p) => !p.isStarter && !p.matchRedCard);
+  const userActiveStarters = userStarters.filter(p => !p.matchRedCard); // jogadores efetivamente em campo
   const opponentStarters = opponentPlayers.filter((p) => p.isStarter);
 
   // Ordenar titulares respeitando a ordem salva no localStorage
