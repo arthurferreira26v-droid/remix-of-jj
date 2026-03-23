@@ -359,7 +359,8 @@ const Match = () => {
 
   // Função para escolher jogador aleatório com peso por posição
   const getRandomPlayer = (team: 'home' | 'away'): string => {
-    const players = team === 'away' ? userStarters : opponentStarters;
+    // Only active (non-expelled) players participate
+    const players = team === 'away' ? userActiveStarters : opponentStarters;
     if (players.length === 0) return 'Jogador';
 
     // Pesos por posição para chance de marcar gol
