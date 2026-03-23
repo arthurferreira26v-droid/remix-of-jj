@@ -320,7 +320,7 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
               })}
             </div>
           )}
-        </div>
+        </div>)}
       </div>
     </div>
   );
