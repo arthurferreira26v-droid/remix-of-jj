@@ -567,6 +567,7 @@ const Game = () => {
                 userForm={userForm}
                 opponentForm={opponentForm}
                 isHome={isHome}
+                onSimulated={handleSimulated}
               />
             </div>
           )}
