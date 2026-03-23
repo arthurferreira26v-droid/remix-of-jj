@@ -28,11 +28,11 @@ const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, s
   const hasYellow = yellowCard || (player.matchYellowCards || 0) >= 1 || (player.accumulatedYellows || 0) > 0;
   const hasRed = redCard || player.matchRedCard || (player.suspensionMatches || 0) > 0;
 
-  // During a match, red-carded players are fully disabled
+  // During a match, red-carded players are visually distinct but STILL CLICKABLE for tactical repositioning
   // On home screen, suspended players can be selected for substitution
   const isSuspendedOnly = !redCard && !player.matchRedCard && (player.suspensionMatches || 0) > 0;
   const isMatchRedCard = redCard || player.matchRedCard;
-  const isDisabled = isMatchRedCard; // only disable during match red cards
+  // Expelled players are NOT disabled — they can be moved tactically
 
   return (
     <div
