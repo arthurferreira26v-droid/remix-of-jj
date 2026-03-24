@@ -775,9 +775,10 @@ const Match = () => {
                 <SheetTitle>Gerenciar Time</SheetTitle>
               </VisuallyHidden>
               <div className="h-full overflow-y-auto pb-20">
-                <div className="px-4 pt-6 pb-2">
+              <div className="px-4 pt-6 pb-2">
                   <h2 className="text-2xl font-bold text-white text-center mb-4">GERENCIAR ELENCO</h2>
                 </div>
+                <div className="max-w-md mx-auto">
                 <TacticsManager
                   teamName={teamName}
                   players={userStarters}
@@ -789,6 +790,7 @@ const Match = () => {
                   onPlayersChanged={(updated) => { setUserPlayers(updated); localStorage.setItem(`players_${teamName}`, JSON.stringify(updated)); }}
                   hideSavedFormations
                 />
+                </div>
 
                 <div className="px-4 mt-4">
                   <div className="bg-zinc-900 rounded-lg p-4">
@@ -924,6 +926,7 @@ const Match = () => {
                   <span className="text-muted-foreground text-sm">45'</span>
                 </div>
 
+                <div className="max-w-md mx-auto">
                 <TacticsManager
                   teamName={teamName}
                   players={userStarters}
@@ -935,6 +938,7 @@ const Match = () => {
                   onPlayersChanged={(updated) => { setUserPlayers(updated); localStorage.setItem(`players_${teamName}`, JSON.stringify(updated)); }}
                   hideSavedFormations
                 />
+                </div>
 
                 <div className="mt-4">
                   <div className="bg-zinc-900 rounded-lg p-4">
