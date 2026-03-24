@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { teams } from "@/data/teams";
 import { getTeamLogo } from "@/utils/teamLogos";
+import { ArrowLeftRight } from "lucide-react";
 
 interface PostMatchData {
   teamName: string;
@@ -23,8 +24,8 @@ const getEventIcon = (type: string) => {
     case 'penalty_missed': return '🔴';
     case 'yellow_card': return '🟨';
     case 'red_card': return '🟥';
-    case 'substitution': return '🔄';
-    default: return '';
+    case 'substitution': return <ArrowLeftRight size={14} className="text-green-400" />;
+    default: return null;
   }
 };
 
