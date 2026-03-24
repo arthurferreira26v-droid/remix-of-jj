@@ -716,9 +716,9 @@ const Match = () => {
       case 'red_card':
         return '🟥';
       case 'substitution':
-        return '🔄';
+        return <ArrowLeftRight size={14} className="text-green-400" />;
       default:
-        return '';
+        return null;
     }
   };
 
