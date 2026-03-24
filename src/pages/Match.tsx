@@ -978,7 +978,7 @@ const Match = () => {
               </div>
             </div>
             {!isQMGuest && (
-              <div className="shrink-0 p-4 bg-gradient-to-t from-black via-black/90 to-transparent">
+              <div className="shrink-0 px-4 pb-6 pt-2">
                 <button
                   onClick={() => {
                     setIsHalftime(false);
