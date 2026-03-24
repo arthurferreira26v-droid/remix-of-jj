@@ -20,10 +20,10 @@ export const formations: Formation[] = [
       { x: 40, y: 75, role: "ZAG" }, // Zagueiro
       { x: 60, y: 75, role: "ZAG" }, // Zagueiro
       { x: 80, y: 75, role: "LD" },  // Lateral Direito
-      { x: 20, y: 50, role: "MD" },  // Meio Direito
+      { x: 20, y: 50, role: "ME" },  // Meio Esquerdo
       { x: 40, y: 50, role: "MC" },  // Meio Central
       { x: 60, y: 50, role: "MC" },  // Meio Central
-      { x: 80, y: 50, role: "ME" },  // Meio Esquerdo
+      { x: 80, y: 50, role: "MD" },  // Meio Direito
       { x: 40, y: 20, role: "ATA" }, // Atacante
       { x: 60, y: 20, role: "ATA" }, // Atacante
     ],
