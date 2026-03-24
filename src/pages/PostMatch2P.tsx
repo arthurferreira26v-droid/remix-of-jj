@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { teams } from "@/data/teams";
 import { getTeamLogo } from "@/utils/teamLogos";
+import { ArrowLeftRight } from "lucide-react";
 
 interface PostMatchData {
   teamName: string;
