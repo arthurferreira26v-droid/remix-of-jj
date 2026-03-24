@@ -551,4 +551,5 @@ const transferPlayer = (offer: TransferOffer) => {
 /** Limpa todas as ofertas (para reset de campeonato) */
 export const clearAllOffers = () => {
   localStorage.removeItem(OFFERS_KEY);
+  resetCpuSeasonOffers();
 };
