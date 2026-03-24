@@ -390,20 +390,24 @@ export const tickOffers = (teamName: string): { expired: TransferOffer[] } => {
   return { expired };
 };
 
-const CPU_OFFERS_SEASON_KEY = "cpu_offers_season_count";
+const CPU_OFFERS_SEASON_KEY_PREFIX = "cpu_offers_season_count";
 
-const getCpuSeasonOffers = (): number => {
-  const raw = localStorage.getItem(CPU_OFFERS_SEASON_KEY);
+const getCpuSeasonOffers = (targetTeam?: string): number => {
+  const key = targetTeam ? `${CPU_OFFERS_SEASON_KEY_PREFIX}_${targetTeam}` : CPU_OFFERS_SEASON_KEY_PREFIX;
+  const raw = localStorage.getItem(key);
   return raw ? parseInt(raw, 10) : 0;
 };
 
-const saveCpuSeasonOffers = (count: number) => {
-  localStorage.setItem(CPU_OFFERS_SEASON_KEY, count.toString());
+const saveCpuSeasonOffers = (count: number, targetTeam?: string) => {
+  const key = targetTeam ? `${CPU_OFFERS_SEASON_KEY_PREFIX}_${targetTeam}` : CPU_OFFERS_SEASON_KEY_PREFIX;
+  localStorage.setItem(key, count.toString());
 };
 
 /** Reseta contador de ofertas da CPU (chamar ao iniciar nova temporada) */
 export const resetCpuSeasonOffers = () => {
-  localStorage.removeItem(CPU_OFFERS_SEASON_KEY);
+  // Limpa todos os contadores (global e por time)
+  const keys = Object.keys(localStorage).filter(k => k.startsWith(CPU_OFFERS_SEASON_KEY_PREFIX));
+  keys.forEach(k => localStorage.removeItem(k));
 };
 
 /** CPU faz ofertas ativamente por jogadores de outros times (máx 3 por temporada, mín 1) */
