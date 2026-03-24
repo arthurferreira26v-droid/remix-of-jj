@@ -790,6 +790,7 @@ const Match = () => {
                   onPlayersChanged={(updated) => { setUserPlayers(updated); localStorage.setItem(`players_${teamName}`, JSON.stringify(updated)); }}
                   hideSavedFormations
                 />
+                </div>
 
                 <div className="px-4 mt-4">
                   <div className="bg-zinc-900 rounded-lg p-4">
