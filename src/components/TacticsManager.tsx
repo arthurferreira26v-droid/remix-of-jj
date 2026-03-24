@@ -31,7 +31,7 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
 
   const getInitialGameStyle = () => {
     const saved = localStorage.getItem(`tactics_gamestyle_${teamName}`);
-    return saved || "balanced_style";
+    return saved || "through_middle";
   };
 
   const [selectedFormation, setSelectedFormation] = useState(getInitialFormation);
@@ -241,7 +241,6 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
                     </span>
                     {selectedGameStyle === style.id && <div className="w-2 h-2 rounded-full bg-[#c8ff00]" />}
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">{style.description}</p>
                 </button>
               ))}
             </div>
