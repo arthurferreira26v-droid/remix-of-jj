@@ -926,6 +926,7 @@ const Match = () => {
                   <span className="text-muted-foreground text-sm">45'</span>
                 </div>
 
+                <div className="max-w-md mx-auto">
                 <TacticsManager
                   teamName={teamName}
                   players={userStarters}
@@ -937,6 +938,7 @@ const Match = () => {
                   onPlayersChanged={(updated) => { setUserPlayers(updated); localStorage.setItem(`players_${teamName}`, JSON.stringify(updated)); }}
                   hideSavedFormations
                 />
+                </div>
 
                 <div className="mt-4">
                   <div className="bg-zinc-900 rounded-lg p-4">
