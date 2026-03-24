@@ -916,7 +916,7 @@ const Match = () => {
         {/* Halftime Overlay */}
         {isHalftime && (
           <div className="fixed inset-0 bg-black z-50 flex flex-col">
-            <div className="flex-1 overflow-y-auto pb-24">
+            <div className="flex-1 overflow-y-auto">
               <div className="px-4 pt-8">
                 <div className="text-center mb-6">
                   <h2 className="text-2xl font-bold text-white/60 tracking-widest mb-3">INTERVALO</h2>
@@ -975,22 +975,23 @@ const Match = () => {
                     <p className="text-center text-muted-foreground animate-pulse text-lg py-4">Aguardando o anfitrião iniciar o 2º tempo...</p>
                   )}
                 </div>
+
+                {!isQMGuest && (
+                  <div className="px-0 py-6">
+                    <button
+                      onClick={() => {
+                        setIsHalftime(false);
+                        setHalftimeDone(true);
+                        setIsPlaying(true);
+                      }}
+                      className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-4 px-6 rounded-xl transition-all text-lg"
+                    >
+                      INICIAR 2º TEMPO
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
-            {!isQMGuest && (
-              <div className="shrink-0 px-4 pb-6 pt-2">
-                <button
-                  onClick={() => {
-                    setIsHalftime(false);
-                    setHalftimeDone(true);
-                    setIsPlaying(true);
-                  }}
-                  className="w-full max-w-md mx-auto block bg-accent hover:bg-accent/90 text-black font-bold py-4 px-6 rounded-xl transition-all text-lg"
-                >
-                  INICIAR 2º TEMPO
-                </button>
-              </div>
-            )}
           </div>
         )}
 
