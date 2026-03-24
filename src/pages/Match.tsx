@@ -778,7 +778,7 @@ const Match = () => {
               <div className="px-4 pt-6 pb-2">
                   <h2 className="text-2xl font-bold text-white text-center mb-4">GERENCIAR ELENCO</h2>
                 </div>
-                <div className="max-w-md mx-auto">
+                <div className="container mx-auto px-4">
                 <TacticsManager
                   teamName={teamName}
                   players={userStarters}
