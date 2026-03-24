@@ -775,9 +775,10 @@ const Match = () => {
                 <SheetTitle>Gerenciar Time</SheetTitle>
               </VisuallyHidden>
               <div className="h-full overflow-y-auto pb-20">
-                <div className="px-4 pt-6 pb-2">
+              <div className="px-4 pt-6 pb-2">
                   <h2 className="text-2xl font-bold text-white text-center mb-4">GERENCIAR ELENCO</h2>
                 </div>
+                <div className="max-w-md mx-auto">
                 <TacticsManager
                   teamName={teamName}
                   players={userStarters}
