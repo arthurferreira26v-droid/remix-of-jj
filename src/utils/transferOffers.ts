@@ -390,22 +390,54 @@ export const tickOffers = (teamName: string): { expired: TransferOffer[] } => {
   return { expired };
 };
 
-/** CPU faz ofertas ativamente por jogadores de outros times */
+const CPU_OFFERS_SEASON_KEY = "cpu_offers_season_count";
+
+const getCpuSeasonOffers = (): number => {
+  const raw = localStorage.getItem(CPU_OFFERS_SEASON_KEY);
+  return raw ? parseInt(raw, 10) : 0;
+};
+
+const saveCpuSeasonOffers = (count: number) => {
+  localStorage.setItem(CPU_OFFERS_SEASON_KEY, count.toString());
+};
+
+/** Reseta contador de ofertas da CPU (chamar ao iniciar nova temporada) */
+export const resetCpuSeasonOffers = () => {
+  localStorage.removeItem(CPU_OFFERS_SEASON_KEY);
+};
+
+/** CPU faz ofertas ativamente por jogadores de outros times (máx 3 por temporada, mín 1) */
 export const generateCpuOffers = (
   humanTeams: string[],
   allTeamNames: string[],
-  maxOffers: number = 2
+  maxOffers: number = 1
 ): TransferOffer[] => {
+  const seasonCount = getCpuSeasonOffers();
+  const MAX_SEASON_OFFERS = 3;
+
+  // Já atingiu o limite de ofertas na temporada
+  if (seasonCount >= MAX_SEASON_OFFERS) return [];
+
   const cpuTeams = allTeamNames.filter(
     (t) => !humanTeams.some((h) => h.toLowerCase() === t.toLowerCase())
   );
 
   if (cpuTeams.length === 0) return [];
 
+  // Chance de gerar oferta nesta rodada (~25% por rodada, garante spread)
+  // Se ainda não fez nenhuma oferta e já passou metade da temporada, força
+  if (seasonCount === 0 && Math.random() > 0.5) {
+    // Primeira metade: 50% de chance
+  } else if (seasonCount > 0 && Math.random() > 0.25) {
+    return []; // 75% de chance de pular esta rodada
+  }
+
   const generated: TransferOffer[] = [];
   const existingOffers = getOffers();
 
-  const numAttempts = Math.min(maxOffers, Math.ceil(Math.random() * 3));
+  // Limitar tentativas ao que resta na temporada
+  const remaining = MAX_SEASON_OFFERS - seasonCount;
+  const numAttempts = Math.min(maxOffers, remaining, 1);
 
   for (let i = 0; i < numAttempts; i++) {
     const buyerTeam = cpuTeams[Math.floor(Math.random() * cpuTeams.length)];
@@ -449,6 +481,11 @@ export const generateCpuOffers = (
       true
     );
     generated.push(offer);
+  }
+
+  // Atualizar contador da temporada
+  if (generated.length > 0) {
+    saveCpuSeasonOffers(seasonCount + generated.length);
   }
 
   return generated;
@@ -522,4 +559,5 @@ const transferPlayer = (offer: TransferOffer) => {
 /** Limpa todas as ofertas (para reset de campeonato) */
 export const clearAllOffers = () => {
   localStorage.removeItem(OFFERS_KEY);
+  resetCpuSeasonOffers();
 };
