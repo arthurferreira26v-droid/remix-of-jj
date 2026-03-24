@@ -475,6 +475,11 @@ export const generateCpuOffers = (
     generated.push(offer);
   }
 
+  // Atualizar contador da temporada
+  if (generated.length > 0) {
+    saveCpuSeasonOffers(seasonCount + generated.length);
+  }
+
   return generated;
 };
 
