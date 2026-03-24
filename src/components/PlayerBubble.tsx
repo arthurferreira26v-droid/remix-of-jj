@@ -42,7 +42,7 @@ const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, s
     >
       {/* OVR circle */}
       <div className="relative">
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg ${
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${
           isSelected 
             ? "bg-[#c8ff00] border-[3px] border-[#c8ff00]" 
             : hasRed
