@@ -42,7 +42,7 @@ const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, s
     >
       {/* OVR circle */}
       <div className="relative">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg ${
           isSelected 
             ? "bg-[#c8ff00] border-[3px] border-[#c8ff00]" 
             : hasRed
@@ -96,7 +96,7 @@ const FieldBubble = ({ player, isSelected, isInPosition = true, role, onClick, s
       {/* Horizontal energy bar below position */}
       {showEnergyBar && !hasRed && (
         <div
-          className="w-9 h-[4px] rounded-full overflow-hidden mt-0.5"
+          className="w-11 h-[6px] rounded-full overflow-hidden mt-0.5"
           style={{
             background: '#1f2937',
             boxShadow: '0 1px 4px rgba(0,0,0,0.5)',
