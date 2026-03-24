@@ -410,46 +410,37 @@ export const resetCpuSeasonOffers = () => {
   keys.forEach(k => localStorage.removeItem(k));
 };
 
-/** CPU faz ofertas ativamente por jogadores de outros times (máx 3 por temporada, mín 1) */
+/** CPU faz ofertas ativamente por jogadores de times humanos (máx 3 por temporada por jogador humano, mín 1) */
 export const generateCpuOffers = (
   humanTeams: string[],
   allTeamNames: string[],
   maxOffers: number = 1
 ): TransferOffer[] => {
-  const seasonCount = getCpuSeasonOffers();
   const MAX_SEASON_OFFERS = 3;
-
-  // Já atingiu o limite de ofertas na temporada
-  if (seasonCount >= MAX_SEASON_OFFERS) return [];
 
   const cpuTeams = allTeamNames.filter(
     (t) => !humanTeams.some((h) => h.toLowerCase() === t.toLowerCase())
   );
-
   if (cpuTeams.length === 0) return [];
-
-  // Chance de gerar oferta nesta rodada (~25% por rodada, garante spread)
-  // Se ainda não fez nenhuma oferta e já passou metade da temporada, força
-  if (seasonCount === 0 && Math.random() > 0.5) {
-    // Primeira metade: 50% de chance
-  } else if (seasonCount > 0 && Math.random() > 0.25) {
-    return []; // 75% de chance de pular esta rodada
-  }
 
   const generated: TransferOffer[] = [];
   const existingOffers = getOffers();
 
-  // Limitar tentativas ao que resta na temporada
-  const remaining = MAX_SEASON_OFFERS - seasonCount;
-  const numAttempts = Math.min(maxOffers, remaining, 1);
+  // Gerar ofertas independentemente para cada time humano
+  for (const humanTeam of humanTeams) {
+    const seasonCount = getCpuSeasonOffers(humanTeam);
 
-  for (let i = 0; i < numAttempts; i++) {
-    const buyerTeam = cpuTeams[Math.floor(Math.random() * cpuTeams.length)];
-    const targetTeams = allTeamNames.filter((t) => t.toLowerCase() !== buyerTeam.toLowerCase());
-    if (targetTeams.length === 0) continue;
+    // Já atingiu o limite para este jogador humano
+    if (seasonCount >= MAX_SEASON_OFFERS) continue;
 
-    const targetTeam = targetTeams[Math.floor(Math.random() * targetTeams.length)];
-    const raw = localStorage.getItem(`players_${targetTeam}`);
+    // Chance de gerar oferta nesta rodada (~25-50% por rodada, garante spread)
+    if (seasonCount === 0 && Math.random() > 0.5) {
+      // 50% de chance para primeira oferta
+    } else if (seasonCount > 0 && Math.random() > 0.25) {
+      continue; // 75% de chance de pular esta rodada
+    }
+
+    const raw = localStorage.getItem(`players_${humanTeam}`);
     if (!raw) continue;
 
     const players: Player[] = JSON.parse(raw);
@@ -458,18 +449,18 @@ export const generateCpuOffers = (
     const sorted = [...players].sort((a, b) => b.overall - a.overall);
     const topPlayers = sorted.slice(0, Math.min(5, sorted.length));
     const target = topPlayers[Math.floor(Math.random() * topPlayers.length)];
-    const targetKey = getPlayerUniqueKey(target.id, targetTeam);
+    const targetKey = getPlayerUniqueKey(target.id, humanTeam);
 
     const alreadyHasOffer = existingOffers.some(
-      (o) => o.playerUniqueKey === targetKey && (o.status === "pending" || o.status === "counter") && o.fromTeam.toLowerCase() === buyerTeam.toLowerCase()
+      (o) => o.playerUniqueKey === targetKey && (o.status === "pending" || o.status === "counter")
     );
     if (alreadyHasOffer) continue;
 
+    const buyerTeam = cpuTeams[Math.floor(Math.random() * cpuTeams.length)];
     const mktValue = calculateMarketValue(target);
     const offerPct = 1.1 + Math.random() * 0.2;
     const offerValue = Math.round(mktValue * offerPct);
 
-    // Verificar budget antes de deduzir (sendOffer deduz automaticamente)
     const budgetRaw = localStorage.getItem(`local_budget_${buyerTeam}`);
     const cpuBudget = budgetRaw ? parseFloat(budgetRaw) : 5000000;
     if (offerValue > cpuBudget) continue;
@@ -480,16 +471,12 @@ export const generateCpuOffers = (
       target.overall,
       target.position,
       buyerTeam,
-      targetTeam,
+      humanTeam,
       offerValue,
       true
     );
     generated.push(offer);
-  }
-
-  // Atualizar contador da temporada
-  if (generated.length > 0) {
-    saveCpuSeasonOffers(seasonCount + generated.length);
+    saveCpuSeasonOffers(seasonCount + 1, humanTeam);
   }
 
   return generated;
