@@ -926,7 +926,7 @@ const Match = () => {
                   <span className="text-muted-foreground text-sm">45'</span>
                 </div>
 
-                <div className="max-w-md mx-auto">
+                <div className="container mx-auto px-4">
                 <TacticsManager
                   teamName={teamName}
                   players={userStarters}
