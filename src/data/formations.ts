@@ -283,21 +283,15 @@ export interface GameStyle {
 
 export const gameStyles: GameStyle[] = [
   {
-    id: "balanced_style",
-    name: "Equilibrado",
-    description: "Sem bônus ou penalidade",
-    bonuses: { mcVolBonus: 0, wingLateralBonus: 0, mcVolPenalty: 0, wingLateralPenalty: 0 }
-  },
-  {
     id: "through_middle",
     name: "Pelo Meio",
-    description: "Aumenta força do meio-campo, reduz pontas",
+    description: "",
     bonuses: { mcVolBonus: 15, wingLateralBonus: 0, mcVolPenalty: 0, wingLateralPenalty: -10 }
   },
   {
     id: "through_wings",
     name: "Pelas Laterais",
-    description: "Aumenta laterais e pontas, reduz meio",
+    description: "",
     bonuses: { mcVolBonus: 0, wingLateralBonus: 15, mcVolPenalty: -10, wingLateralPenalty: 0 }
   },
 ];

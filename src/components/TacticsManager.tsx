@@ -31,7 +31,7 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
 
   const getInitialGameStyle = () => {
     const saved = localStorage.getItem(`tactics_gamestyle_${teamName}`);
-    return saved || "balanced_style";
+    return saved || "through_middle";
   };
 
   const [selectedFormation, setSelectedFormation] = useState(getInitialFormation);
