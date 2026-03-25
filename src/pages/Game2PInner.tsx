@@ -41,16 +41,18 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
   const [showReceivedOffers, setShowReceivedOffers] = useState(false);
   const [showFinances, setShowFinances] = useState(false);
   const [offersCount, setOffersCount] = useState(0);
+  const [adminSquadReady, setAdminSquadReady] = useState(false);
 
   useEffect(() => {
+    if (!adminSquadReady) return;
     const params = new URLSearchParams(window.location.search);
     const team2 = params.get("time2") || "";
     const humanTeams = [activeTeam, team2].filter(Boolean);
     const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
     processCpuOffers(humanTeams);
-    generateCpuOffers(humanTeams, brazilianTeams);
+    generateCpuOffers([activeTeam], brazilianTeams);
     setOffersCount(countPendingOffers(activeTeam));
-  }, [activeTeam]);
+  }, [activeTeam, adminSquadReady]);
 
   const refreshOffersCount = () => setOffersCount(countPendingOffers(activeTeam));
   const [totalSales, setTotalSales] = useState(0);
@@ -74,8 +76,13 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
   const [players, setPlayers] = useState<Player[]>(getInitialPlayers);
 
   useEffect(() => {
+    let active = true;
+    setAdminSquadReady(false);
+
     (async () => {
       const [adminPlayers] = await Promise.all([fetchAdminPlayers(true), fetchAdminLogos()]);
+      if (!active) return;
+
       const team = teams.find(t => t.name === activeTeam);
       const teamId = team?.id ?? activeTeam;
       if (adminPlayers[teamId]?.length > 0) {
@@ -101,7 +108,10 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
           return optimized;
         });
       }
+
+      if (active) setAdminSquadReady(true);
     })();
+    return () => { active = false; };
   }, [activeTeam]);
 
   const updatePlayers = (updatedPlayers: Player[]) => {

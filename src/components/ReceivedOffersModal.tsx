@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { X, Inbox, Check, XIcon, DollarSign, ArrowRight, MessageSquare, Send, Clock } from "lucide-react";
 import { getReceivedOffers, getCounterOffers, getSentOffers, acceptOffer, acceptCounterOffer, rejectOffer, claimOffer, dismissRejectedOffer, TransferOffer } from "@/utils/transferOffers";
 import { getLocalBudget } from "@/utils/localChampionship";
-import { formatMarketValue } from "@/utils/marketValue";
+import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { toast } from "sonner";
 
 interface ReceivedOffersModalProps {
@@ -18,6 +18,36 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
   const [sentOffers, setSentOffers] = useState<TransferOffer[]>([]);
   const [tab, setTab] = useState<"received" | "sent" | "counter">("received");
 
+  const currentTeamPlayers = useMemo(() => {
+    const raw = localStorage.getItem(`players_${teamName}`);
+    if (!raw) return [];
+
+    try {
+      return JSON.parse(raw) as Array<{
+        id: string;
+        name: string;
+        overall: number;
+        position: string;
+        marketValue?: number;
+      }>;
+    } catch {
+      return [];
+    }
+  }, [teamName, offers.length, counterOffers.length, sentOffers.length]);
+
+  const resolveReceivedPlayer = (offer: TransferOffer) => {
+    const rosterPlayer = currentTeamPlayers.find((player) => player.id === offer.playerId);
+    const sourcePlayer = rosterPlayer ?? offer.playerData;
+    const resolvedOverall = sourcePlayer?.overall ?? offer.playerOverall;
+
+    return {
+      name: sourcePlayer?.name || offer.playerName,
+      overall: resolvedOverall,
+      position: sourcePlayer?.position || offer.playerPosition,
+      marketValue: sourcePlayer?.marketValue ?? calculateMarketValue(resolvedOverall),
+    };
+  };
+
   useEffect(() => {
     setOffers(getReceivedOffers(teamName));
     setCounterOffers(getCounterOffers(teamName));
@@ -27,11 +57,12 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
   const refreshSent = () => setSentOffers(getSentOffers(teamName));
 
   const handleAccept = (offer: TransferOffer) => {
+    const resolvedPlayer = resolveReceivedPlayer(offer);
     const result = acceptOffer(offer.id, (accepted) => {
       onAccepted?.(accepted);
     });
     if (result) {
-      toast.success(`${result.playerName} transferido para ${result.fromTeam} por ${formatMarketValue(result.offerValue)}!`);
+      toast.success(`${resolvedPlayer.name} transferido para ${result.fromTeam} por ${formatMarketValue(result.offerValue)}!`);
       setOffers(prev => prev.filter(o => o.id !== offer.id));
       onBudgetChanged?.(getLocalBudget(teamName));
     }
@@ -145,21 +176,23 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
             ) : (
               Object.entries(grouped).map(([playerId, playerOffers]) => {
                 const first = playerOffers[0];
+                const resolvedFirstPlayer = resolveReceivedPlayer(first);
                 return (
                   <div key={playerId} className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
                     <div className="flex items-center gap-3 p-4 border-b border-zinc-800">
                       <div className="w-10 h-10 bg-black border-2 border-white rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold">{first.playerOverall}</span>
+                        <span className="text-white font-bold">{resolvedFirstPlayer.overall}</span>
                       </div>
                       <div>
-                        <h4 className="font-bold text-white">{first.playerName}</h4>
-                        <span className="text-xs text-zinc-400">{first.playerPosition} • Valor: {formatMarketValue(first.marketValue)}</span>
+                        <h4 className="font-bold text-white">{resolvedFirstPlayer.name}</h4>
+                        <span className="text-xs text-zinc-400">{resolvedFirstPlayer.position} • Valor: {formatMarketValue(resolvedFirstPlayer.marketValue)}</span>
                       </div>
                     </div>
 
                     <div className="divide-y divide-zinc-800">
                       {playerOffers.map((offer) => {
-                        const ratio = offer.offerValue / offer.marketValue;
+                        const resolvedPlayer = resolveReceivedPlayer(offer);
+                        const ratio = offer.offerValue / resolvedPlayer.marketValue;
                         const ratioColor = ratio >= 1.0 ? "text-green-400" : ratio >= 0.9 ? "text-emerald-400" : ratio >= 0.7 ? "text-yellow-400" : "text-red-400";
 
                         return (
