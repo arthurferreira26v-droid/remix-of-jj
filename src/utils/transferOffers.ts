@@ -415,7 +415,6 @@ const hasActiveOfferForPlayer = (offers: TransferOffer[], playerUniqueKey: strin
 
 const buildCpuOffer = (
   target: Player,
-  humanTeam: string,
   cpuTeams: string[]
 ): { buyerTeam: string; offerValue: number } | null => {
   const marketValue = calculateMarketValue(target);
@@ -500,7 +499,7 @@ export const generateCpuOffers = (
     if (availableTargets.length === 0) continue;
 
     const target = availableTargets[Math.floor(Math.random() * availableTargets.length)];
-    const cpuOffer = buildCpuOffer(target, humanTeam, cpuTeams);
+    const cpuOffer = buildCpuOffer(target, cpuTeams);
     if (!cpuOffer) continue;
 
     const offer = sendOffer(
