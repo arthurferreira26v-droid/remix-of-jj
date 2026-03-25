@@ -38,12 +38,13 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
   const resolveReceivedPlayer = (offer: TransferOffer) => {
     const rosterPlayer = currentTeamPlayers.find((player) => player.id === offer.playerId);
     const sourcePlayer = rosterPlayer ?? offer.playerData;
+    const resolvedOverall = sourcePlayer?.overall ?? offer.playerOverall;
 
     return {
       name: sourcePlayer?.name || offer.playerName,
-      overall: sourcePlayer?.overall ?? offer.playerOverall,
+      overall: resolvedOverall,
       position: sourcePlayer?.position || offer.playerPosition,
-      marketValue: calculateMarketValue(sourcePlayer ?? offer.playerOverall),
+      marketValue: sourcePlayer?.marketValue ?? calculateMarketValue(resolvedOverall),
     };
   };
 
