@@ -40,14 +40,16 @@ const Game = () => {
   const [showReceivedOffers, setShowReceivedOffers] = useState(false);
   const [showFinances, setShowFinances] = useState(false);
   const [offersCount, setOffersCount] = useState(0);
+  const [adminSquadReady, setAdminSquadReady] = useState(false);
 
   // Process CPU offers + generate active CPU offers on mount
   useEffect(() => {
+    if (!adminSquadReady) return;
     const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
     processCpuOffers([teamName]);
     generateCpuOffers([teamName], brazilianTeams);
     setOffersCount(countPendingOffers(teamName));
-  }, [teamName]);
+  }, [teamName, adminSquadReady]);
 
   const refreshOffersCount = () => setOffersCount(countPendingOffers(teamName));
   const [totalSales, setTotalSales] = useState(0);
@@ -82,8 +84,13 @@ const Game = () => {
   // Load admin overrides from DB — always merge admin info (name, age, overall, etc.)
   // while preserving runtime state (energy, consecutiveMatches, season stats)
   useEffect(() => {
+    let active = true;
+    setAdminSquadReady(false);
+
     (async () => {
       const [adminPlayers] = await Promise.all([fetchAdminPlayers(true), fetchAdminLogos()]);
+      if (!active) return;
+
       const team = teams.find(t => t.name === teamName);
       const teamId = team?.id ?? teamName;
       if (adminPlayers[teamId] && adminPlayers[teamId].length > 0) {
@@ -140,7 +147,10 @@ const Game = () => {
           return prev;
         });
       }
+
+      if (active) setAdminSquadReady(true);
     })();
+    return () => { active = false; };
   }, [teamName]);
 
   // Atualizar jogadores (NÃO salva automaticamente - apenas via save explícito)

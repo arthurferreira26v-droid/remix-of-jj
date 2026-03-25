@@ -89,7 +89,7 @@ export const sendOffer = (
     fromTeam,
     toTeam,
     offerValue,
-    marketValue: calculateMarketValue(playerOverall),
+    marketValue: calculateMarketValue(fullPlayerData ?? playerOverall),
     status: "pending",
     createdAt: Date.now(),
     isFromCpu,
@@ -510,7 +510,8 @@ export const generateCpuOffers = (
       cpuOffer.buyerTeam,
       humanTeam,
       cpuOffer.offerValue,
-      true
+      true,
+      target
     );
     generated.push(offer);
     saveCpuSeasonOffers(seasonCount + 1, humanTeam);
