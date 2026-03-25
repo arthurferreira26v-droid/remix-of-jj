@@ -391,6 +391,8 @@ export const tickOffers = (teamName: string): { expired: TransferOffer[] } => {
 };
 
 const CPU_OFFERS_SEASON_KEY_PREFIX = "cpu_offers_season_count";
+const CPU_OFFER_MIN_MULTIPLIER = 1.1;
+const CPU_OFFER_MAX_MULTIPLIER = 1.4;
 
 const getCpuSeasonOffers = (targetTeam?: string): number => {
   const key = targetTeam ? `${CPU_OFFERS_SEASON_KEY_PREFIX}_${targetTeam}` : CPU_OFFERS_SEASON_KEY_PREFIX;
@@ -401,6 +403,47 @@ const getCpuSeasonOffers = (targetTeam?: string): number => {
 const saveCpuSeasonOffers = (count: number, targetTeam?: string) => {
   const key = targetTeam ? `${CPU_OFFERS_SEASON_KEY_PREFIX}_${targetTeam}` : CPU_OFFERS_SEASON_KEY_PREFIX;
   localStorage.setItem(key, count.toString());
+};
+
+const hasActiveOfferForPlayer = (offers: TransferOffer[], playerUniqueKey: string) => {
+  return offers.some(
+    (offer) =>
+      offer.playerUniqueKey === playerUniqueKey &&
+      (offer.status === "pending" || offer.status === "counter")
+  );
+};
+
+const buildCpuOffer = (
+  target: Player,
+  cpuTeams: string[]
+): { buyerTeam: string; offerValue: number } | null => {
+  const marketValue = calculateMarketValue(target);
+  const minimumOffer = Math.round(marketValue * CPU_OFFER_MIN_MULTIPLIER);
+
+  const eligibleCpuTeams = cpuTeams
+    .map((teamName) => ({
+      teamName,
+      budget: getLocalBudget(teamName),
+    }))
+    .filter(({ budget }) => budget >= minimumOffer);
+
+  if (eligibleCpuTeams.length === 0) return null;
+
+  const selectedBuyer = eligibleCpuTeams[Math.floor(Math.random() * eligibleCpuTeams.length)];
+  const maximumOffer = Math.round(
+    Math.min(marketValue * CPU_OFFER_MAX_MULTIPLIER, selectedBuyer.budget)
+  );
+
+  if (maximumOffer < minimumOffer) return null;
+
+  const offerValue = Math.round(
+    minimumOffer + Math.random() * (maximumOffer - minimumOffer)
+  );
+
+  return {
+    buyerTeam: selectedBuyer.teamName,
+    offerValue,
+  };
 };
 
 /** Reseta contador de ofertas da CPU (chamar ao iniciar nova temporada) */
@@ -447,32 +490,26 @@ export const generateCpuOffers = (
     if (players.length === 0) continue;
 
     const sorted = [...players].sort((a, b) => b.overall - a.overall);
-    const topPlayers = sorted.slice(0, Math.min(5, sorted.length));
-    const target = topPlayers[Math.floor(Math.random() * topPlayers.length)];
-    const targetKey = getPlayerUniqueKey(target.id, humanTeam);
+    const topPlayers = sorted.slice(0, Math.min(8, sorted.length));
+    const availableTargets = topPlayers.filter((player) => {
+      const targetKey = getPlayerUniqueKey(player.id, humanTeam);
+      return !hasActiveOfferForPlayer(existingOffers, targetKey);
+    });
 
-    const alreadyHasOffer = existingOffers.some(
-      (o) => o.playerUniqueKey === targetKey && (o.status === "pending" || o.status === "counter")
-    );
-    if (alreadyHasOffer) continue;
+    if (availableTargets.length === 0) continue;
 
-    const buyerTeam = cpuTeams[Math.floor(Math.random() * cpuTeams.length)];
-    const mktValue = calculateMarketValue(target);
-    const offerPct = 1.1 + Math.random() * 0.2;
-    const offerValue = Math.round(mktValue * offerPct);
-
-    const budgetRaw = localStorage.getItem(`local_budget_${buyerTeam}`);
-    const cpuBudget = budgetRaw ? parseFloat(budgetRaw) : 5000000;
-    if (offerValue > cpuBudget) continue;
+    const target = availableTargets[Math.floor(Math.random() * availableTargets.length)];
+    const cpuOffer = buildCpuOffer(target, cpuTeams);
+    if (!cpuOffer) continue;
 
     const offer = sendOffer(
       target.id,
       target.name,
       target.overall,
       target.position,
-      buyerTeam,
+      cpuOffer.buyerTeam,
       humanTeam,
-      offerValue,
+      cpuOffer.offerValue,
       true
     );
     generated.push(offer);
