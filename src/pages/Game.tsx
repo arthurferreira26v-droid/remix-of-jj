@@ -27,6 +27,7 @@ import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { removePlayerFromTeamRoster } from "@/utils/teamRoster";
+import { sortPlayersByReserveOrder } from "@/utils/playerOrder";
 import { toast } from "sonner";
 import { useSwipePages } from "@/hooks/useSwipePages";
 
@@ -246,7 +247,7 @@ const Game = () => {
   const [selectedStarter, setSelectedStarter] = useState<Player | null>(null);
 
   const starters = players.filter((p) => p.isStarter);
-  const reserves = players.filter((p) => !p.isStarter);
+  const reserves = sortPlayersByReserveOrder(players.filter((p) => !p.isStarter));
 
   // Ordenação dos titulares baseada na ordem salva (para manter posições trocadas)
   const getStarterOrder = () => {

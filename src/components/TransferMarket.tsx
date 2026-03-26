@@ -6,6 +6,7 @@ import { fetchAdminPlayers } from "@/hooks/useAdminData";
 import { teams } from "@/data/teams";
 import { sendOffer, getSentOffers, countPendingOffers } from "@/utils/transferOffers";
 import { getLocalBudget } from "@/utils/localChampionship";
+import { getTeamRosterPlayers } from "@/utils/teamRoster";
 import { toast } from "sonner";
 
 interface TransferMarketProps {
@@ -33,20 +34,17 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const adminPlayers = await fetchAdminPlayers(true);
+      await fetchAdminPlayers(true);
       const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
       const all: { player: Player; ownerTeam: string }[] = [];
 
-      for (const [teamId, players] of Object.entries(adminPlayers)) {
-        if (teamId.toLowerCase() === userTeamName.toLowerCase()) continue;
-        if (!brazilianTeams.some(name => name.toLowerCase() === teamId.toLowerCase())) continue;
+      for (const teamName of brazilianTeams) {
+        if (teamName.toLowerCase() === userTeamName.toLowerCase()) continue;
 
-        // Check localStorage for current roster (handles transfers)
-        const localRaw = localStorage.getItem(`players_${teamId}`);
-        const localPlayers: Player[] = localRaw ? JSON.parse(localRaw) : players;
+        const currentRoster = getTeamRosterPlayers(teamName);
 
-        localPlayers.forEach(p => {
-          all.push({ player: p, ownerTeam: teamId });
+        currentRoster.forEach(p => {
+          all.push({ player: p, ownerTeam: teamName });
         });
       }
 

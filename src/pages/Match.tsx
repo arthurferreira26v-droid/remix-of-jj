@@ -18,6 +18,7 @@ import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { flushPendingWrites } from "@/utils/localChampionship";
 import { getYellowCardChance, applyCardToPlayer, finalizeCardsAfterMatch } from "@/utils/cardSystem";
 import { tickOffers } from "@/utils/transferOffers";
+import { sortPlayersByReserveOrder } from "@/utils/playerOrder";
 
 interface MatchEvent {
   minute: number;
@@ -163,7 +164,9 @@ const Match = () => {
   
   const userStarters = userPlayers.filter((p) => p.isStarter);
   // Reservas: exclui expulsos e jogadores já substituídos (não podem voltar)
-  const userReserves = userPlayers.filter((p) => !p.isStarter && !p.matchRedCard && !substitutedOutIds.has(p.id));
+  const userReserves = sortPlayersByReserveOrder(
+    userPlayers.filter((p) => !p.isStarter && !p.matchRedCard && !substitutedOutIds.has(p.id))
+  );
   const userActiveStarters = userStarters.filter(p => !p.matchRedCard); // jogadores efetivamente em campo
   const opponentStarters = opponentPlayers.filter((p) => p.isStarter);
 
