@@ -200,9 +200,6 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
                             <div>
                               <div className="flex items-center gap-2">
                                 <span className="text-sm text-white font-medium">{offer.fromTeam}</span>
-                                {offer.isFromCpu && (
-                                  <span className="text-[10px] px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded">CPU</span>
-                                )}
                               </div>
                               <div className="flex items-center gap-2 mt-1">
                                 <DollarSign className="w-3.5 h-3.5 text-green-400" />

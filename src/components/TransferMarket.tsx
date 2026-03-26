@@ -69,6 +69,12 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
 
   const handleSendOffer = () => {
     if (!offerModal) return;
+
+    if (offerModal.ownerTeam.toLowerCase() === userTeamName.toLowerCase()) {
+      toast.error("Você não pode fazer oferta para o próprio time!");
+      return;
+    }
+
     const value = parseFloat(offerValue.replace(/[^0-9.]/g, ""));
     if (isNaN(value) || value <= 0) {
       toast.error("Informe um valor válido!");
@@ -94,6 +100,11 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
         offerModal.player
       );
     } catch (error) {
+      if (error instanceof Error && error.message === "same_team_offer") {
+        toast.error("Você não pode fazer oferta para o próprio time!");
+        return;
+      }
+
       toast.error("Você não tem caixa suficiente!");
       return;
     }
