@@ -1,6 +1,7 @@
 import { Player } from "@/data/players";
 import { getLocalBudget, saveLocalBudget } from "@/utils/localChampionship";
 import { calculateMarketValue } from "@/utils/marketValue";
+import { addPlayerToTeamRoster, getTeamRosterPlayers, removePlayerFromTeamRoster } from "@/utils/teamRoster";
 
 // ==================== TYPES ====================
 
@@ -76,6 +77,10 @@ export const sendOffer = (
   isFromCpu: boolean = false,
   fullPlayerData?: Player
 ): TransferOffer => {
+  if (fromTeam.toLowerCase() === toTeam.toLowerCase()) {
+    throw new Error("same_team_offer");
+  }
+
   deductBudget(fromTeam, offerValue);
 
   const offer: TransferOffer = {
@@ -129,8 +134,15 @@ export const claimOffer = (offerId: string): TransferOffer | null => {
   const offers = getOffers();
   const idx = offers.findIndex((o) => o.id === offerId);
   if (idx === -1) return null;
-  // Transferir o jogador agora (no momento do resgate)
-  transferPlayer(offers[idx]);
+
+  const offer = offers[idx];
+  const sellerStillHasPlayer = getTeamRosterPlayers(offer.toTeam).some((player) => player.id === offer.playerId);
+  const buyerAlreadyHasPlayer = getTeamRosterPlayers(offer.fromTeam).some((player) => player.id === offer.playerId);
+
+  if (sellerStillHasPlayer && !buyerAlreadyHasPlayer) {
+    transferPlayer(offer);
+  }
+
   offers[idx].status = "claimed";
   saveOffers(offers);
   return offers[idx];
@@ -535,51 +547,21 @@ export const findPlayerOwner = (playerId: string, allTeamNames: string[]): strin
 
 /** Transfere o jogador entre times no localStorage. Budget do comprador já foi deduzido via escrow. */
 const transferPlayer = (offer: TransferOffer) => {
-  // 1) Remover do time vendedor (toTeam = dono atual)
-  const ownerKey = `players_${offer.toTeam}`;
-  const ownerRaw = localStorage.getItem(ownerKey);
-  let playerData: Player | undefined;
+  const { removedPlayer } = removePlayerFromTeamRoster(offer.toTeam, offer.playerId);
 
-  if (ownerRaw) {
-    const ownerPlayers: Player[] = JSON.parse(ownerRaw);
-    playerData = ownerPlayers.find((p) => p.id === offer.playerId);
-    const filtered = ownerPlayers.filter((p) => p.id !== offer.playerId);
-    localStorage.setItem(ownerKey, JSON.stringify(filtered));
-  }
+  const playerData = removedPlayer ?? offer.playerData ?? {
+    id: offer.playerId,
+    name: offer.playerName,
+    number: getTeamRosterPlayers(offer.fromTeam).length + 1,
+    position: offer.playerPosition,
+    overall: offer.playerOverall,
+    age: 25,
+    isStarter: false,
+    energy: 100,
+    consecutiveMatches: 0,
+  };
 
-  // 2) Adicionar ao time comprador (fromTeam)
-  const buyerKey = `players_${offer.fromTeam}`;
-  const buyerRaw = localStorage.getItem(buyerKey);
-  const buyerPlayers: Player[] = buyerRaw ? JSON.parse(buyerRaw) : [];
-
-  // Evitar duplicata
-  if (buyerPlayers.some((p) => p.id === offer.playerId)) {
-    addBudget(offer.toTeam, offer.offerValue);
-    return;
-  }
-
-  if (playerData) {
-    buyerPlayers.push({ ...playerData, isStarter: false });
-  } else {
-    // Jogador não encontrado no localStorage do vendedor — usar dados salvos na oferta
-    if (offer.playerData) {
-      buyerPlayers.push({ ...offer.playerData, isStarter: false, energy: 100, consecutiveMatches: 0 });
-    } else {
-      buyerPlayers.push({
-        id: offer.playerId,
-        name: offer.playerName,
-        number: buyerPlayers.length + 1,
-        position: offer.playerPosition,
-        overall: offer.playerOverall,
-        age: 25,
-        isStarter: false,
-        energy: 100,
-        consecutiveMatches: 0,
-      });
-    }
-  }
-
-  localStorage.setItem(buyerKey, JSON.stringify(buyerPlayers));
+  addPlayerToTeamRoster(offer.fromTeam, playerData);
 
   // 3) Creditar o vendedor (comprador já pagou via escrow)
   addBudget(offer.toTeam, offer.offerValue);

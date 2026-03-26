@@ -20,6 +20,7 @@ import { getLocalStandings } from "@/utils/localChampionship";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
+import { removePlayerFromTeamRoster } from "@/utils/teamRoster";
 import { toast } from "sonner";
 import { useSwipePages } from "@/hooks/useSwipePages";
 import { getSuspendedStarters } from "@/utils/cardSystem";
@@ -213,20 +214,17 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
 
   const handleSellPlayer = (player: Player) => {
     const sellValue = Math.floor(calculateMarketValue(player.overall) * 0.8);
-    const wasStarter = player.isStarter;
-    const soldPosition = player.position;
-    let updatedPlayers = players.filter(p => p.id !== player.id);
-    if (wasStarter) {
-      const rep = updatedPlayers.find(p => !p.isStarter && p.position === soldPosition);
-      if (rep) {
-        updatedPlayers = updatedPlayers.map(p => p.id === rep.id ? { ...p, isStarter: true } : p);
-        toast.success(`${rep.name} promovido a titular!`);
-      }
-    }
+    const { updatedPlayers, replacement } = removePlayerFromTeamRoster(activeTeam, player.id);
+
     updatePlayers(updatedPlayers);
     setBudget(budget + sellValue);
     setTotalSales(prev => prev + sellValue);
     setSelectedPlayerForValue(null);
+
+    if (replacement) {
+      toast.success(`${replacement.name} assumiu a vaga de titular!`);
+    }
+
     toast.success(`${player.name} vendido por ${formatMarketValue(sellValue)}!`);
   };
 

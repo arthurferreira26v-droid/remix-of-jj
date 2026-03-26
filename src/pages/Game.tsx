@@ -26,6 +26,7 @@ import { getLocalStandings, deleteLocalChampionship, getLocalBudget } from "@/ut
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
+import { removePlayerFromTeamRoster } from "@/utils/teamRoster";
 import { toast } from "sonner";
 import { useSwipePages } from "@/hooks/useSwipePages";
 
@@ -351,27 +352,17 @@ const Game = () => {
 
   const handleSellPlayer = (player: Player) => {
     const sellValue = Math.floor(calculateMarketValue(player.overall) * 0.8);
-    const wasStarter = player.isStarter;
-    const soldPosition = player.position;
-    
-    // Remove o jogador da lista
-    let updatedPlayers = players.filter(p => p.id !== player.id);
-    
-    // Se era titular, promove um reserva da mesma posição automaticamente
-    if (wasStarter) {
-      const reserveReplacement = updatedPlayers.find(p => !p.isStarter && p.position === soldPosition);
-      if (reserveReplacement) {
-        updatedPlayers = updatedPlayers.map(p => 
-          p.id === reserveReplacement.id ? { ...p, isStarter: true } : p
-        );
-        toast.success(`${reserveReplacement.name} promovido a titular!`);
-      }
-    }
-    
+    const { updatedPlayers, replacement } = removePlayerFromTeamRoster(teamName, player.id);
+
     updatePlayers(updatedPlayers);
     setBudget(budget + sellValue);
     setTotalSales(prev => prev + sellValue);
     setSelectedPlayerForValue(null);
+
+    if (replacement) {
+      toast.success(`${replacement.name} assumiu a vaga de titular!`);
+    }
+
     toast.success(`${player.name} vendido por ${formatMarketValue(sellValue)}!`);
   };
 
