@@ -1,4 +1,5 @@
 import { Player } from "@/data/players";
+import { getAdminPlayersSync } from "@/hooks/useAdminData";
 
 const getPlayersStorageKey = (teamName: string) => `players_${teamName}`;
 const getStarterOrderStorageKey = (teamName: string) => `starter_order_${teamName}`;
@@ -6,12 +7,14 @@ const getStarterOrderStorageKey = (teamName: string) => `starter_order_${teamNam
 export const getTeamRosterPlayers = (teamName: string): Player[] => {
   const raw = localStorage.getItem(getPlayersStorageKey(teamName));
 
-  if (!raw) return [];
+  if (!raw) {
+    return getAdminPlayersSync()[teamName] ?? [];
+  }
 
   try {
     return JSON.parse(raw) as Player[];
   } catch {
-    return [];
+    return getAdminPlayersSync()[teamName] ?? [];
   }
 };
 

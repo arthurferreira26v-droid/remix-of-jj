@@ -67,6 +67,10 @@ export function getAdminLogosSync(): Record<string, string> {
   return cachedLogos ?? {};
 }
 
+export function getAdminPlayersSync(): Record<string, Player[]> {
+  return cachedPlayers ?? {};
+}
+
 export function useAdminData() {
   const [allPlayers, setAllPlayers] = useState<Record<string, Player[]>>({});
   const [teamLogos, setTeamLogos] = useState<Record<string, string>>({});
