@@ -5,6 +5,7 @@ import { X, Zap, Star, Users, Eye } from "lucide-react";
 import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { optimizeStartersForFormation } from "@/utils/formationOptimizer";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
+import { RESERVE_POSITION_ORDER } from "@/utils/playerOrder";
 
 interface SquadManagerProps {
   players: Player[];
@@ -13,7 +14,7 @@ interface SquadManagerProps {
   onSellPlayer?: (player: Player) => void;
 }
 
-const POSITION_ORDER = ["GOL", "ZAG", "LD", "LE", "VOL", "MC", "MEI", "PD", "PE", "ATA"] as const;
+const POSITION_ORDER = [...RESERVE_POSITION_ORDER] as const;
 
 const POSITION_LABELS: Record<string, string> = {
   GOL: "Goleiros",

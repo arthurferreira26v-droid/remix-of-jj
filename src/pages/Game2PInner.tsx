@@ -21,6 +21,7 @@ import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { removePlayerFromTeamRoster } from "@/utils/teamRoster";
+import { sortPlayersByReserveOrder } from "@/utils/playerOrder";
 import { toast } from "sonner";
 import { useSwipePages } from "@/hooks/useSwipePages";
 import { getSuspendedStarters } from "@/utils/cardSystem";
@@ -142,7 +143,7 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
   const [selectedStarter, setSelectedStarter] = useState<Player | null>(null);
 
   const starters = players.filter(p => p.isStarter);
-  const reserves = players.filter(p => !p.isStarter);
+  const reserves = sortPlayersByReserveOrder(players.filter(p => !p.isStarter));
 
   const getStarterOrder = () => {
     const savedOrder = localStorage.getItem(`starter_order_${activeTeam}`);
