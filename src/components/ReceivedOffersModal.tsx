@@ -3,6 +3,7 @@ import { X, Inbox, Check, XIcon, DollarSign, ArrowRight, MessageSquare, Send, Cl
 import { getReceivedOffers, getCounterOffers, getSentOffers, acceptOffer, acceptCounterOffer, rejectOffer, claimOffer, dismissRejectedOffer, TransferOffer } from "@/utils/transferOffers";
 import { getLocalBudget } from "@/utils/localChampionship";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
+import { getTeamRosterPlayers } from "@/utils/teamRoster";
 import { toast } from "sonner";
 
 interface ReceivedOffersModalProps {
@@ -19,20 +20,13 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
   const [tab, setTab] = useState<"received" | "sent" | "counter">("received");
 
   const currentTeamPlayers = useMemo(() => {
-    const raw = localStorage.getItem(`players_${teamName}`);
-    if (!raw) return [];
-
-    try {
-      return JSON.parse(raw) as Array<{
-        id: string;
-        name: string;
-        overall: number;
-        position: string;
-        marketValue?: number;
-      }>;
-    } catch {
-      return [];
-    }
+    return getTeamRosterPlayers(teamName) as Array<{
+      id: string;
+      name: string;
+      overall: number;
+      position: string;
+      marketValue?: number;
+    }>;
   }, [teamName, offers.length, counterOffers.length, sentOffers.length]);
 
   const resolveReceivedPlayer = (offer: TransferOffer) => {
