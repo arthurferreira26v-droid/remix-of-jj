@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { X, Search, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Minus, Loader2, Send, Inbox } from "lucide-react";
 import { Player } from "@/data/players";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
-import { fetchAdminPlayers } from "@/hooks/useAdminData";
 import { teams } from "@/data/teams";
 import { sendOffer, getSentOffers, countPendingOffers } from "@/utils/transferOffers";
 import { getLocalBudget } from "@/utils/localChampionship";
@@ -34,7 +33,6 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
   useEffect(() => {
     (async () => {
       setLoading(true);
-      await fetchAdminPlayers(true);
       const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
       const all: { player: Player; ownerTeam: string }[] = [];
 
@@ -44,7 +42,10 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
         const currentRoster = getTeamRosterPlayers(teamName);
 
         currentRoster.forEach(p => {
-          all.push({ player: p, ownerTeam: teamName });
+          all.push({
+            player: { ...p, marketValue: p.marketValue ?? calculateMarketValue(p) },
+            ownerTeam: teamName,
+          });
         });
       }
 

@@ -19,6 +19,7 @@ import { flushPendingWrites } from "@/utils/localChampionship";
 import { getYellowCardChance, applyCardToPlayer, finalizeCardsAfterMatch } from "@/utils/cardSystem";
 import { tickOffers } from "@/utils/transferOffers";
 import { sortPlayersByReserveOrder } from "@/utils/playerOrder";
+import { getTeamRosterPlayers, saveTeamRosterPlayers } from "@/utils/teamRoster";
 
 interface MatchEvent {
   minute: number;
@@ -138,14 +139,11 @@ const Match = () => {
 
   // Initialize players - carregar do localStorage se existir
   const getInitialUserPlayers = () => {
-    const savedPlayers = localStorage.getItem(`players_${teamName}`);
-    let players: Player[];
-    if (savedPlayers) {
-      players = JSON.parse(savedPlayers);
-    } else {
+    let players = getTeamRosterPlayers(teamName);
+    if (players.length === 0) {
       const raw = generateTeamPlayers(teamName);
       const { players: optimized, starterOrder } = optimizeStartersDefault(raw);
-      localStorage.setItem(`players_${teamName}`, JSON.stringify(optimized));
+      saveTeamRosterPlayers(teamName, optimized);
       localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
       players = optimized;
     }
@@ -153,14 +151,14 @@ const Match = () => {
     const afterSuspensions = applySuspensions(players);
     // Reset match-specific card fields
     const resetCards = afterSuspensions.map(p => ({ ...p, matchYellowCards: 0, matchRedCard: false }));
-    localStorage.setItem(`players_${teamName}`, JSON.stringify(resetCards));
+    saveTeamRosterPlayers(teamName, resetCards);
     // Initialize matchEnergy from energy at start of match
     return initMatchEnergy(resetCards);
   };
 
   const [userPlayers, setUserPlayers] = useState<Player[]>(getInitialUserPlayers);
   
-  const opponentPlayers = generateTeamPlayers(opponentName);
+  const opponentPlayers = getTeamRosterPlayers(opponentName);
   
   const userStarters = userPlayers.filter((p) => p.isStarter);
   // Reservas: exclui expulsos e jogadores já substituídos (não podem voltar)
@@ -316,7 +314,7 @@ const Match = () => {
       // Finalize energy and cards
       const afterEnergy = finalizeMatchEnergy(userPlayers);
       const finalizedPlayers = finalizeCardsAfterMatch(afterEnergy);
-      localStorage.setItem(`players_${teamName}`, JSON.stringify(finalizedPlayers));
+      saveTeamRosterPlayers(teamName, finalizedPlayers);
       
       // Evolução de OVR é aplicada apenas no final da temporada
 
@@ -790,7 +788,7 @@ const Match = () => {
                   canSubstitute={!!selectedReserve || !!selectedStarter}
                   selectedStarterId={selectedReserve?.id || selectedStarter?.id}
                   allPlayers={userPlayers}
-                  onPlayersChanged={(updated) => { setUserPlayers(updated); localStorage.setItem(`players_${teamName}`, JSON.stringify(updated)); }}
+                  onPlayersChanged={(updated) => { setUserPlayers(updated); saveTeamRosterPlayers(teamName, updated); }}
                   hideSavedFormations
                 />
                 </div>
@@ -938,7 +936,7 @@ const Match = () => {
                   canSubstitute={!!selectedReserve || !!selectedStarter}
                   selectedStarterId={selectedReserve?.id || selectedStarter?.id}
                   allPlayers={userPlayers}
-                  onPlayersChanged={(updated) => { setUserPlayers(updated); localStorage.setItem(`players_${teamName}`, JSON.stringify(updated)); }}
+                  onPlayersChanged={(updated) => { setUserPlayers(updated); saveTeamRosterPlayers(teamName, updated); }}
                   hideSavedFormations
                 />
                 </div>

@@ -20,7 +20,7 @@ import { getLocalStandings } from "@/utils/localChampionship";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
-import { removePlayerFromTeamRoster } from "@/utils/teamRoster";
+import { getTeamRosterPlayers, removePlayerFromTeamRoster, saveTeamRosterPlayers } from "@/utils/teamRoster";
 import { sortPlayersByReserveOrder } from "@/utils/playerOrder";
 import { toast } from "sonner";
 import { useSwipePages } from "@/hooks/useSwipePages";
@@ -66,11 +66,9 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
   const swipe = useSwipePages({ threshold: 0.3 });
 
   const getInitialPlayers = () => {
-    const saved = localStorage.getItem(`players_${activeTeam}`);
-    if (saved) return JSON.parse(saved);
-    const raw = generateTeamPlayers(activeTeam);
+    const raw = getTeamRosterPlayers(activeTeam);
     const { players: optimized, starterOrder } = optimizeStartersDefault(raw);
-    localStorage.setItem(`players_${activeTeam}`, JSON.stringify(optimized));
+    saveTeamRosterPlayers(activeTeam, optimized);
     localStorage.setItem(`starter_order_${activeTeam}`, JSON.stringify(starterOrder));
     return optimized;
   };
@@ -105,7 +103,7 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
           );
           const allPlayers = [...merged, ...transferredPlayers];
           const { players: optimized, starterOrder } = optimizeStartersDefault(allPlayers);
-          localStorage.setItem(`players_${activeTeam}`, JSON.stringify(optimized));
+          saveTeamRosterPlayers(activeTeam, optimized);
           localStorage.setItem(`starter_order_${activeTeam}`, JSON.stringify(starterOrder));
           return optimized;
         });
@@ -118,7 +116,7 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
 
   const updatePlayers = (updatedPlayers: Player[]) => {
     setPlayers(updatedPlayers);
-    localStorage.setItem(`players_${activeTeam}`, JSON.stringify(updatedPlayers));
+    saveTeamRosterPlayers(activeTeam, updatedPlayers);
   };
 
   const selectedTeam = teams.find(t => t.name === activeTeam);
@@ -230,8 +228,7 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
   };
 
   const handleOfferAccepted = () => {
-    const saved = localStorage.getItem(`players_${activeTeam}`);
-    if (saved) setPlayers(JSON.parse(saved));
+    setPlayers(getTeamRosterPlayers(activeTeam));
     refreshOffersCount();
   };
 
@@ -365,7 +362,7 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
               canSubstitute={!!selectedReserve}
               selectedStarterId={selectedStarter?.id}
               allPlayers={players}
-              onPlayersChanged={(updated) => { setPlayers(updated); }}
+              onPlayersChanged={(updated) => { setPlayers(updated); saveTeamRosterPlayers(activeTeam, updated); }}
             />
             <div className="bg-zinc-900 rounded-lg p-4">
               <h3 className="text-white text-xl font-bold mb-4">Reservas</h3>
@@ -407,7 +404,7 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
           <SquadManager
             players={players}
             onClose={() => swipe.goToPage(0)}
-            onSquadChange={up => setPlayers(up)}
+            onSquadChange={up => updatePlayers(up)}
             onSellPlayer={handleSellPlayer}
           />
         </div>

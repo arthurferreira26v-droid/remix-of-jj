@@ -1,7 +1,7 @@
 import { Player } from "@/data/players";
 import { getLocalBudget, saveLocalBudget } from "@/utils/localChampionship";
 import { calculateMarketValue } from "@/utils/marketValue";
-import { addPlayerToTeamRoster, getTeamRosterPlayers, removePlayerFromTeamRoster } from "@/utils/teamRoster";
+import { getTeamRosterPlayers, transferPlayerToTeamRoster } from "@/utils/teamRoster";
 
 // ==================== TYPES ====================
 
@@ -547,9 +547,7 @@ export const findPlayerOwner = (playerId: string, allTeamNames: string[]): strin
 
 /** Transfere o jogador entre times no localStorage. Budget do comprador já foi deduzido via escrow. */
 const transferPlayer = (offer: TransferOffer) => {
-  const { removedPlayer } = removePlayerFromTeamRoster(offer.toTeam, offer.playerId);
-
-  const playerData = removedPlayer ?? offer.playerData ?? {
+  const playerData = offer.playerData ?? {
     id: offer.playerId,
     name: offer.playerName,
     number: getTeamRosterPlayers(offer.fromTeam).length + 1,
@@ -561,7 +559,7 @@ const transferPlayer = (offer: TransferOffer) => {
     consecutiveMatches: 0,
   };
 
-  addPlayerToTeamRoster(offer.fromTeam, playerData);
+  transferPlayerToTeamRoster(offer.toTeam, offer.fromTeam, offer.playerId, playerData);
 
   // 3) Creditar o vendedor (comprador já pagou via escrow)
   addBudget(offer.toTeam, offer.offerValue);

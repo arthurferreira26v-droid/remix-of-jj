@@ -26,7 +26,7 @@ import { getLocalStandings, deleteLocalChampionship, getLocalBudget } from "@/ut
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
-import { removePlayerFromTeamRoster } from "@/utils/teamRoster";
+import { getTeamRosterPlayers, removePlayerFromTeamRoster, saveTeamRosterPlayers } from "@/utils/teamRoster";
 import { sortPlayersByReserveOrder } from "@/utils/playerOrder";
 import { toast } from "sonner";
 import { useSwipePages } from "@/hooks/useSwipePages";
@@ -67,17 +67,9 @@ const Game = () => {
   
   // Initialize players state - always prefer localStorage (preserves energy state)
   const getInitialPlayers = () => {
-    const savedPlayers = localStorage.getItem(`players_${teamName}`);
-    
-    if (savedPlayers) {
-      return JSON.parse(savedPlayers);
-    }
-    
-    const raw = generateTeamPlayers(teamName);
-    
-    // Optimize starters to fit the default formation (4-3-3)
-    const { players: optimized, starterOrder } = optimizeStartersDefault(raw);
-    localStorage.setItem(`players_${teamName}`, JSON.stringify(optimized));
+    const rosterPlayers = getTeamRosterPlayers(teamName);
+    const { players: optimized, starterOrder } = optimizeStartersDefault(rosterPlayers);
+    saveTeamRosterPlayers(teamName, optimized);
     localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
     return optimized;
   };
@@ -132,7 +124,7 @@ const Game = () => {
           const allPlayers = [...merged, ...transferredPlayers];
           // Ensure exactly 11 starters and optimize positions for current formation
           const { players: optimized, starterOrder } = optimizeStartersDefault(allPlayers);
-          localStorage.setItem(`players_${teamName}`, JSON.stringify(optimized));
+          saveTeamRosterPlayers(teamName, optimized);
           localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
           return optimized;
         });
@@ -142,7 +134,7 @@ const Game = () => {
           const starterCount = prev.filter(p => p.isStarter).length;
           if (starterCount !== 11) {
             const { players: optimized, starterOrder } = optimizeStartersDefault(prev);
-            localStorage.setItem(`players_${teamName}`, JSON.stringify(optimized));
+            saveTeamRosterPlayers(teamName, optimized);
             localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
             return optimized;
           }
@@ -158,9 +150,7 @@ const Game = () => {
   // Atualizar jogadores (NÃO salva automaticamente - apenas via save explícito)
   const updatePlayers = (updatedPlayers: Player[]) => {
     setPlayers(updatedPlayers);
-    // Salvar no localStorage apenas para manter estado durante a sessão
-    // Será limpo ao escolher novo time se não vier de um save
-    localStorage.setItem(`players_${teamName}`, JSON.stringify(updatedPlayers));
+    saveTeamRosterPlayers(teamName, updatedPlayers);
   };
 
   // Find the selected team
@@ -368,9 +358,7 @@ const Game = () => {
   };
 
   const handleOfferAccepted = () => {
-    // Reload players from localStorage after transfer
-    const saved = localStorage.getItem(`players_${teamName}`);
-    if (saved) setPlayers(JSON.parse(saved));
+    setPlayers(getTeamRosterPlayers(teamName));
     refreshOffersCount();
   };
 
@@ -587,7 +575,7 @@ const Game = () => {
               canSubstitute={!!selectedReserve}
               selectedStarterId={selectedStarter?.id}
               allPlayers={players}
-              onPlayersChanged={(updated) => { setPlayers(updated); }}
+              onPlayersChanged={(updated) => { setPlayers(updated); saveTeamRosterPlayers(teamName, updated); }}
             />
 
             <div className="bg-zinc-900 rounded-lg p-4">
@@ -640,7 +628,7 @@ const Game = () => {
           <SquadManager
             players={players}
             onClose={() => swipe.goToPage(0)}
-            onSquadChange={(updatedPlayers) => setPlayers(updatedPlayers)}
+            onSquadChange={(updatedPlayers) => updatePlayers(updatedPlayers)}
             onSellPlayer={handleSellPlayer}
           />
         </div>
