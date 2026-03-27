@@ -7,6 +7,7 @@ import { MatchResult } from "@/hooks/useTeamForm";
 import { instantaneo } from "@/config/gameSettings";
 import { toast } from "sonner";
 import { getSuspendedStarters } from "@/utils/cardSystem";
+import { getTeamRosterPlayers, saveTeamRosterPlayers } from "@/utils/teamRoster";
 
 interface MatchCardProps {
   userTeam: string;
@@ -77,9 +78,6 @@ export const MatchCard = ({
         getLocalBudget,
         saveLocalBudget,
       } = await import("@/utils/localChampionship");
-      // Evolução de jogadores ocorre apenas no final da temporada
-      const { generateTeamPlayers } = await import("@/data/players");
-
       const nextMatch = getNextUserMatch(userTeam);
       if (!nextMatch) {
         toast.error("Partida não encontrada");
@@ -88,11 +86,10 @@ export const MatchCard = ({
       }
 
       // Load players for simulation
-      const savedPlayers = localStorage.getItem(`players_${userTeam}`);
-      const userPlayers = savedPlayers ? JSON.parse(savedPlayers) : [];
+      const userPlayers = getTeamRosterPlayers(userTeam);
       const userStarters = userPlayers.filter((p: any) => p.isStarter);
 
-      const oppPlayers = generateTeamPlayers(opponentTeam);
+      const oppPlayers = getTeamRosterPlayers(opponentTeam);
       const oppStarters = oppPlayers.filter((p: any) => p.isStarter);
 
       // Calculate result based on OVR difference
@@ -123,17 +120,16 @@ export const MatchCard = ({
       }
 
       // Energy update
-      if (savedPlayers) {
+      if (userPlayers.length > 0) {
         const { finalizeMatchEnergy } = await import("@/utils/energySystem");
         const { finalizeCardsAfterMatch } = await import("@/utils/cardSystem");
-        const currentPlayers = JSON.parse(savedPlayers);
-        const withMatchEnergy = currentPlayers.map((p: any) => ({
+        const withMatchEnergy = userPlayers.map((p: any) => ({
           ...p,
           matchEnergy: p.isStarter ? Math.max(0, (p.energy ?? 100) - (Math.floor(Math.random() * 20) + 30)) : p.energy,
         }));
         const withEnergy = finalizeMatchEnergy(withMatchEnergy);
         const withCards = finalizeCardsAfterMatch(withEnergy);
-        localStorage.setItem(`players_${userTeam}`, JSON.stringify(withCards));
+        saveTeamRosterPlayers(userTeam, withCards);
       }
 
       flushPendingWrites();
