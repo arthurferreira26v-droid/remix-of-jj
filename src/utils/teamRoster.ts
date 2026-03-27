@@ -1,25 +1,73 @@
-import { Player } from "@/data/players";
+import { Player, generateTeamPlayers } from "@/data/players";
+import { teams } from "@/data/teams";
 import { getAdminPlayersSync } from "@/hooks/useAdminData";
 
-const getPlayersStorageKey = (teamName: string) => `players_${teamName}`;
-const getStarterOrderStorageKey = (teamName: string) => `starter_order_${teamName}`;
+const resolveTeamName = (teamName: string) => {
+  const normalized = teamName.toLowerCase();
+  const matchedTeam = teams.find(
+    (team) => team.name.toLowerCase() === normalized || team.id.toLowerCase() === normalized
+  );
+
+  return {
+    storageTeamName: matchedTeam?.name ?? teamName,
+    teamId: matchedTeam?.id ?? teamName,
+  };
+};
+
+const getPlayersStorageKey = (teamName: string) => `players_${resolveTeamName(teamName).storageTeamName}`;
+const getStarterOrderStorageKey = (teamName: string) => `starter_order_${resolveTeamName(teamName).storageTeamName}`;
+
+const normalizePlayer = (player: Player): Player => ({
+  ...player,
+  isStarter: Boolean(player.isStarter),
+  energy: player.energy ?? 100,
+  consecutiveMatches: player.consecutiveMatches ?? 0,
+});
+
+const saveInitialStarterOrder = (teamName: string, players: Player[]) => {
+  const key = getStarterOrderStorageKey(teamName);
+  if (localStorage.getItem(key)) return;
+
+  const starters = players.filter((player) => player.isStarter).map((player) => player.id);
+  if (starters.length > 0) {
+    localStorage.setItem(key, JSON.stringify(starters));
+  }
+};
+
+const getFallbackPlayers = (teamName: string): Player[] => {
+  const { storageTeamName, teamId } = resolveTeamName(teamName);
+  const adminPlayers = getAdminPlayersSync();
+  const sourcePlayers =
+    adminPlayers[teamId] ??
+    adminPlayers[storageTeamName] ??
+    adminPlayers[teamName] ??
+    generateTeamPlayers(storageTeamName);
+
+  return sourcePlayers.map(normalizePlayer);
+};
 
 export const getTeamRosterPlayers = (teamName: string): Player[] => {
   const raw = localStorage.getItem(getPlayersStorageKey(teamName));
 
   if (!raw) {
-    return getAdminPlayersSync()[teamName] ?? [];
+    const fallbackPlayers = getFallbackPlayers(teamName);
+    saveTeamRosterPlayers(teamName, fallbackPlayers);
+    return fallbackPlayers;
   }
 
   try {
-    return JSON.parse(raw) as Player[];
+    return (JSON.parse(raw) as Player[]).map(normalizePlayer);
   } catch {
-    return getAdminPlayersSync()[teamName] ?? [];
+    const fallbackPlayers = getFallbackPlayers(teamName);
+    saveTeamRosterPlayers(teamName, fallbackPlayers);
+    return fallbackPlayers;
   }
 };
 
 export const saveTeamRosterPlayers = (teamName: string, players: Player[]) => {
-  localStorage.setItem(getPlayersStorageKey(teamName), JSON.stringify(players));
+  const normalizedPlayers = players.map(normalizePlayer);
+  localStorage.setItem(getPlayersStorageKey(teamName), JSON.stringify(normalizedPlayers));
+  saveInitialStarterOrder(teamName, normalizedPlayers);
 };
 
 const getStarterOrder = (teamName: string): string[] => {
@@ -36,6 +84,28 @@ const getStarterOrder = (teamName: string): string[] => {
 
 const saveStarterOrder = (teamName: string, starterOrder: string[]) => {
   localStorage.setItem(getStarterOrderStorageKey(teamName), JSON.stringify(starterOrder));
+};
+
+const removePlayerFromOtherRosters = (playerId: string, ownerTeam: string) => {
+  const ownerTeamName = resolveTeamName(ownerTeam).storageTeamName.toLowerCase();
+
+  teams.forEach((team) => {
+    if (team.name.toLowerCase() === ownerTeamName) return;
+
+    const roster = getTeamRosterPlayers(team.name);
+    if (!roster.some((player) => player.id === playerId)) return;
+
+    const updatedPlayers = roster.filter((player) => player.id !== playerId);
+    saveTeamRosterPlayers(team.name, updatedPlayers);
+
+    const starterOrder = getStarterOrder(team.name);
+    if (starterOrder.length > 0) {
+      saveStarterOrder(
+        team.name,
+        starterOrder.filter((starterId) => starterId !== playerId)
+      );
+    }
+  });
 };
 
 const pickReplacement = (players: Player[], soldPlayer: Player): Player | null => {
@@ -96,6 +166,8 @@ export const removePlayerFromTeamRoster = (teamName: string, playerId: string) =
 };
 
 export const addPlayerToTeamRoster = (teamName: string, player: Player) => {
+  removePlayerFromOtherRosters(player.id, teamName);
+
   const players = getTeamRosterPlayers(teamName);
 
   if (players.some((currentPlayer) => currentPlayer.id === player.id)) {
@@ -106,7 +178,7 @@ export const addPlayerToTeamRoster = (teamName: string, player: Player) => {
   }
 
   const nextPlayer: Player = {
-    ...player,
+    ...normalizePlayer(player),
     isStarter: false,
     energy: player.energy ?? 100,
     consecutiveMatches: player.consecutiveMatches ?? 0,
@@ -118,5 +190,52 @@ export const addPlayerToTeamRoster = (teamName: string, player: Player) => {
   return {
     added: true,
     updatedPlayers,
+  };
+};
+
+export const transferPlayerToTeamRoster = (
+  fromTeam: string,
+  toTeam: string,
+  playerId: string,
+  fallbackPlayer?: Player
+) => {
+  if (resolveTeamName(fromTeam).storageTeamName.toLowerCase() === resolveTeamName(toTeam).storageTeamName.toLowerCase()) {
+    throw new Error("same_team_offer");
+  }
+
+  const { removedPlayer, replacement, updatedPlayers: updatedFromPlayers } = removePlayerFromTeamRoster(
+    fromTeam,
+    playerId
+  );
+
+  const playerToTransfer = removedPlayer ?? fallbackPlayer ?? null;
+  if (!playerToTransfer) {
+    return {
+      removedPlayer: null,
+      addedPlayer: null,
+      replacement,
+      updatedFromPlayers,
+      updatedToPlayers: getTeamRosterPlayers(toTeam),
+    };
+  }
+
+  const destinationPlayers = getTeamRosterPlayers(toTeam);
+  const nextNumber =
+    destinationPlayers.reduce((highest, player) => Math.max(highest, player.number ?? 0), 0) + 1;
+
+  const nextPlayer: Player = {
+    ...normalizePlayer(playerToTransfer),
+    number: playerToTransfer.number ?? nextNumber,
+    isStarter: false,
+  };
+
+  const { updatedPlayers: updatedToPlayers } = addPlayerToTeamRoster(toTeam, nextPlayer);
+
+  return {
+    removedPlayer: playerToTransfer,
+    addedPlayer: nextPlayer,
+    replacement,
+    updatedFromPlayers,
+    updatedToPlayers,
   };
 };
