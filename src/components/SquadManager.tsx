@@ -267,7 +267,7 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer, us
             </div>
 
             {selectedPlayer && (
-              <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#c8ff00] text-black px-6 py-3 rounded-lg font-medium z-10">
+              <div className="sticky bottom-4 mx-auto w-fit bg-[#c8ff00] text-black px-6 py-3 rounded-lg font-medium z-10">
                 Clique em outro jogador para trocar
               </div>
             )}
@@ -275,10 +275,12 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer, us
             <div className="pb-8" />
           </>
         ) : (
-          /* Scout / Observação tab - placeholder */
-          <div className="flex items-center justify-center py-32">
-            <p className="text-zinc-600 text-sm">Em andamento</p>
-          </div>
+          <ScoutTab
+            userTeamName={userTeamName ?? ""}
+            budget={budget ?? 0}
+            onOfferSent={onOfferSent}
+            onBudgetChanged={onBudgetChanged}
+          />
         )}
 
         {valuePlayer && (
