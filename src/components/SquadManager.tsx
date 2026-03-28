@@ -65,7 +65,7 @@ const ensureStarterCount = (players: Player[], requiredCount: number): Player[] 
   return updated;
 };
 
-export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: SquadManagerProps) => {
+export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer, userTeamName, budget, onOfferSent, onBudgetChanged }: SquadManagerProps) => {
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
   const [selectedPlayStyle, setSelectedPlayStyle] = useState("counter");
   const [openDropdown, setOpenDropdown] = useState<"style" | "formation" | null>(null);
