@@ -406,6 +406,10 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
             onClose={() => swipe.goToPage(0)}
             onSquadChange={up => updatePlayers(up)}
             onSellPlayer={handleSellPlayer}
+            userTeamName={activeTeam}
+            budget={budget}
+            onOfferSent={refreshOffersCount}
+            onBudgetChanged={(newBudget) => setBudget(newBudget)}
           />
         </div>
       </div>
