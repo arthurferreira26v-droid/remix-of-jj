@@ -1,7 +1,17 @@
 import { useState, useEffect } from "react";
 import { Player } from "@/data/players";
 import { formations, playStyles, Formation } from "@/data/formations";
-import { X, Zap, Star, Users, Eye } from "lucide-react";
+import { X, Zap, Star, Users, Eye, Send, Binoculars, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { PlayerValueModal } from "@/components/PlayerValueModal";
+import { optimizeStartersForFormation } from "@/utils/formationOptimizer";
+import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
+import { RESERVE_POSITION_ORDER } from "@/utils/playerOrder";
+import { getWatchlist, removeFromWatchlist } from "@/utils/watchlist";
+import { getTeamRosterPlayers } from "@/utils/teamRoster";
+import { teams } from "@/data/teams";
+import { sendOffer, getSentOffers } from "@/utils/transferOffers";
+import { getLocalBudget } from "@/utils/localChampionship";
+import { toast } from "sonner";
 import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { optimizeStartersForFormation } from "@/utils/formationOptimizer";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
