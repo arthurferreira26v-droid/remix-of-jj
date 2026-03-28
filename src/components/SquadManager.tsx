@@ -12,10 +12,6 @@ import { teams } from "@/data/teams";
 import { sendOffer, getSentOffers } from "@/utils/transferOffers";
 import { getLocalBudget } from "@/utils/localChampionship";
 import { toast } from "sonner";
-import { PlayerValueModal } from "@/components/PlayerValueModal";
-import { optimizeStartersForFormation } from "@/utils/formationOptimizer";
-import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
-import { RESERVE_POSITION_ORDER } from "@/utils/playerOrder";
 
 interface SquadManagerProps {
   players: Player[];
