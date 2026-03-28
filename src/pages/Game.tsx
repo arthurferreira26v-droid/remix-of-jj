@@ -630,6 +630,10 @@ const Game = () => {
             onClose={() => swipe.goToPage(0)}
             onSquadChange={(updatedPlayers) => updatePlayers(updatedPlayers)}
             onSellPlayer={handleSellPlayer}
+            userTeamName={teamName}
+            budget={budget}
+            onOfferSent={refreshOffersCount}
+            onBudgetChanged={(newBudget) => setBudget(newBudget)}
           />
         </div>
       </div>

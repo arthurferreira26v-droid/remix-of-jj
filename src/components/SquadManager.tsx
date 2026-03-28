@@ -1,17 +1,28 @@
 import { useState, useEffect } from "react";
 import { Player } from "@/data/players";
 import { formations, playStyles, Formation } from "@/data/formations";
-import { X, Zap, Star, Users, Eye } from "lucide-react";
+import { X, Zap, Star, Users, Eye, Send, Binoculars, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { PlayerValueModal } from "@/components/PlayerValueModal";
 import { optimizeStartersForFormation } from "@/utils/formationOptimizer";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { RESERVE_POSITION_ORDER } from "@/utils/playerOrder";
+import { getWatchlist, removeFromWatchlist } from "@/utils/watchlist";
+import { getTeamRosterPlayers } from "@/utils/teamRoster";
+import { teams } from "@/data/teams";
+import { sendOffer, getSentOffers } from "@/utils/transferOffers";
+import { getLocalBudget } from "@/utils/localChampionship";
+import { toast } from "sonner";
+import { ScoutTab } from "@/components/ScoutTab";
 
 interface SquadManagerProps {
   players: Player[];
   onClose: () => void;
   onSquadChange: (updatedPlayers: Player[]) => void;
   onSellPlayer?: (player: Player) => void;
+  userTeamName?: string;
+  budget?: number;
+  onOfferSent?: () => void;
+  onBudgetChanged?: (newBudget: number) => void;
 }
 
 const POSITION_ORDER = [...RESERVE_POSITION_ORDER] as const;
@@ -55,7 +66,7 @@ const ensureStarterCount = (players: Player[], requiredCount: number): Player[] 
   return updated;
 };
 
-export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: SquadManagerProps) => {
+export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer, userTeamName, budget, onOfferSent, onBudgetChanged }: SquadManagerProps) => {
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
   const [selectedPlayStyle, setSelectedPlayStyle] = useState("counter");
   const [openDropdown, setOpenDropdown] = useState<"style" | "formation" | null>(null);
@@ -257,7 +268,7 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
             </div>
 
             {selectedPlayer && (
-              <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#c8ff00] text-black px-6 py-3 rounded-lg font-medium z-10">
+              <div className="sticky bottom-4 mx-auto w-fit bg-[#c8ff00] text-black px-6 py-3 rounded-lg font-medium z-10">
                 Clique em outro jogador para trocar
               </div>
             )}
@@ -265,10 +276,12 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer }: 
             <div className="pb-8" />
           </>
         ) : (
-          /* Scout / Observação tab - placeholder */
-          <div className="flex items-center justify-center py-32">
-            <p className="text-zinc-600 text-sm">Em andamento</p>
-          </div>
+          <ScoutTab
+            userTeamName={userTeamName ?? ""}
+            budget={budget ?? 0}
+            onOfferSent={onOfferSent}
+            onBudgetChanged={onBudgetChanged}
+          />
         )}
 
         {valuePlayer && (
