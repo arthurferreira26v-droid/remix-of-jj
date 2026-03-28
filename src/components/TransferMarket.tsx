@@ -228,22 +228,48 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
 
                     <div className="text-right">
                       <div className="text-sm font-bold text-green-400">{formatMarketValue(price)}</div>
-                      {hasSentOffer ? (
-                        <span className="mt-2 inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-yellow-600/20 text-yellow-400 border border-yellow-600/30">
-                          Oferta Enviada
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setOfferModal({ player, ownerTeam });
-                            setOfferValue((price / 1000000).toFixed(1));
-                          }}
-                          className="mt-2 px-4 py-2 rounded-lg font-bold text-sm bg-[#c8ff00] text-black hover:bg-[#b8ef00] transition-colors flex items-center gap-1.5"
-                        >
-                          <Send className="w-3.5 h-3.5" />
-                          Ofertar
-                        </button>
-                      )}
+                      <div className="flex items-center gap-2 mt-2">
+                        {(() => {
+                          const watched = isInWatchlist(userTeamName, player.id, ownerTeam);
+                          return (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (watched) {
+                                  toast.info("Jogador já está na observação");
+                                  return;
+                                }
+                                addToWatchlist(userTeamName, player.id, ownerTeam);
+                                toast.success("Jogador adicionado à observação 🔭");
+                              }}
+                              className={`p-2 rounded-lg border transition-colors ${
+                                watched
+                                  ? "bg-green-900/30 border-green-600/40 text-green-400"
+                                  : "bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700"
+                              }`}
+                              title={watched ? "Na observação" : "Adicionar à observação"}
+                            >
+                              <Binoculars className="w-4 h-4" />
+                            </button>
+                          );
+                        })()}
+                        {hasSentOffer ? (
+                          <span className="inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-yellow-600/20 text-yellow-400 border border-yellow-600/30">
+                            Oferta Enviada
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setOfferModal({ player, ownerTeam });
+                              setOfferValue((price / 1000000).toFixed(1));
+                            }}
+                            className="px-4 py-2 rounded-lg font-bold text-sm bg-[#c8ff00] text-black hover:bg-[#b8ef00] transition-colors flex items-center gap-1.5"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                            Ofertar
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
