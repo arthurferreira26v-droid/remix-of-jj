@@ -22,6 +22,10 @@ interface SquadManagerProps {
   onClose: () => void;
   onSquadChange: (updatedPlayers: Player[]) => void;
   onSellPlayer?: (player: Player) => void;
+  userTeamName?: string;
+  budget?: number;
+  onOfferSent?: () => void;
+  onBudgetChanged?: (newBudget: number) => void;
 }
 
 const POSITION_ORDER = [...RESERVE_POSITION_ORDER] as const;
