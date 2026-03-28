@@ -12,6 +12,7 @@ import { teams } from "@/data/teams";
 import { sendOffer, getSentOffers } from "@/utils/transferOffers";
 import { getLocalBudget } from "@/utils/localChampionship";
 import { toast } from "sonner";
+import { ScoutTab } from "@/components/ScoutTab";
 
 interface SquadManagerProps {
   players: Player[];
