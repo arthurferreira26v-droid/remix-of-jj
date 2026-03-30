@@ -6,7 +6,7 @@ import { teams } from "@/data/teams";
 import { sendOffer, getSentOffers, countPendingOffers } from "@/utils/transferOffers";
 import { getLocalBudget } from "@/utils/localChampionship";
 import { getTeamRosterPlayers } from "@/utils/teamRoster";
-import { addToWatchlist, isInWatchlist } from "@/utils/watchlist";
+import { addToWatchlist, removeFromWatchlist, isInWatchlist } from "@/utils/watchlist";
 import { toast } from "sonner";
 
 interface TransferMarketProps {
@@ -236,11 +236,17 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
                           const mk = getMarketKey(player.id, ownerTeam);
                           const watched = watchedKeys.has(mk) || isInWatchlist(userTeamName, player.id, ownerTeam);
                           return (
-                            <button
+                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (watched) {
-                                  toast.info("Jogador já está na observação");
+                                  removeFromWatchlist(userTeamName, player.id, ownerTeam);
+                                  setWatchedKeys(prev => {
+                                    const next = new Set(prev);
+                                    next.delete(mk);
+                                    return next;
+                                  });
+                                  toast.info("Jogador removido da observação");
                                   return;
                                 }
                                 addToWatchlist(userTeamName, player.id, ownerTeam);

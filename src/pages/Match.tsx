@@ -6,6 +6,7 @@ import { generateTeamPlayers, Player } from "@/data/players";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { TacticsManager } from "@/components/TacticsManager";
 import { ChevronLeft, Loader2, ArrowLeftRight, X } from "lucide-react";
+import { PressaoFinal } from "@/components/PressaoFinal";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -65,6 +66,13 @@ const Match = () => {
   const [pausedByRole, setPausedByRole] = useState<string | null>(null);
   const [substitutionCount, setSubstitutionCount] = useState(0);
   const [substitutedOutIds, setSubstitutedOutIds] = useState<Set<string>>(new Set());
+
+  // Pressão Final state
+  const [pressaoActive, setPressaoActive] = useState(false);
+  const [pressaoTriggered, setPressaoTriggered] = useState(false);
+  const [pressaoEventText, setPressaoEventText] = useState<string | undefined>();
+  const pressaoTriggerMinute = useRef(0);
+  const pressaoEventDone = useRef(false);
 
   // Quick match: channel setup for realtime sync
   useEffect(() => {
@@ -692,8 +700,88 @@ const Match = () => {
           away: 100 - homePoss
         });
         
+        // ===== PRESSÃO FINAL SYSTEM =====
+        // 20% chance, only between minutes 83-90, once per match
+        if (next >= 83 && next <= 90 && !pressaoTriggered) {
+          // Decide at minute 83 if it will trigger this match
+          if (next === 83) {
+            if (Math.random() < 0.20) {
+              // Pick random trigger minute between 83-88
+              pressaoTriggerMinute.current = 83 + Math.floor(Math.random() * 6);
+              pressaoEventDone.current = false;
+            } else {
+              setPressaoTriggered(true); // won't trigger this match
+            }
+          }
+
+          // Activate visual effect at trigger minute
+          if (pressaoTriggerMinute.current > 0 && next === pressaoTriggerMinute.current) {
+            setPressaoActive(true);
+            setPressaoTriggered(true);
+          }
+
+          // Fire mandatory event 2 minutes after activation
+          if (pressaoActive && !pressaoEventDone.current && next === pressaoTriggerMinute.current + 2) {
+            pressaoEventDone.current = true;
+
+            // Determine event based on game situation
+            const userLosing = awayScore < homeScore;
+            const userWinning = awayScore > homeScore;
+            let roll = Math.random() * 100;
+
+            // Bias: losing team gets more positive events
+            let goalProb = 30, penaltyProb = 25, goalAgainstProb = 25, expulsionProb = 20;
+            if (userLosing) {
+              goalProb = 40; penaltyProb = 30; goalAgainstProb = 15; expulsionProb = 15;
+            } else if (userWinning) {
+              goalProb = 15; penaltyProb = 15; goalAgainstProb = 40; expulsionProb = 30;
+            }
+
+            if (roll < goalProb) {
+              // Gol do usuário
+              const scorer = getRandomPlayer('away');
+              setAwayScore(s => s + 1);
+              setMatchEvents(events => [...events, { minute: next, type: 'goal' as const, team: 'away' as const, playerName: scorer }]);
+              setPressaoEventText(`⚽ GOL! ${scorer} marca no momento decisivo!`);
+            } else if (roll < goalProb + penaltyProb) {
+              // Pênalti para o usuário
+              const kicker = userActiveStarters.find(p => ['ATA', 'PE', 'PD'].includes(p.position)) || userActiveStarters[0];
+              const kickerName = kicker?.name || 'Jogador';
+              const isGoal = Math.random() < 0.75;
+              if (isGoal) {
+                setAwayScore(s => s + 1);
+                setMatchEvents(events => [...events, { minute: next, type: 'penalty' as const, team: 'away' as const, playerName: kickerName }]);
+                setPressaoEventText(`⚽ PÊNALTI CONVERTIDO! ${kickerName}!`);
+              } else {
+                setMatchEvents(events => [...events, { minute: next, type: 'penalty_missed' as const, team: 'away' as const, playerName: kickerName }]);
+                setPressaoEventText(`❌ PÊNALTI PERDIDO! ${kickerName} desperdiça!`);
+              }
+            } else if (roll < goalProb + penaltyProb + goalAgainstProb) {
+              // Gol contra (adversário marca)
+              const scorer = getRandomPlayer('home');
+              setHomeScore(s => s + 1);
+              setMatchEvents(events => [...events, { minute: next, type: 'goal' as const, team: 'home' as const, playerName: scorer }]);
+              setPressaoEventText(`⚽ GOL DO ADVERSÁRIO! ${scorer} marca!`);
+            } else {
+              // Expulsão de jogador adversário
+              const opponentPlayer = opponentStarters[Math.floor(Math.random() * opponentStarters.length)];
+              const expName = opponentPlayer?.name || 'Jogador';
+              setMatchEvents(events => [...events, { minute: next, type: 'red_card' as const, team: 'home' as const, playerName: expName }]);
+              setPressaoEventText(`🟥 EXPULSÃO! ${expName} recebe vermelho direto!`);
+            }
+
+            // Deactivate after 3 seconds
+            setTimeout(() => {
+              setPressaoActive(false);
+              setPressaoEventText(undefined);
+            }, 3000);
+          }
+        }
+
         if (next >= 90) {
           setIsPlaying(false);
+          setPressaoActive(false);
+          setPressaoEventText(undefined);
         }
         
         return next;
@@ -701,7 +789,7 @@ const Match = () => {
     }, 167); // 15000ms / 90 = ~167ms
 
     return () => clearInterval(interval);
-  }, [isPlaying, minute, showPenaltyModal, isHalftime, halftimeDone]);
+  }, [isPlaying, minute, showPenaltyModal, isHalftime, halftimeDone, pressaoActive, pressaoTriggered]);
 
   // Função para renderizar ícone do evento
   const getEventIcon = (type: MatchEvent['type']) => {
@@ -734,6 +822,8 @@ const Match = () => {
 
   return (
     <div className="min-h-screen bg-black">
+      {/* Pressão Final overlay */}
+      <PressaoFinal active={pressaoActive} eventText={pressaoEventText} />
       {/* Header - only timer */}
 
       {/* Match Info */}
