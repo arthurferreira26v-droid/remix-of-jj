@@ -6,7 +6,7 @@ import { teams } from "@/data/teams";
 import { sendOffer, getSentOffers, countPendingOffers } from "@/utils/transferOffers";
 import { getLocalBudget } from "@/utils/localChampionship";
 import { getTeamRosterPlayers } from "@/utils/teamRoster";
-import { addToWatchlist, isInWatchlist } from "@/utils/watchlist";
+import { addToWatchlist, removeFromWatchlist, isInWatchlist } from "@/utils/watchlist";
 import { toast } from "sonner";
 
 interface TransferMarketProps {
