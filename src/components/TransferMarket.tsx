@@ -26,6 +26,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
   const [offerModal, setOfferModal] = useState<{ player: Player; ownerTeam: string } | null>(null);
   const [offerValue, setOfferValue] = useState("");
   const [sentOfferKeys, setSentOfferKeys] = useState<Set<string>>(new Set());
+  const [watchedKeys, setWatchedKeys] = useState<Set<string>>(new Set());
 
   const getMarketKey = (playerId: string, ownerTeam: string) => `${ownerTeam.toLowerCase()}::${playerId}`;
 
