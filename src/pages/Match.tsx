@@ -5,7 +5,7 @@ import { teams } from "@/data/teams";
 import { generateTeamPlayers, Player } from "@/data/players";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { TacticsManager } from "@/components/TacticsManager";
-import { ChevronLeft, Loader2, ArrowLeftRight } from "lucide-react";
+import { ChevronLeft, Loader2, ArrowLeftRight, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
