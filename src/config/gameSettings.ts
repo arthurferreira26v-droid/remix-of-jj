@@ -7,4 +7,4 @@
 // ║  Só mude a linha abaixo. Não mexa em mais nada.          ║
 // ╚══════════════════════════════════════════════════════════╝
 
-export const instantaneo = true;
+export const instantaneo = false;
