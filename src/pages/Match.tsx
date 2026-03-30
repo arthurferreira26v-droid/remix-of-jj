@@ -822,6 +822,8 @@ const Match = () => {
 
   return (
     <div className="min-h-screen bg-black">
+      {/* Pressão Final overlay */}
+      <PressaoFinal active={pressaoActive} eventText={pressaoEventText} />
       {/* Header - only timer */}
 
       {/* Match Info */}
