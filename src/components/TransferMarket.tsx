@@ -26,6 +26,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
   const [offerModal, setOfferModal] = useState<{ player: Player; ownerTeam: string } | null>(null);
   const [offerValue, setOfferValue] = useState("");
   const [sentOfferKeys, setSentOfferKeys] = useState<Set<string>>(new Set());
+  const [watchedKeys, setWatchedKeys] = useState<Set<string>>(new Set());
 
   const getMarketKey = (playerId: string, ownerTeam: string) => `${ownerTeam.toLowerCase()}::${playerId}`;
 
@@ -232,7 +233,8 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
                       <div className="text-sm font-bold text-green-400">{formatMarketValue(price)}</div>
                       <div className="flex items-center gap-2 mt-2">
                         {(() => {
-                          const watched = isInWatchlist(userTeamName, player.id, ownerTeam);
+                          const mk = getMarketKey(player.id, ownerTeam);
+                          const watched = watchedKeys.has(mk) || isInWatchlist(userTeamName, player.id, ownerTeam);
                           return (
                             <button
                               onClick={(e) => {
@@ -242,6 +244,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
                                   return;
                                 }
                                 addToWatchlist(userTeamName, player.id, ownerTeam);
+                                setWatchedKeys(prev => new Set([...prev, mk]));
                                 toast.success("Jogador adicionado à observação 🔭");
                               }}
                               className={`p-2 rounded-lg border transition-colors ${
