@@ -236,11 +236,17 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
                           const mk = getMarketKey(player.id, ownerTeam);
                           const watched = watchedKeys.has(mk) || isInWatchlist(userTeamName, player.id, ownerTeam);
                           return (
-                            <button
+                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (watched) {
-                                  toast.info("Jogador já está na observação");
+                                  removeFromWatchlist(userTeamName, player.id, ownerTeam);
+                                  setWatchedKeys(prev => {
+                                    const next = new Set(prev);
+                                    next.delete(mk);
+                                    return next;
+                                  });
+                                  toast.info("Jogador removido da observação");
                                   return;
                                 }
                                 addToWatchlist(userTeamName, player.id, ownerTeam);
