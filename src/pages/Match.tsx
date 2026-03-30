@@ -67,6 +67,13 @@ const Match = () => {
   const [substitutionCount, setSubstitutionCount] = useState(0);
   const [substitutedOutIds, setSubstitutedOutIds] = useState<Set<string>>(new Set());
 
+  // Pressão Final state
+  const [pressaoActive, setPressaoActive] = useState(false);
+  const [pressaoTriggered, setPressaoTriggered] = useState(false);
+  const [pressaoEventText, setPressaoEventText] = useState<string | undefined>();
+  const pressaoTriggerMinute = useRef(0);
+  const pressaoEventDone = useRef(false);
+
   // Quick match: channel setup for realtime sync
   useEffect(() => {
     if (!isQuickMatch || !quickMatchCode) return;
