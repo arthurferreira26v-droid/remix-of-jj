@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { FormationField } from "@/components/FormationField";
 import { formations, playStyles, gameStyles, SavedFormation } from "@/data/formations";
 import { Player } from "@/data/players";
