@@ -260,7 +260,7 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
 
         {/* Full-screen saved formations modal */}
         {openDropdown === "saved" && (
-          <div className="fixed inset-0 z-50 bg-black flex flex-col overflow-hidden" style={{ height: '100dvh' }}>
+          <div className="fixed inset-0 z-[9999] bg-black flex flex-col overflow-hidden" style={{ height: '100dvh', width: '100vw', top: 0, left: 0 }}>
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800 shrink-0">
               <h2 className="text-lg font-bold text-white">Formações Salvas</h2>
