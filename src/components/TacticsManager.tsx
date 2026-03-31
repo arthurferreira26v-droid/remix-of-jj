@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { FormationField } from "@/components/FormationField";
 import { formations, playStyles, gameStyles, SavedFormation } from "@/data/formations";
 import { Player } from "@/data/players";
@@ -259,8 +260,8 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
         )}
 
         {/* Full-screen saved formations modal */}
-        {openDropdown === "saved" && (
-          <div className="fixed inset-0 z-50 bg-black flex flex-col overflow-hidden" style={{ height: '100dvh' }}>
+        {openDropdown === "saved" && createPortal(
+          <div className="fixed inset-0 z-[9999] bg-black flex flex-col overflow-hidden" style={{ height: '100dvh', width: '100vw', top: 0, left: 0 }}>
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800 shrink-0">
               <h2 className="text-lg font-bold text-white">Formações Salvas</h2>
@@ -269,9 +270,8 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
               </button>
             </div>
 
-            {/* Content - single screen, no scroll */}
+            {/* Content */}
             <div className="flex-1 flex flex-col px-5 py-5 gap-4 overflow-hidden">
-              {/* Save current formation */}
               {!showSaveInput ? (
                 <button
                   onClick={() => { if (savedFormations.length >= 7) { toast.error("Máximo de 7 formações salvas"); return; } setShowSaveInput(true); }}
@@ -304,7 +304,6 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
                 </div>
               )}
 
-              {/* Saved formations list */}
               <div className="flex-1 flex flex-col gap-2 overflow-y-auto min-h-0">
                 {savedFormations.length === 0 ? (
                   <div className="flex-1 flex items-center justify-center">
@@ -336,12 +335,12 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
                 )}
               </div>
 
-              {/* Counter */}
               <div className="shrink-0 text-center">
                 <span className="text-xs text-zinc-600">{savedFormations.length}/7 formações</span>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </div>
