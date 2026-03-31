@@ -260,33 +260,36 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
 
         {/* Full-screen saved formations modal */}
         {openDropdown === "saved" && (
-          <div className="fixed inset-0 z-50 bg-black flex flex-col">
-            <div className="flex items-center justify-between px-4 py-4 border-b border-zinc-800">
+          <div className="fixed inset-0 z-50 bg-black flex flex-col overflow-hidden" style={{ height: '100dvh' }}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800 shrink-0">
               <h2 className="text-lg font-bold text-white">Formações Salvas</h2>
               <button onClick={() => { setOpenDropdown(null); setShowSaveInput(false); setSaveName(""); }} className="text-zinc-400 hover:text-white p-1">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+            {/* Content - single screen, no scroll */}
+            <div className="flex-1 flex flex-col px-5 py-5 gap-4 overflow-hidden">
               {/* Save current formation */}
               {!showSaveInput ? (
                 <button
-                  onClick={() => setShowSaveInput(true)}
-                  className="w-full py-4 rounded-xl border border-dashed border-zinc-600 flex items-center justify-center gap-2 hover:bg-zinc-900 transition-colors"
+                  onClick={() => { if (savedFormations.length >= 7) { toast.error("Máximo de 7 formações salvas"); return; } setShowSaveInput(true); }}
+                  className="w-full py-4 rounded-xl border border-dashed border-zinc-600 flex items-center justify-center gap-2 hover:bg-zinc-900 transition-colors shrink-0"
                 >
                   <Plus className="w-5 h-5 text-[#c8ff00]" />
                   <span className="text-[#c8ff00] font-semibold text-sm">Salvar formação atual</span>
                 </button>
               ) : (
-                <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-700 space-y-3">
-                  <span className="text-white text-sm font-medium">Nome da formação</span>
+                <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-700 shrink-0">
+                  <span className="text-white text-sm font-medium block mb-3">Nome da formação</span>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
                       value={saveName}
                       onChange={(e) => setSaveName(e.target.value)}
                       placeholder="Ex: Ataque total..."
+                      maxLength={20}
                       className="flex-1 bg-zinc-800 text-white text-sm px-4 py-3 rounded-lg outline-none focus:ring-1 focus:ring-[#c8ff00]"
                       autoFocus
                       onKeyDown={(e) => { if (e.key === 'Enter') handleSaveFormation(); }}
@@ -302,34 +305,41 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
               )}
 
               {/* Saved formations list */}
-              {savedFormations.length === 0 && (
-                <div className="py-12 text-center text-zinc-500 text-sm">
-                  Nenhuma formação salva ainda
-                </div>
-              )}
-              {savedFormations.map((saved, index) => {
-                const form = formations.find(f => f.id === saved.formationId);
-                const ps = playStyles.find(s => s.id === saved.playStyleId);
-                const gs = gameStyles.find(s => s.id === saved.gameStyleId);
-                return (
-                  <div
-                    key={index}
-                    onClick={() => handleLoadFormation(saved)}
-                    className="w-full p-4 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-between hover:bg-zinc-800 transition-colors cursor-pointer"
-                  >
-                    <div>
-                      <span className="text-white font-bold text-base">{saved.name}</span>
-                      <p className="text-xs text-zinc-400 mt-1">{form?.name || saved.formationId} • {ps?.name || ""} • {gs?.name || ""}</p>
-                    </div>
-                    <button
-                      onClick={(e) => handleDeleteFormation(index, e)}
-                      className="text-red-400 hover:text-red-300 p-2"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+              <div className="flex-1 flex flex-col gap-2 overflow-y-auto min-h-0">
+                {savedFormations.length === 0 ? (
+                  <div className="flex-1 flex items-center justify-center">
+                    <p className="text-zinc-600 text-sm">Nenhuma formação salva ainda</p>
                   </div>
-                );
-              })}
+                ) : (
+                  savedFormations.map((saved, index) => {
+                    const form = formations.find(f => f.id === saved.formationId);
+                    const ps = playStyles.find(s => s.id === saved.playStyleId);
+                    return (
+                      <div
+                        key={index}
+                        onClick={() => handleLoadFormation(saved)}
+                        className="w-full p-4 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between hover:bg-zinc-800 transition-colors cursor-pointer shrink-0"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <span className="text-white font-bold text-sm block truncate">{saved.name}</span>
+                          <span className="text-xs text-zinc-500 mt-0.5 block">{form?.name} • {ps?.name}</span>
+                        </div>
+                        <button
+                          onClick={(e) => handleDeleteFormation(index, e)}
+                          className="text-red-500 hover:text-red-400 p-2 shrink-0 ml-2"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Counter */}
+              <div className="shrink-0 text-center">
+                <span className="text-xs text-zinc-600">{savedFormations.length}/7 formações</span>
+              </div>
             </div>
           </div>
         )}
