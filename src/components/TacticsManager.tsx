@@ -248,78 +248,91 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
         </div>
 
         {/* Formações Salvas - only on main screen */}
-        {!hideSavedFormations && (<div className="relative">
+        {!hideSavedFormations && (
           <button
             onClick={() => toggleDropdown("saved")}
-            className="w-full bg-white text-black rounded-lg px-4 py-3 flex items-center justify-between font-medium hover:bg-white/90 transition-colors"
+            className="w-full bg-black text-white border border-zinc-700 rounded-lg px-4 py-3 flex items-center justify-between font-medium hover:bg-zinc-900 transition-colors"
           >
             <span className="text-sm truncate">Formações</span>
             <FolderOpen className="w-4 h-4 shrink-0" />
           </button>
-          
-          {openDropdown === "saved" && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 rounded-xl overflow-hidden shadow-xl z-50 border border-zinc-700 max-h-72 overflow-y-auto">
-              {/* Save current */}
+        )}
+
+        {/* Full-screen saved formations modal */}
+        {openDropdown === "saved" && (
+          <div className="fixed inset-0 z-50 bg-black flex flex-col">
+            <div className="flex items-center justify-between px-4 py-4 border-b border-zinc-800">
+              <h2 className="text-lg font-bold text-white">Formações Salvas</h2>
+              <button onClick={() => { setOpenDropdown(null); setShowSaveInput(false); setSaveName(""); }} className="text-zinc-400 hover:text-white p-1">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+              {/* Save current formation */}
               {!showSaveInput ? (
                 <button
                   onClick={() => setShowSaveInput(true)}
-                  className="w-full px-4 py-3 text-left hover:bg-zinc-800 transition-colors border-b border-zinc-700 flex items-center gap-2"
+                  className="w-full py-4 rounded-xl border border-dashed border-zinc-600 flex items-center justify-center gap-2 hover:bg-zinc-900 transition-colors"
                 >
-                  <Plus className="w-4 h-4 text-[#c8ff00]" />
+                  <Plus className="w-5 h-5 text-[#c8ff00]" />
                   <span className="text-[#c8ff00] font-semibold text-sm">Salvar formação atual</span>
                 </button>
               ) : (
-                <div className="px-4 py-3 border-b border-zinc-700">
+                <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-700 space-y-3">
+                  <span className="text-white text-sm font-medium">Nome da formação</span>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
                       value={saveName}
                       onChange={(e) => setSaveName(e.target.value)}
-                      placeholder="Nome da formação..."
-                      className="flex-1 bg-zinc-800 text-white text-sm px-3 py-2 rounded-lg outline-none focus:ring-1 focus:ring-[#c8ff00]"
+                      placeholder="Ex: Ataque total..."
+                      className="flex-1 bg-zinc-800 text-white text-sm px-4 py-3 rounded-lg outline-none focus:ring-1 focus:ring-[#c8ff00]"
                       autoFocus
                       onKeyDown={(e) => { if (e.key === 'Enter') handleSaveFormation(); }}
                     />
-                    <button onClick={handleSaveFormation} className="bg-[#c8ff00] text-black p-2 rounded-lg">
-                      <Save className="w-4 h-4" />
+                    <button onClick={handleSaveFormation} className="bg-[#c8ff00] text-black p-3 rounded-lg">
+                      <Save className="w-5 h-5" />
                     </button>
-                    <button onClick={() => { setShowSaveInput(false); setSaveName(""); }} className="text-zinc-400 p-2">
-                      <X className="w-4 h-4" />
+                    <button onClick={() => { setShowSaveInput(false); setSaveName(""); }} className="text-zinc-400 p-3">
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* Saved list */}
+              {/* Saved formations list */}
               {savedFormations.length === 0 && (
-                <div className="px-4 py-4 text-center text-zinc-500 text-xs">
-                  Nenhuma formação salva
+                <div className="py-12 text-center text-zinc-500 text-sm">
+                  Nenhuma formação salva ainda
                 </div>
               )}
               {savedFormations.map((saved, index) => {
                 const form = formations.find(f => f.id === saved.formationId);
+                const ps = playStyles.find(s => s.id === saved.playStyleId);
+                const gs = gameStyles.find(s => s.id === saved.gameStyleId);
                 return (
-                  <button
+                  <div
                     key={index}
                     onClick={() => handleLoadFormation(saved)}
-                    className="w-full px-4 py-3 text-left hover:bg-zinc-800 transition-colors border-b border-zinc-800 last:border-b-0 flex items-center justify-between"
+                    className="w-full p-4 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-between hover:bg-zinc-800 transition-colors cursor-pointer"
                   >
                     <div>
-                      <span className="text-white font-semibold text-sm">{saved.name}</span>
-                      <p className="text-xs text-gray-400 mt-0.5">{form?.name || saved.formationId}</p>
+                      <span className="text-white font-bold text-base">{saved.name}</span>
+                      <p className="text-xs text-zinc-400 mt-1">{form?.name || saved.formationId} • {ps?.name || ""} • {gs?.name || ""}</p>
                     </div>
                     <button
                       onClick={(e) => handleDeleteFormation(index, e)}
-                      className="text-red-400 hover:text-red-300 p-1"
+                      className="text-red-400 hover:text-red-300 p-2"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-5 h-5" />
                     </button>
-                  </button>
+                  </div>
                 );
               })}
             </div>
-          )}
-        </div>)}
+          </div>
+        )}
       </div>
     </div>
   );
