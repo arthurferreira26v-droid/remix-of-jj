@@ -67,6 +67,7 @@ export const generateTeamPlayers = (teamName: string): Player[] => {
     isStarter: p.isStarter,
     energy: 100,
     consecutiveMatches: 0,
+    isListed: true,
     seasonStarterMatches: p.isStarter ? 1 : 0,
     seasonBenchMatches: p.isStarter ? 0 : 1,
   }));
