@@ -110,30 +110,44 @@ export const finalizeCardsAfterMatch = (players: Player[]): Player[] => {
  * Returns updated players list.
  */
 export const applySuspensions = (players: Player[]): Player[] => {
-  const suspended = players.filter(p => p.isStarter && (p.suspensionMatches || 0) > 0);
+  const suspended = players.filter(p => (p.suspensionMatches || 0) > 0);
   if (suspended.length === 0) return players;
 
   let updated = [...players];
 
   for (const sus of suspended) {
-    // Find a non-suspended reserve with same position
-    const replacement = updated.find(
-      p => !p.isStarter && (p.suspensionMatches || 0) === 0 && p.position === sus.position
-    ) || updated.find(
-      p => !p.isStarter && (p.suspensionMatches || 0) === 0
-    );
+    if (sus.isStarter) {
+      // Find a non-suspended, listed reserve with same position
+      const replacement = updated.find(
+        p => !p.isStarter && p.isListed !== false && (p.suspensionMatches || 0) === 0 && p.position === sus.position
+      ) || updated.find(
+        p => !p.isStarter && p.isListed !== false && (p.suspensionMatches || 0) === 0
+      );
 
-    updated = updated.map(p => {
-      if (p.id === sus.id) return { ...p, isStarter: false };
-      if (replacement && p.id === replacement.id) return { ...p, isStarter: true };
-      return p;
-    });
+      updated = updated.map(p => {
+        if (p.id === sus.id) return { ...p, isStarter: false, isListed: false };
+        if (replacement && p.id === replacement.id) return { ...p, isStarter: true };
+        return p;
+      });
+    } else {
+      // Move suspended non-starters to unlisted
+      updated = updated.map(p => {
+        if (p.id === sus.id) return { ...p, isListed: false };
+        return p;
+      });
+    }
   }
 
   // Decrement suspension counter for suspended players
   updated = updated.map(p => {
     if ((p.suspensionMatches || 0) > 0) {
-      return { ...p, suspensionMatches: (p.suspensionMatches || 0) - 1 };
+      const newSuspension = (p.suspensionMatches || 0) - 1;
+      return { 
+        ...p, 
+        suspensionMatches: newSuspension,
+        // Auto-relist when suspension ends
+        isListed: newSuspension === 0 ? true : p.isListed,
+      };
     }
     return p;
   });
