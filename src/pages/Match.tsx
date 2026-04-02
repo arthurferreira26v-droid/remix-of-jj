@@ -73,6 +73,7 @@ const Match = () => {
   const [pressaoEventText, setPressaoEventText] = useState<string | undefined>();
   const pressaoTriggerMinute = useRef(0);
   const pressaoEventDone = useRef(false);
+  const pressaoEventFired = useRef(false);
 
   // Quick match: channel setup for realtime sync
   useEffect(() => {
