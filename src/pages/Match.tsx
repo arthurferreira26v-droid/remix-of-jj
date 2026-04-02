@@ -714,14 +714,20 @@ const Match = () => {
             }
           }
 
-          // Activate visual effect at trigger minute
-          if (pressaoTriggerMinute.current > 0 && next === pressaoTriggerMinute.current) {
+          // Activate visual effect at trigger minute and schedule event after 5 seconds
+          if (pressaoTriggerMinute.current > 0 && next === pressaoTriggerMinute.current && !pressaoActive) {
             setPressaoActive(true);
             setPressaoTriggered(true);
+            
+            // Schedule the event to fire after 5 seconds of tension
+            setTimeout(() => {
+              pressaoEventDone.current = true;
+            }, 5000);
           }
 
-          // Fire mandatory event 2 minutes after activation
-          if (pressaoActive && !pressaoEventDone.current && next === pressaoTriggerMinute.current + 2) {
+          // Fire mandatory event when timer expires
+          if (pressaoActive && pressaoEventDone.current && !pressaoEventFired.current) {
+            pressaoEventFired.current = true;
             pressaoEventDone.current = true;
 
             // Determine event based on game situation
