@@ -710,6 +710,7 @@ const Match = () => {
               // Pick random trigger minute between 83-88
               pressaoTriggerMinute.current = 83 + Math.floor(Math.random() * 6);
               pressaoEventDone.current = false;
+              pressaoEventFired.current = false;
             } else {
               setPressaoTriggered(true); // won't trigger this match
             }
