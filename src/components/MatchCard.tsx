@@ -51,10 +51,18 @@ export const MatchCard = ({
     const savedPlayers = localStorage.getItem(`players_${userTeam}`);
     if (savedPlayers) {
       const players = JSON.parse(savedPlayers);
+      // Check suspended starters
       const suspended = getSuspendedStarters(players);
       if (suspended.length > 0) {
         const names = suspended.map((p: any) => p.name).join(', ');
-        toast.error(`Jogador(es) suspenso(s): ${names}. Substitua no elenco antes de jogar!`);
+        toast.error(`Jogador(es) suspenso(s): ${names}. Mova para Não relacionados!`);
+        return;
+      }
+      // Check suspended players in reserves (isListed !== false and not starter)
+      const suspendedReserves = players.filter((p: any) => !p.isStarter && p.isListed !== false && (p.suspensionMatches || 0) > 0);
+      if (suspendedReserves.length > 0) {
+        const names = suspendedReserves.map((p: any) => p.name).join(', ');
+        toast.error(`Jogador(es) suspenso(s) nos reservas: ${names}. Mova para Não relacionados!`);
         return;
       }
       localStorage.setItem('match_players', savedPlayers);
