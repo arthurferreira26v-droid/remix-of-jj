@@ -777,11 +777,11 @@ const Match = () => {
               setPressaoEventText(`🟥 EXPULSÃO! ${expName} recebe vermelho direto!`);
             }
 
-            // Deactivate after 3 seconds
+            // Deactivate after 5 seconds
             setTimeout(() => {
               setPressaoActive(false);
               setPressaoEventText(undefined);
-            }, 3000);
+            }, 5000);
           }
         }
 
