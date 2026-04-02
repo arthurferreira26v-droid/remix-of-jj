@@ -267,9 +267,14 @@ const Game = () => {
   const handleReserveClick = (player: Player) => {
     // Se tiver um titular selecionado, troca titular <-> reserva
     if (selectedStarter) {
+      // Block if player is suspended
+      if ((player.suspensionMatches || 0) > 0) {
+        toast.error("Jogador suspenso! Mova para Não relacionados.");
+        return;
+      }
       const updatedPlayers = players.map((p) => {
-        if (p.id === selectedStarter.id) return { ...p, isStarter: false };
-        if (p.id === player.id) return { ...p, isStarter: true };
+        if (p.id === selectedStarter.id) return { ...p, isStarter: false, isListed: true };
+        if (p.id === player.id) return { ...p, isStarter: true, isListed: true };
         return p;
       });
       const newOrder = orderedStarters.map(p =>
@@ -286,6 +291,31 @@ const Game = () => {
     } else {
       setSelectedReserve(player);
     }
+  };
+
+  const handleMoveToUnlisted = (player: Player) => {
+    const updatedPlayers = players.map(p =>
+      p.id === player.id ? { ...p, isListed: false, isStarter: false } : p
+    );
+    updatePlayers(updatedPlayers);
+    toast.success(`${player.name} movido para Não relacionados`);
+  };
+
+  const handleMoveToReserves = (player: Player) => {
+    const currentReserves = players.filter(p => !p.isStarter && p.isListed !== false);
+    if (currentReserves.length >= 10) {
+      toast.error("Máximo de 10 reservas! Mova alguém para Não relacionados primeiro.");
+      return;
+    }
+    if ((player.suspensionMatches || 0) > 0) {
+      toast.error("Jogador suspenso! Deve ficar em Não relacionados.");
+      return;
+    }
+    const updatedPlayers = players.map(p =>
+      p.id === player.id ? { ...p, isListed: true, isStarter: false } : p
+    );
+    updatePlayers(updatedPlayers);
+    toast.success(`${player.name} movido para Reservas`);
   };
 
   const handleReserveLongPress = (player: Player) => {
