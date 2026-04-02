@@ -20,6 +20,7 @@ const getStarterOrderStorageKey = (teamName: string) => `starter_order_${resolve
 const normalizePlayer = (player: Player): Player => ({
   ...player,
   isStarter: Boolean(player.isStarter),
+  isListed: player.isListed !== false, // default true for backwards compat
   energy: player.energy ?? 100,
   consecutiveMatches: player.consecutiveMatches ?? 0,
 });

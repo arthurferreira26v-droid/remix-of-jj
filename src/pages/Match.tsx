@@ -170,9 +170,9 @@ const Match = () => {
   const opponentPlayers = getTeamRosterPlayers(opponentName);
   
   const userStarters = userPlayers.filter((p) => p.isStarter);
-  // Reservas: exclui expulsos e jogadores já substituídos (não podem voltar)
+  // Reservas: only listed (isListed !== false), exclui expulsos e jogadores já substituídos
   const userReserves = sortPlayersByReserveOrder(
-    userPlayers.filter((p) => !p.isStarter && !p.matchRedCard && !substitutedOutIds.has(p.id))
+    userPlayers.filter((p) => !p.isStarter && p.isListed !== false && !p.matchRedCard && !substitutedOutIds.has(p.id))
   );
   const userActiveStarters = userStarters.filter(p => !p.matchRedCard); // jogadores efetivamente em campo
   const opponentStarters = opponentPlayers.filter((p) => p.isStarter);
@@ -845,11 +845,11 @@ const Match = () => {
         {/* Score Board */}
         <div className="flex items-center justify-center gap-8 mb-4">
           {/* Home Team (Opponent) - not clickable */}
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center p-4">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-16 h-16 bg-white/8 rounded-2xl flex items-center justify-center p-2.5">
               <img src={opponent?.logo} alt={opponentName} className="w-full h-full object-contain" />
             </div>
-            <span className="text-sm font-medium text-white">{opponentName.slice(0, 3).toUpperCase()}</span>
+            <span className="text-xs font-semibold text-white/70 tracking-wide">{opponentName.slice(0, 3).toUpperCase()}</span>
           </div>
 
           {/* Score */}
@@ -862,11 +862,11 @@ const Match = () => {
           {/* Away Team (User) - opens full squad management */}
           <Sheet onOpenChange={(open) => handleSquadSheetChange(open)}>
             <SheetTrigger asChild>
-              <button className="flex flex-col items-center gap-3 hover:opacity-80 transition-opacity">
-                <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center p-4">
+              <button className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity">
+                <div className="w-16 h-16 bg-white/8 rounded-2xl flex items-center justify-center p-2.5">
                   <img src={selectedTeam?.logo} alt={teamName} className="w-full h-full object-contain" />
                 </div>
-                <span className="text-sm font-medium text-white">{teamName.slice(0, 3).toUpperCase()}</span>
+                <span className="text-xs font-semibold text-white/70 tracking-wide">{teamName.slice(0, 3).toUpperCase()}</span>
               </button>
             </SheetTrigger>
             <SheetContent side="bottom" className="bg-black border-none h-[100dvh] p-0">
