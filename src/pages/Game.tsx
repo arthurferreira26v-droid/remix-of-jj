@@ -237,7 +237,9 @@ const Game = () => {
   const [selectedStarter, setSelectedStarter] = useState<Player | null>(null);
 
   const starters = players.filter((p) => p.isStarter);
-  const reserves = sortPlayersByReserveOrder(players.filter((p) => !p.isStarter));
+  const allNonStarters = players.filter((p) => !p.isStarter);
+  const reserves = sortPlayersByReserveOrder(allNonStarters.filter((p) => p.isListed !== false));
+  const unlisted = sortPlayersByReserveOrder(allNonStarters.filter((p) => p.isListed === false));
 
   // Ordenação dos titulares baseada na ordem salva (para manter posições trocadas)
   const getStarterOrder = () => {
