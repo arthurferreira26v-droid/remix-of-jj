@@ -15,6 +15,9 @@ export interface Player {
   matchEnergy?: number;
   consecutiveMatches?: number;
 
+  // 📋 RELACIONADO PARA PARTIDA
+  isListed?: boolean; // true = reserva (banco), false = não relacionado
+
   // 📊 CONTROLE DE TEMPO DE JOGO NA TEMPORADA
   seasonStarterMatches?: number;
   seasonBenchMatches?: number;
