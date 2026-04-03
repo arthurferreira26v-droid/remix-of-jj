@@ -265,11 +265,10 @@ const Game = () => {
   };
 
   const handleReserveClick = (player: Player) => {
-    // Se tiver um titular selecionado, troca titular <-> reserva
+    // Se tiver um titular selecionado, troca titular <-> reserva/não-relacionado
     if (selectedStarter) {
-      // Block if player is suspended
       if ((player.suspensionMatches || 0) > 0) {
-        toast.error("Jogador suspenso! Mova para Não relacionados.");
+        toast.error("Jogador suspenso! Deve ficar em Não relacionados.");
         return;
       }
       const updatedPlayers = players.map((p) => {
@@ -286,11 +285,25 @@ const Game = () => {
       return;
     }
 
-    if (selectedReserve?.id === player.id) {
+    // Se já tem um reserva/não-relacionado selecionado
+    if (selectedReserve) {
+      if (selectedReserve.id === player.id) {
+        setSelectedReserve(null);
+        return;
+      }
+      // Swap listed status between the two players
+      const updatedPlayers = players.map((p) => {
+        if (p.id === selectedReserve.id) return { ...p, isListed: player.isListed };
+        if (p.id === player.id) return { ...p, isListed: selectedReserve.isListed };
+        return p;
+      });
+      updatePlayers(updatedPlayers);
       setSelectedReserve(null);
-    } else {
-      setSelectedReserve(player);
+      toast.success(`${selectedReserve.name} ↔ ${player.name}`);
+      return;
     }
+
+    setSelectedReserve(player);
   };
 
   const handleMoveToUnlisted = (player: Player) => {
