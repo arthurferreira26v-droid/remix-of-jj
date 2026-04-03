@@ -621,48 +621,41 @@ const Game = () => {
                   const energy = player.energy ?? 100;
                   const energyColor = energy >= 80 ? 'hsl(142 70% 50%)' : energy >= 60 ? 'hsl(45 100% 50%)' : 'hsl(0 80% 55%)';
                   const isSuspended = (player.suspensionMatches || 0) > 0;
+                  const isSelected = selectedReserve?.id === player.id;
                   return (
-                    <div key={player.id} className="flex items-center gap-1">
-                      <button
-                        onClick={() => handleReserveClick(player)}
-                        className={`flex-1 flex items-center justify-between p-3 rounded-lg transition-colors ${
-                          selectedReserve?.id === player.id
-                            ? "bg-[#c8ff00] text-black"
-                            : isSuspended
-                            ? "bg-red-900/30 text-white/50 border border-red-500/40"
-                            : "bg-zinc-800 text-white hover:bg-zinc-700"
-                        }`}
-                        style={isSuspended ? { opacity: 0.6 } : {}}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={`font-bold text-lg w-8 ${selectedReserve?.id === player.id ? 'text-black' : isSuspended ? 'text-red-400' : 'text-blue-800'}`}>{player.overall}</span>
-                          <div className="text-left">
-                            <div className="flex items-center gap-1.5">
-                              <span className={`font-medium ${isSuspended ? 'line-through' : ''}`}>{player.name}</span>
-                              {isSuspended && (
-                                <span className="text-[9px] bg-red-500/20 text-red-400 px-1 py-0.5 rounded font-bold">SUSPENSO</span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-sm opacity-70">{player.position}</span>
-                            </div>
+                    <button
+                      key={player.id}
+                      onClick={() => handleReserveClick(player)}
+                      className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                        isSelected
+                          ? "bg-[#c8ff00] text-black"
+                          : isSuspended
+                          ? "bg-red-900/30 text-white/50 border border-red-500/40"
+                          : "bg-zinc-800 text-white hover:bg-zinc-700"
+                      }`}
+                      style={isSuspended ? { opacity: 0.6 } : {}}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`font-bold text-lg w-8 ${isSelected ? 'text-black' : isSuspended ? 'text-red-400' : 'text-blue-800'}`}>{player.overall}</span>
+                        <div className="text-left">
+                          <div className="flex items-center gap-1.5">
+                            <span className={`font-medium ${isSuspended ? 'line-through' : ''}`}>{player.name}</span>
+                            {isSuspended && (
+                              <span className="text-[9px] bg-red-500/20 text-red-400 px-1 py-0.5 rounded font-bold">SUSPENSO</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-sm opacity-70">{player.position}</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Zap className="w-3.5 h-3.5" style={{ color: selectedReserve?.id === player.id ? 'black' : energyColor }} />
-                          <span className="text-[12px] font-bold" style={{ color: selectedReserve?.id === player.id ? 'black' : energyColor }}>
-                            {energy}%
-                          </span>
-                        </div>
-                      </button>
-                      <button
-                        onClick={() => handleMoveToUnlisted(player)}
-                        className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
-                        title="Mover para Não relacionados"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Zap className="w-3.5 h-3.5" style={{ color: isSelected ? 'black' : energyColor }} />
+                        <span className="text-[12px] font-bold" style={{ color: isSelected ? 'black' : energyColor }}>
+                          {energy}%
+                        </span>
+                      </div>
+                    </button>
                   );
                 })}
                 {reserves.length === 0 && (
@@ -674,33 +667,36 @@ const Game = () => {
                   Selecione um titular no campo para substituir.
                 </p>
               )}
-            </div>
 
-            {/* Não relacionados */}
-            {unlisted.length > 0 && (
-              <div className="bg-zinc-900 rounded-lg p-4 mt-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex-1 h-px bg-zinc-700" />
-                  <h3 className="text-[#c8ff00] text-sm font-bold tracking-wide">NÃO RELACIONADOS</h3>
-                  <div className="flex-1 h-px bg-zinc-700" />
-                </div>
-                <div className="space-y-2">
-                  {unlisted.map((player) => {
-                    const energy = player.energy ?? 100;
-                    const isSuspended = (player.suspensionMatches || 0) > 0;
-                    return (
-                      <div key={player.id} className="flex items-center gap-1">
+              {/* Não relacionados - divider + list */}
+              {unlisted.length > 0 && (
+                <div className="mt-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex-1 h-px bg-zinc-700" />
+                    <span className="text-[#c8ff00] text-[11px] font-bold tracking-wide">NÃO RELACIONADOS</span>
+                    <div className="flex-1 h-px bg-zinc-700" />
+                  </div>
+                  <div className="space-y-2">
+                    {unlisted.map((player) => {
+                      const energy = player.energy ?? 100;
+                      const energyColor = energy >= 80 ? 'hsl(142 70% 50%)' : energy >= 60 ? 'hsl(45 100% 50%)' : 'hsl(0 80% 55%)';
+                      const isSuspended = (player.suspensionMatches || 0) > 0;
+                      const isSelected = selectedReserve?.id === player.id;
+                      return (
                         <button
-                          onClick={() => handleMoveToReserves(player)}
-                          className={`flex-1 flex items-center justify-between p-3 rounded-lg transition-colors ${
-                            isSuspended
+                          key={player.id}
+                          onClick={() => handleReserveClick(player)}
+                          className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                            isSelected
+                              ? "bg-[#c8ff00] text-black"
+                              : isSuspended
                               ? "bg-red-900/20 text-white/40 border border-red-500/30"
                               : "bg-zinc-800/50 text-white/60 hover:bg-zinc-700/60"
                           }`}
                           style={isSuspended ? { opacity: 0.5 } : {}}
                         >
                           <div className="flex items-center gap-3">
-                            <span className={`font-bold text-lg w-8 ${isSuspended ? 'text-red-400/60' : 'text-zinc-500'}`}>{player.overall}</span>
+                            <span className={`font-bold text-lg w-8 ${isSelected ? 'text-black' : isSuspended ? 'text-red-400/60' : 'text-zinc-500'}`}>{player.overall}</span>
                             <div className="text-left">
                               <div className="flex items-center gap-1.5">
                                 <span className={`font-medium ${isSuspended ? 'line-through' : ''}`}>{player.name}</span>
@@ -710,17 +706,24 @@ const Game = () => {
                                   </span>
                                 )}
                               </div>
-                              <span className="text-xs opacity-50">{player.position}</span>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-sm opacity-70">{player.position}</span>
+                              </div>
                             </div>
                           </div>
+                          <div className="flex items-center gap-1">
+                            <Zap className="w-3.5 h-3.5" style={{ color: isSelected ? 'black' : energyColor }} />
+                            <span className="text-[12px] font-bold" style={{ color: isSelected ? 'black' : energyColor }}>
+                              {energy}%
+                            </span>
+                          </div>
                         </button>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-                <p className="text-[10px] text-zinc-500 mt-2 text-center">Toque para mover para reservas</p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
