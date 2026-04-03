@@ -600,10 +600,7 @@ const Game = () => {
             />
 
             <div className="bg-zinc-900 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-white text-xl font-bold">Reservas</h3>
-                <span className="text-xs text-zinc-400 font-medium">{reserves.length}/10</span>
-              </div>
+              <h3 className="text-white text-xl font-bold mb-3">Reservas</h3>
               <p className="text-xs text-zinc-400 mb-3">Clique para selecionar e trocar com um titular.</p>
               <div className="space-y-2">
                 {reserves.map((player) => {
