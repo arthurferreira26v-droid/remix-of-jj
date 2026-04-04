@@ -66,7 +66,14 @@ export const getTeamRosterPlayers = (teamName: string): Player[] => {
   }
 
   try {
-    return (JSON.parse(raw) as Player[]).map(normalizePlayer);
+    const players = (JSON.parse(raw) as Player[]).map(normalizePlayer);
+    // Enforce max 10 reserves on load
+    const nonStarters = players.filter(p => !p.isStarter);
+    const listedCount = nonStarters.filter(p => p.isListed !== false).length;
+    if (listedCount > 10) {
+      return enforceReserveLimit(players);
+    }
+    return players;
   } catch {
     const fallbackPlayers = getFallbackPlayers(teamName);
     saveTeamRosterPlayers(teamName, fallbackPlayers);
