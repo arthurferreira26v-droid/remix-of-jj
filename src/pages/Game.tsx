@@ -108,6 +108,7 @@ const Game = () => {
               return {
                 ...adminP,
                 isStarter: existing.isStarter,
+                isListed: existing.isListed,
                 energy: existing.energy,
                 matchEnergy: existing.matchEnergy,
                 consecutiveMatches: existing.consecutiveMatches,
