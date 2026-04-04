@@ -35,6 +35,15 @@ const saveInitialStarterOrder = (teamName: string, players: Player[]) => {
   }
 };
 
+const enforceReserveLimit = (players: Player[]): Player[] => {
+  const starters = players.filter(p => p.isStarter);
+  const nonStarters = players.filter(p => !p.isStarter);
+  // First 10 non-starters are listed (reserves), rest are unlisted
+  const listed = nonStarters.slice(0, 10).map(p => ({ ...p, isListed: true }));
+  const unlisted = nonStarters.slice(10).map(p => ({ ...p, isListed: false }));
+  return [...starters, ...listed, ...unlisted];
+};
+
 const getFallbackPlayers = (teamName: string): Player[] => {
   const { storageTeamName, teamId } = resolveTeamName(teamName);
   const adminPlayers = getAdminPlayersSync();
@@ -44,7 +53,7 @@ const getFallbackPlayers = (teamName: string): Player[] => {
     adminPlayers[teamName] ??
     generateTeamPlayers(storageTeamName);
 
-  return sourcePlayers.map(normalizePlayer);
+  return enforceReserveLimit(sourcePlayers.map(normalizePlayer));
 };
 
 export const getTeamRosterPlayers = (teamName: string): Player[] => {
@@ -57,7 +66,16 @@ export const getTeamRosterPlayers = (teamName: string): Player[] => {
   }
 
   try {
-    return (JSON.parse(raw) as Player[]).map(normalizePlayer);
+    const players = (JSON.parse(raw) as Player[]).map(normalizePlayer);
+    // Enforce max 10 reserves on load
+    const nonStarters = players.filter(p => !p.isStarter);
+    const listedCount = nonStarters.filter(p => p.isListed !== false).length;
+    if (listedCount > 10) {
+      const enforced = enforceReserveLimit(players);
+      saveTeamRosterPlayers(teamName, enforced);
+      return enforced;
+    }
+    return players;
   } catch {
     const fallbackPlayers = getFallbackPlayers(teamName);
     saveTeamRosterPlayers(teamName, fallbackPlayers);
