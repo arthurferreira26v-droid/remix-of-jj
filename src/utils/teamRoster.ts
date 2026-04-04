@@ -71,7 +71,9 @@ export const getTeamRosterPlayers = (teamName: string): Player[] => {
     const nonStarters = players.filter(p => !p.isStarter);
     const listedCount = nonStarters.filter(p => p.isListed !== false).length;
     if (listedCount > 10) {
-      return enforceReserveLimit(players);
+      const enforced = enforceReserveLimit(players);
+      saveTeamRosterPlayers(teamName, enforced);
+      return enforced;
     }
     return players;
   } catch {
