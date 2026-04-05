@@ -16,7 +16,7 @@ import {
   generateTeamPlayers,
   type Player,
 } from "@/data/players";
-import { Loader2, Zap, ShoppingCart, ArrowDown, ArrowUp } from "lucide-react";
+import { Loader2, Zap, ShoppingCart } from "lucide-react";
 import { useChampionship } from "@/hooks/useChampionship";
 import { useLibertadores } from "@/hooks/useLibertadores";
 import { useTeamForm } from "@/hooks/useTeamForm";
@@ -26,7 +26,7 @@ import { getLocalStandings, deleteLocalChampionship, getLocalBudget } from "@/ut
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
-import { getTeamRosterPlayers, removePlayerFromTeamRoster, saveTeamRosterPlayers } from "@/utils/teamRoster";
+import { getTeamRosterPlayers, removePlayerFromTeamRoster, saveTeamRosterPlayers, adjustSquadBalance } from "@/utils/teamRoster";
 import { sortPlayersByReserveOrder } from "@/utils/playerOrder";
 import { toast } from "sonner";
 import { useSwipePages } from "@/hooks/useSwipePages";
@@ -151,8 +151,9 @@ const Game = () => {
 
   // Atualizar jogadores (NÃO salva automaticamente - apenas via save explícito)
   const updatePlayers = (updatedPlayers: Player[]) => {
-    setPlayers(updatedPlayers);
-    saveTeamRosterPlayers(teamName, updatedPlayers);
+    const balanced = adjustSquadBalance(updatedPlayers);
+    setPlayers(balanced);
+    saveTeamRosterPlayers(teamName, balanced);
   };
 
   // Find the selected team
@@ -632,10 +633,10 @@ const Game = () => {
                       const isSuspended = (player.suspensionMatches || 0) > 0;
                       const isSelected = selectedReserve?.id === player.id;
                       return (
-                        <div key={player.id} className="flex items-center gap-1.5">
-                          <button
+                        <button
+                            key={player.id}
                             onClick={() => handleReserveClick(player)}
-                            className={`flex-1 flex items-center justify-between p-3 rounded-lg transition-colors ${
+                            className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
                               isSelected
                                 ? "bg-[#c8ff00] text-black"
                                 : isSuspended
@@ -661,25 +662,6 @@ const Game = () => {
                               <span className="text-[12px] font-bold" style={{ color: isSelected ? 'black' : energyColor }}>{energy}%</span>
                             </div>
                           </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (reserves.length <= 7) {
-                                toast.error("Mínimo de 7 reservas!");
-                                return;
-                              }
-                              const updatedPlayers = players.map((p) =>
-                                p.id === player.id ? { ...p, isListed: false } : p
-                              );
-                              updatePlayers(updatedPlayers);
-                              toast.success(`${player.name} movido para Não Relacionados`);
-                            }}
-                            className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-red-400 transition-colors shrink-0"
-                            title="Mover para Não Relacionados"
-                          >
-                            <ArrowDown className="w-4 h-4" />
-                          </button>
-                        </div>
                       );
                     })}
                     {reserves.length === 0 && (
@@ -696,7 +678,7 @@ const Game = () => {
 
               {rosterTab === 'unlisted' && (
                 <>
-                  <p className="text-xs text-zinc-400 mb-3">Jogadores fora da lista de relacionados para a partida.</p>
+                  <p className="text-xs text-zinc-400 mb-3">Clique para selecionar e trocar com reserva ou titular.</p>
                   <div className="space-y-2">
                     {unlisted.map((player) => {
                       const energy = player.energy ?? 100;
@@ -704,10 +686,10 @@ const Game = () => {
                       const isSuspended = (player.suspensionMatches || 0) > 0;
                       const isSelected = selectedReserve?.id === player.id;
                       return (
-                        <div key={player.id} className="flex items-center gap-1.5">
-                          <button
+                        <button
+                            key={player.id}
                             onClick={() => handleReserveClick(player)}
-                            className={`flex-1 flex items-center justify-between p-3 rounded-lg transition-colors ${
+                            className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
                               isSelected
                                 ? "bg-[#c8ff00] text-black"
                                 : isSuspended
@@ -733,29 +715,6 @@ const Game = () => {
                               <span className="text-[12px] font-bold" style={{ color: isSelected ? 'black' : energyColor }}>{energy}%</span>
                             </div>
                           </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (reserves.length >= 10) {
-                                toast.error("Máximo de 10 reservas!");
-                                return;
-                              }
-                              if ((player.suspensionMatches || 0) > 0) {
-                                toast.error("Jogador suspenso! Não pode ir para Reservas.");
-                                return;
-                              }
-                              const updatedPlayers = players.map((p) =>
-                                p.id === player.id ? { ...p, isListed: true } : p
-                              );
-                              updatePlayers(updatedPlayers);
-                              toast.success(`${player.name} movido para Reservas`);
-                            }}
-                            className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-[#c8ff00] transition-colors shrink-0"
-                            title="Mover para Reservas"
-                          >
-                            <ArrowUp className="w-4 h-4" />
-                          </button>
-                        </div>
                       );
                     })}
                     {unlisted.length === 0 && (
