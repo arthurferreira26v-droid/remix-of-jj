@@ -151,8 +151,9 @@ const Game = () => {
 
   // Atualizar jogadores (NÃO salva automaticamente - apenas via save explícito)
   const updatePlayers = (updatedPlayers: Player[]) => {
-    setPlayers(updatedPlayers);
-    saveTeamRosterPlayers(teamName, updatedPlayers);
+    const balanced = adjustSquadBalance(updatedPlayers);
+    setPlayers(balanced);
+    saveTeamRosterPlayers(teamName, balanced);
   };
 
   // Find the selected team
