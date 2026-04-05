@@ -686,10 +686,10 @@ const Game = () => {
                       const isSuspended = (player.suspensionMatches || 0) > 0;
                       const isSelected = selectedReserve?.id === player.id;
                       return (
-                        <div key={player.id} className="flex items-center gap-1.5">
-                          <button
+                        <button
+                            key={player.id}
                             onClick={() => handleReserveClick(player)}
-                            className={`flex-1 flex items-center justify-between p-3 rounded-lg transition-colors ${
+                            className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
                               isSelected
                                 ? "bg-[#c8ff00] text-black"
                                 : isSuspended
@@ -715,29 +715,6 @@ const Game = () => {
                               <span className="text-[12px] font-bold" style={{ color: isSelected ? 'black' : energyColor }}>{energy}%</span>
                             </div>
                           </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (reserves.length >= 10) {
-                                toast.error("Máximo de 10 reservas!");
-                                return;
-                              }
-                              if ((player.suspensionMatches || 0) > 0) {
-                                toast.error("Jogador suspenso! Não pode ir para Reservas.");
-                                return;
-                              }
-                              const updatedPlayers = players.map((p) =>
-                                p.id === player.id ? { ...p, isListed: true } : p
-                              );
-                              updatePlayers(updatedPlayers);
-                              toast.success(`${player.name} movido para Reservas`);
-                            }}
-                            className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-[#c8ff00] transition-colors shrink-0"
-                            title="Mover para Reservas"
-                          >
-                            <ArrowUp className="w-4 h-4" />
-                          </button>
-                        </div>
                       );
                     })}
                     {unlisted.length === 0 && (
