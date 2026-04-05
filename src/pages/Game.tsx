@@ -39,9 +39,45 @@ const Game = () => {
 
   useEffect(() => { document.title = `${teamName} - Painel | Gerenciador`; }, [teamName]);
 
-  const [showTransferMarket, setShowTransferMarket] = useState(false);
-  const [showReceivedOffers, setShowReceivedOffers] = useState(false);
-  const [showFinances, setShowFinances] = useState(false);
+  const [showTransferMarket, setShowTransferMarketRaw] = useState(false);
+  const [showReceivedOffers, setShowReceivedOffersRaw] = useState(false);
+  const [showFinances, setShowFinancesRaw] = useState(false);
+
+  // Wrap overlay setters to push/pop history state for Android back button
+  const openOverlay = useCallback((setter: (v: boolean) => void) => {
+    window.history.pushState({ overlay: true }, '');
+    setter(true);
+  }, []);
+
+  const closeAllOverlays = useCallback(() => {
+    setShowTransferMarketRaw(false);
+    setShowReceivedOffersRaw(false);
+    setShowFinancesRaw(false);
+  }, []);
+
+  const setShowTransferMarket = useCallback((v: boolean) => {
+    if (v) openOverlay(setShowTransferMarketRaw);
+    else { setShowTransferMarketRaw(false); }
+  }, [openOverlay]);
+
+  const setShowReceivedOffers = useCallback((v: boolean) => {
+    if (v) openOverlay(setShowReceivedOffersRaw);
+    else { setShowReceivedOffersRaw(false); }
+  }, [openOverlay]);
+
+  const setShowFinances = useCallback((v: boolean) => {
+    if (v) openOverlay(setShowFinancesRaw);
+    else { setShowFinancesRaw(false); }
+  }, [openOverlay]);
+
+  // Handle Android back button (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      closeAllOverlays();
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [closeAllOverlays]);
   const [offersCount, setOffersCount] = useState(0);
   const [adminSquadReady, setAdminSquadReady] = useState(false);
 
