@@ -26,7 +26,7 @@ import { getLocalStandings, deleteLocalChampionship, getLocalBudget } from "@/ut
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
-import { getTeamRosterPlayers, removePlayerFromTeamRoster, saveTeamRosterPlayers } from "@/utils/teamRoster";
+import { getTeamRosterPlayers, removePlayerFromTeamRoster, saveTeamRosterPlayers, adjustSquadBalance } from "@/utils/teamRoster";
 import { sortPlayersByReserveOrder } from "@/utils/playerOrder";
 import { toast } from "sonner";
 import { useSwipePages } from "@/hooks/useSwipePages";

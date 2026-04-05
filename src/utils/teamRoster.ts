@@ -184,6 +184,59 @@ export const removePlayerFromTeamRoster = (teamName: string, playerId: string) =
   };
 };
 
+/**
+ * Auto-balance squad: enforce reserve limits based on total squad size.
+ * - If total >= 21: reserves must be exactly 10
+ * - If total < 21: reserves = max(7, total - 11), capped at 10
+ * Suspended players are forced to unlisted.
+ */
+export const adjustSquadBalance = (players: Player[]): Player[] => {
+  const starters = players.filter(p => p.isStarter);
+  const nonStarters = players.filter(p => !p.isStarter);
+  const total = players.length;
+
+  // Calculate target reserve count
+  let targetReserves: number;
+  if (total >= 21) {
+    targetReserves = 10;
+  } else {
+    targetReserves = Math.max(7, Math.min(10, total - 11));
+  }
+
+  // Separate suspended from available
+  const suspended = nonStarters.filter(p => (p.suspensionMatches || 0) > 0);
+  const available = nonStarters.filter(p => (p.suspensionMatches || 0) === 0);
+
+  // Currently listed available players
+  const currentlyListed = available.filter(p => p.isListed !== false);
+  const currentlyUnlisted = available.filter(p => p.isListed === false);
+
+  let listed: Player[];
+  let unlistedFinal: Player[];
+
+  if (currentlyListed.length === targetReserves) {
+    listed = currentlyListed;
+    unlistedFinal = currentlyUnlisted;
+  } else if (currentlyListed.length > targetReserves) {
+    // Too many reserves — move excess to unlisted (from the end)
+    listed = currentlyListed.slice(0, targetReserves);
+    unlistedFinal = [...currentlyListed.slice(targetReserves), ...currentlyUnlisted];
+  } else {
+    // Not enough reserves — pull from unlisted
+    const needed = targetReserves - currentlyListed.length;
+    const promoted = currentlyUnlisted.slice(0, needed);
+    listed = [...currentlyListed, ...promoted];
+    unlistedFinal = currentlyUnlisted.slice(needed);
+  }
+
+  return [
+    ...starters,
+    ...listed.map(p => ({ ...p, isListed: true })),
+    ...unlistedFinal.map(p => ({ ...p, isListed: false })),
+    ...suspended.map(p => ({ ...p, isListed: false })),
+  ];
+};
+
 export const addPlayerToTeamRoster = (teamName: string, player: Player) => {
   removePlayerFromOtherRosters(player.id, teamName);
 
