@@ -678,7 +678,7 @@ const Game = () => {
 
               {rosterTab === 'unlisted' && (
                 <>
-                  <p className="text-xs text-zinc-400 mb-3">Jogadores fora da lista de relacionados para a partida.</p>
+                  <p className="text-xs text-zinc-400 mb-3">Clique para selecionar e trocar com reserva ou titular.</p>
                   <div className="space-y-2">
                     {unlisted.map((player) => {
                       const energy = player.energy ?? 100;
