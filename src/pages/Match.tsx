@@ -853,10 +853,10 @@ const Match = () => {
           </div>
 
           {/* Score */}
-          <div className="flex items-center gap-6">
-            <span className="text-6xl font-bold text-white">{homeScore}</span>
-            <span className="text-4xl font-bold text-muted-foreground">-</span>
-            <span className="text-6xl font-bold text-white">{awayScore}</span>
+          <div className="flex items-center gap-3">
+            <span className="text-[32px] font-bold text-white leading-none">{homeScore}</span>
+            <span className="text-xl font-bold text-muted-foreground leading-none">-</span>
+            <span className="text-[32px] font-bold text-white leading-none">{awayScore}</span>
           </div>
 
           {/* Away Team (User) - opens full squad management */}
