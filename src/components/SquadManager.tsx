@@ -23,6 +23,7 @@ interface SquadManagerProps {
   budget?: number;
   onOfferSent?: () => void;
   onBudgetChanged?: (newBudget: number) => void;
+  marketOpen?: boolean;
 }
 
 const POSITION_ORDER = [...RESERVE_POSITION_ORDER] as const;
@@ -281,6 +282,7 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer, us
             budget={budget ?? 0}
             onOfferSent={onOfferSent}
             onBudgetChanged={onBudgetChanged}
+            marketOpen={marketOpen}
           />
         )}
 
