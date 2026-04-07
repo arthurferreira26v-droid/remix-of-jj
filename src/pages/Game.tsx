@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { ExitConfirmModal } from "@/components/ExitConfirmModal";
+import { AbandonDetector } from "@/components/AbandonDetector";
 import { GameMenu } from "@/components/GameMenu";
 import { MatchCard } from "@/components/MatchCard";
 import { TacticsManager } from "@/components/TacticsManager";
@@ -33,6 +35,7 @@ import { useSwipePages } from "@/hooks/useSwipePages";
 
 const Game = () => {
   const [rosterTab, setRosterTab] = useState<'reserves' | 'unlisted'>('reserves');
+  const [showExitModal, setShowExitModal] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const teamName = searchParams.get("time") || "Seu Time";
@@ -72,12 +75,21 @@ const Game = () => {
 
   // Handle Android back button (popstate)
   useEffect(() => {
-    const handlePopState = () => {
-      closeAllOverlays();
+    // Push initial state so we can intercept back
+    window.history.pushState({ game: true }, '');
+    const handlePopState = (e: PopStateEvent) => {
+      const anyOverlayOpen = showTransferMarket || showReceivedOffers || showFinances;
+      if (anyOverlayOpen) {
+        closeAllOverlays();
+      } else {
+        // No overlay open → show exit confirmation
+        window.history.pushState({ game: true }, '');
+        setShowExitModal(true);
+      }
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [closeAllOverlays]);
+  }, [closeAllOverlays, showTransferMarket, showReceivedOffers, showFinances]);
   const [offersCount, setOffersCount] = useState(0);
   const [adminSquadReady, setAdminSquadReady] = useState(false);
 
@@ -821,6 +833,17 @@ const Game = () => {
           hasActiveInvestment={hasActiveInvestment}
         />
       )}
+
+      <AbandonDetector teamName={teamName} onDismiss={() => window.location.reload()} />
+
+      <ExitConfirmModal
+        open={showExitModal}
+        onCancel={() => setShowExitModal(false)}
+        onConfirm={() => {
+          setShowExitModal(false);
+          navigate("/");
+        }}
+      />
     </div>
   );
 };
