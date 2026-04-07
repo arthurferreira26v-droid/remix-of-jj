@@ -833,6 +833,17 @@ const Game = () => {
           hasActiveInvestment={hasActiveInvestment}
         />
       )}
+
+      <AbandonDetector teamName={teamName} onDismiss={() => window.location.reload()} />
+
+      <ExitConfirmModal
+        open={showExitModal}
+        onCancel={() => setShowExitModal(false)}
+        onConfirm={() => {
+          setShowExitModal(false);
+          navigate("/");
+        }}
+      />
     </div>
   );
 };
