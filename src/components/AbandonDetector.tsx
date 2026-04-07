@@ -20,21 +20,20 @@ export const AbandonDetector = ({ teamName, onDismiss }: { teamName: string; onD
     const wasInMatch = localStorage.getItem("inMatch");
     const abandonedTeam = localStorage.getItem("inMatch_team");
     if (wasInMatch === "true" && abandonedTeam === teamName) {
-      // Register defeat
-      try {
-        const { getNextUserMatch, saveMatchResultLocal, flushPendingWrites } = require("@/utils/localChampionship");
-        const nextMatch = getNextUserMatch(teamName);
-        if (nextMatch) {
-          const userIsHome = nextMatch.home_team_name === teamName;
-          // Derrota: 0x3
-          const dbHome = userIsHome ? 0 : 3;
-          const dbAway = userIsHome ? 3 : 0;
-          saveMatchResultLocal(teamName, nextMatch.id, dbHome, dbAway);
-          flushPendingWrites();
+      import("@/utils/localChampionship").then(({ getNextUserMatch, saveMatchResultLocal, flushPendingWrites }) => {
+        try {
+          const nextMatch = getNextUserMatch(teamName);
+          if (nextMatch) {
+            const userIsHome = nextMatch.home_team_name === teamName;
+            const dbHome = userIsHome ? 0 : 3;
+            const dbAway = userIsHome ? 3 : 0;
+            saveMatchResultLocal(teamName, nextMatch.id, dbHome, dbAway);
+            flushPendingWrites();
+          }
+        } catch {
+          // silent
         }
-      } catch {
-        // silent
-      }
+      });
       localStorage.removeItem("inMatch");
       localStorage.removeItem("inMatch_team");
       setShow(true);
