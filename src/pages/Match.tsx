@@ -313,6 +313,10 @@ const Match = () => {
 
   const saveMatchResult = async () => {
     if (isSavingMatch) return;
+
+    // Clear inMatch flag — match ended normally
+    localStorage.removeItem("inMatch");
+    localStorage.removeItem("inMatch_team");
     
     // Quick match: just navigate back, no DB save
     if (isQuickMatch) {
