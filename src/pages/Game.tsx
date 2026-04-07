@@ -75,12 +75,21 @@ const Game = () => {
 
   // Handle Android back button (popstate)
   useEffect(() => {
-    const handlePopState = () => {
-      closeAllOverlays();
+    // Push initial state so we can intercept back
+    window.history.pushState({ game: true }, '');
+    const handlePopState = (e: PopStateEvent) => {
+      const anyOverlayOpen = showTransferMarket || showReceivedOffers || showFinances;
+      if (anyOverlayOpen) {
+        closeAllOverlays();
+      } else {
+        // No overlay open → show exit confirmation
+        window.history.pushState({ game: true }, '');
+        setShowExitModal(true);
+      }
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [closeAllOverlays]);
+  }, [closeAllOverlays, showTransferMarket, showReceivedOffers, showFinances]);
   const [offersCount, setOffersCount] = useState(0);
   const [adminSquadReady, setAdminSquadReady] = useState(false);
 
