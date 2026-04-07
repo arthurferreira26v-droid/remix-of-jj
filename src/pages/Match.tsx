@@ -47,7 +47,36 @@ const Match = () => {
   const channelRef = useRef<any>(null);
 
   useEffect(() => { document.title = `${teamName} vs ${opponentName} | Partida`; }, [teamName, opponentName]);
-  
+
+  // Set inMatch flag for abandon detection
+  useEffect(() => {
+    localStorage.setItem("inMatch", "true");
+    localStorage.setItem("inMatch_team", teamName);
+    return () => {
+      // Only clear if match ended normally (minute >= 90)
+    };
+  }, [teamName]);
+
+  // Block back button during match
+  useEffect(() => {
+    window.history.pushState({ match: true }, '');
+    const handlePopState = () => {
+      window.history.pushState({ match: true }, '');
+      toast("Você está em uma partida em andamento", { duration: 2000 });
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Warn on page reload/close
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
 
   const [minute, setMinute] = useState(1);
   const [homeScore, setHomeScore] = useState(0);
