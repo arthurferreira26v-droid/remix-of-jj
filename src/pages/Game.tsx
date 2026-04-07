@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { ExitConfirmModal } from "@/components/ExitConfirmModal";
+import { AbandonDetector } from "@/components/AbandonDetector";
 import { GameMenu } from "@/components/GameMenu";
 import { MatchCard } from "@/components/MatchCard";
 import { TacticsManager } from "@/components/TacticsManager";
