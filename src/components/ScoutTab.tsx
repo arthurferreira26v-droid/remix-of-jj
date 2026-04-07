@@ -14,9 +14,10 @@ interface ScoutTabProps {
   budget: number;
   onOfferSent?: () => void;
   onBudgetChanged?: (newBudget: number) => void;
+  marketOpen?: boolean;
 }
 
-export const ScoutTab = ({ userTeamName, budget, onOfferSent, onBudgetChanged }: ScoutTabProps) => {
+export const ScoutTab = ({ userTeamName, budget, onOfferSent, onBudgetChanged, marketOpen = true }: ScoutTabProps) => {
   const [watchedPlayers, setWatchedPlayers] = useState<{ player: Player; ownerTeam: string }[]>([]);
   const [offerModal, setOfferModal] = useState<{ player: Player; ownerTeam: string } | null>(null);
   const [offerValue, setOfferValue] = useState("");
@@ -147,10 +148,19 @@ export const ScoutTab = ({ userTeamName, budget, onOfferSent, onBudgetChanged }:
                     ) : (
                       <button
                         onClick={() => {
+                          if (!marketOpen) {
+                            toast("O mercado está fechado");
+                            return;
+                          }
                           setOfferModal({ player, ownerTeam });
                           setOfferValue((price / 1000000).toFixed(1));
                         }}
-                        className="px-4 py-2 rounded-lg font-bold text-sm bg-[#c8ff00] text-black hover:bg-[#b8ef00] transition-colors flex items-center gap-1.5"
+                        disabled={!marketOpen}
+                        className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-1.5 transition-colors ${
+                          marketOpen
+                            ? "bg-[#c8ff00] text-black hover:bg-[#b8ef00]"
+                            : "bg-zinc-700 text-zinc-500 cursor-not-allowed opacity-50"
+                        }`}
                       >
                         <Send className="w-3.5 h-3.5" />
                         Ofertar

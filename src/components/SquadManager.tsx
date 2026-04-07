@@ -23,6 +23,7 @@ interface SquadManagerProps {
   budget?: number;
   onOfferSent?: () => void;
   onBudgetChanged?: (newBudget: number) => void;
+  marketOpen?: boolean;
 }
 
 const POSITION_ORDER = [...RESERVE_POSITION_ORDER] as const;
@@ -66,7 +67,7 @@ const ensureStarterCount = (players: Player[], requiredCount: number): Player[] 
   return updated;
 };
 
-export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer, userTeamName, budget, onOfferSent, onBudgetChanged }: SquadManagerProps) => {
+export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer, userTeamName, budget, onOfferSent, onBudgetChanged, marketOpen }: SquadManagerProps) => {
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
   const [selectedPlayStyle, setSelectedPlayStyle] = useState("counter");
   const [openDropdown, setOpenDropdown] = useState<"style" | "formation" | null>(null);
@@ -281,6 +282,7 @@ export const SquadManager = ({ players, onClose, onSquadChange, onSellPlayer, us
             budget={budget ?? 0}
             onOfferSent={onOfferSent}
             onBudgetChanged={onBudgetChanged}
+            marketOpen={marketOpen}
           />
         )}
 

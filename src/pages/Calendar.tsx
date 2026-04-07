@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronLeft, Loader2, AlertTriangle, RotateCcw } from "lucide-react";
+import { ChevronLeft, Loader2, AlertTriangle, RotateCcw, Clock, XCircle } from "lucide-react";
+import { isMarketOpen } from "@/utils/marketWindow";
 import { teams } from "@/data/teams";
 import { toast } from "sonner";
 import { getLocalMatches, getLocalChampionship, deleteLocalChampionship } from "@/utils/localChampionship";
@@ -161,8 +162,13 @@ const Calendar = () => {
                   className="flex items-center justify-between rounded-lg bg-card px-4 py-3 border border-border/60"
                 >
                   <div className="flex flex-col">
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1.5">
                       Brasileirão • {match.round}ª rodada • {homeAwayLabel}
+                      {isMarketOpen(match.round) ? (
+                        <Clock className="w-3 h-3 text-white/70" />
+                      ) : (
+                        <XCircle className="w-3 h-3 text-red-500" />
+                      )}
                     </span>
                     <span className="text-sm font-medium text-white">
                       {teamName} vs {match.opponentName}

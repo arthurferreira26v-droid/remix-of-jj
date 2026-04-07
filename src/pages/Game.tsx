@@ -26,6 +26,7 @@ import { useTeamBudget } from "@/hooks/useTeamBudget";
 import { getTeamLogo } from "@/utils/teamLogos";
 import { getLocalStandings, deleteLocalChampionship, getLocalBudget } from "@/utils/localChampionship";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
+import { isMarketOpen } from "@/utils/marketWindow";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { getTeamRosterPlayers, removePlayerFromTeamRoster, saveTeamRosterPlayers, adjustSquadBalance } from "@/utils/teamRoster";
@@ -786,6 +787,7 @@ const Game = () => {
             budget={budget}
             onOfferSent={refreshOffersCount}
             onBudgetChanged={(newBudget) => setBudget(newBudget)}
+            marketOpen={isMarketOpen(nextMatch?.round ?? 1)}
           />
         </div>
       </div>
@@ -809,6 +811,7 @@ const Game = () => {
           onOpenOffers={() => setShowReceivedOffers(true)}
           onOfferSent={refreshOffersCount}
           onBudgetChanged={(newBudget) => setBudget(newBudget)}
+          marketOpen={isMarketOpen(nextMatch?.round ?? 1)}
         />
       )}
 
