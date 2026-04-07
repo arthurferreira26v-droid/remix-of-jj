@@ -787,6 +787,7 @@ const Game = () => {
             budget={budget}
             onOfferSent={refreshOffersCount}
             onBudgetChanged={(newBudget) => setBudget(newBudget)}
+            marketOpen={isMarketOpen(nextMatch?.round ?? 1)}
           />
         </div>
       </div>
