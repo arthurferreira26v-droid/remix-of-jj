@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Search, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Minus, Loader2, Send, Inbox, Binoculars } from "lucide-react";
+import { X, Search, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Minus, Loader2, Send, Inbox, Binoculars, XCircle } from "lucide-react";
 import { Player } from "@/data/players";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { teams } from "@/data/teams";
@@ -16,9 +16,10 @@ interface TransferMarketProps {
   onOpenOffers?: () => void;
   onOfferSent?: () => void;
   onBudgetChanged?: (newBudget: number) => void;
+  marketOpen?: boolean;
 }
 
-export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, onOfferSent, onBudgetChanged }: TransferMarketProps) => {
+export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, onOfferSent, onBudgetChanged, marketOpen = true }: TransferMarketProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterPosition, setFilterPosition] = useState<string>("ALL");
   const [marketPlayers, setMarketPlayers] = useState<{ player: Player; ownerTeam: string }[]>([]);
@@ -124,6 +125,17 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
 
   return (
     <div className="fixed inset-0 z-50 bg-black/95 overflow-y-auto">
+      {/* Closed market overlay */}
+      {!marketOpen && (
+        <div className="fixed inset-0 z-[55] flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 bg-black/75 backdrop-blur-sm pointer-events-auto" />
+          <div className="relative z-10 text-center px-6 pointer-events-none">
+            <XCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
+            <p className="text-white text-xl font-bold mb-1">O mercado está fechado no momento</p>
+            <p className="text-zinc-400 text-sm">Aguarde a próxima janela de transferências</p>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="sticky top-0 bg-black border-b border-zinc-800 z-10">
         <div className="flex items-center justify-between p-4">
@@ -271,10 +283,19 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
                         ) : (
                           <button
                             onClick={() => {
+                              if (!marketOpen) {
+                                toast("O mercado está fechado");
+                                return;
+                              }
                               setOfferModal({ player, ownerTeam });
                               setOfferValue((price / 1000000).toFixed(1));
                             }}
-                            className="px-4 py-2 rounded-lg font-bold text-sm bg-[#c8ff00] text-black hover:bg-[#b8ef00] transition-colors flex items-center gap-1.5"
+                            disabled={!marketOpen}
+                            className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-1.5 transition-colors ${
+                              marketOpen
+                                ? "bg-[#c8ff00] text-black hover:bg-[#b8ef00]"
+                                : "bg-zinc-700 text-zinc-500 cursor-not-allowed opacity-50"
+                            }`}
                           >
                             <Send className="w-3.5 h-3.5" />
                             Ofertar
