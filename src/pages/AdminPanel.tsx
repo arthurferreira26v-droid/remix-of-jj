@@ -74,6 +74,53 @@ const AdminPanel = () => {
     saveTeamPlayers(teamId, players);
   };
 
+  // SVG do campo (mesmo desenho do FormationField)
+  const buildFieldSvg = (): string => {
+    const w = 300, h = 400;
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">
+  <defs>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#166534"/>
+      <stop offset="100%" stop-color="#14532d"/>
+    </linearGradient>
+  </defs>
+  <rect width="${w}" height="${h}" fill="url(#grass)" rx="8"/>
+  <g stroke="#ffffff" stroke-width="2" fill="none" opacity="0.4">
+    <rect x="2" y="2" width="${w - 4}" height="${h - 4}" rx="6"/>
+    <line x1="0" y1="${h / 2}" x2="${w}" y2="${h / 2}"/>
+    <circle cx="${w / 2}" cy="${h / 2}" r="60"/>
+    <rect x="${w * 0.25}" y="${h * 0.02}" width="${w * 0.5}" height="${h * 0.18}"/>
+    <rect x="${w * 0.35}" y="${h * 0.02}" width="${w * 0.3}" height="${h * 0.1}"/>
+    <rect x="${w * 0.25}" y="${h * 0.8}" width="${w * 0.5}" height="${h * 0.18}"/>
+    <rect x="${w * 0.35}" y="${h * 0.88}" width="${w * 0.3}" height="${h * 0.1}"/>
+  </g>
+  <circle cx="${w / 2}" cy="${h / 2}" r="4" fill="#ffffff" opacity="0.6"/>
+</svg>`;
+  };
+
+  const handleCopyFieldSvg = async () => {
+    try {
+      await navigator.clipboard.writeText(buildFieldSvg());
+      toast.success("SVG do campo copiado para a área de transferência!");
+    } catch {
+      toast.error("Não foi possível copiar. Tente baixar o SVG.");
+    }
+  };
+
+  const handleDownloadFieldSvg = () => {
+    const blob = new Blob([buildFieldSvg()], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "campo.svg";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("SVG baixado!");
+  };
+
   // Add
   const handleAdd = () => {
     if (!selectedTeamId) return;
