@@ -253,6 +253,12 @@ const AdminPanel = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
+                <Button onClick={handleCopyFieldSvg} variant="outline" className="gap-2 border-zinc-700 text-zinc-200 hover:bg-zinc-800">
+                  <Copy size={16} /> Copiar Campo SVG
+                </Button>
+                <Button onClick={handleDownloadFieldSvg} variant="outline" className="gap-2 border-zinc-700 text-zinc-200 hover:bg-zinc-800">
+                  <Download size={16} /> Baixar SVG
+                </Button>
                 <Button onClick={() => {
                   invalidateAdminCache();
                   toast.success("Mudanças aplicadas! Os jogadores serão atualizados ao iniciar um novo jogo.");
