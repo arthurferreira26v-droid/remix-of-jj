@@ -289,7 +289,8 @@ const Game = () => {
     // Process transfers after match
     const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
     processCpuOffers([teamName]);
-    generateCpuOffers([teamName], brazilianTeams);
+    const newOffers = generateCpuOffers([teamName], brazilianTeams);
+    notifyNewOffers(newOffers);
     refreshOffersCount();
   }, [teamName, refreshChampionship, setBudget]);
 
