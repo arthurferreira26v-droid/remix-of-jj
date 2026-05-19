@@ -122,12 +122,9 @@ export const GameMenu = ({
           )}
         </AnimatePresence>
         {!open && offersCount > 0 && (
-          <>
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[11px] font-bold min-w-[22px] h-[22px] px-1 rounded-full flex items-center justify-center shadow-lg border-2 border-black z-10">
-              {offersCount}
-            </span>
-            <span className="absolute -top-1 -right-1 bg-red-500/60 min-w-[22px] h-[22px] rounded-full animate-ping" />
-          </>
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[11px] font-bold min-w-[22px] h-[22px] px-1 rounded-full flex items-center justify-center shadow-lg border-2 border-black z-10">
+            {offersCount}
+          </span>
         )}
       </button>
     </>

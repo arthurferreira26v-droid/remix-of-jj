@@ -94,12 +94,20 @@ const Game = () => {
   const [offersCount, setOffersCount] = useState(0);
   const [adminSquadReady, setAdminSquadReady] = useState(false);
 
+  // Notifica brevemente novas ofertas recebidas
+  const notifyNewOffers = (newOffers: ReturnType<typeof generateCpuOffers>) => {
+    newOffers.forEach((o) => {
+      toast(`${o.playerName} recebeu proposta do ${o.fromTeam}!`, { duration: 3500 });
+    });
+  };
+
   // Process CPU offers + generate active CPU offers on mount
   useEffect(() => {
     if (!adminSquadReady) return;
     const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
     processCpuOffers([teamName]);
-    generateCpuOffers([teamName], brazilianTeams);
+    const newOffers = generateCpuOffers([teamName], brazilianTeams);
+    notifyNewOffers(newOffers);
     setOffersCount(countPendingOffers(teamName));
   }, [teamName, adminSquadReady]);
 
@@ -281,7 +289,8 @@ const Game = () => {
     // Process transfers after match
     const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
     processCpuOffers([teamName]);
-    generateCpuOffers([teamName], brazilianTeams);
+    const newOffers = generateCpuOffers([teamName], brazilianTeams);
+    notifyNewOffers(newOffers);
     refreshOffersCount();
   }, [teamName, refreshChampionship, setBudget]);
 
