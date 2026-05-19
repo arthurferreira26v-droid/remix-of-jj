@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, Users, TrendingUp, Briefcase, Calendar, Trophy, LogOut, X, Inbox } from "lucide-react";
+import { Menu, Users, TrendingUp, Briefcase, Trophy, LogOut, X, Inbox } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -23,7 +23,7 @@ const menuItemsData = (
   { icon: Users, label: "Elenco", onClick: handlers.onManageSquad },
   { icon: TrendingUp, label: "Transferências", onClick: handlers.onTransferMarket },
   { icon: Inbox, label: "Ofertas", onClick: handlers.onReceivedOffers, badge: offersCount },
-  { icon: Calendar, label: "Calendário", onClick: () => navigate(`/calendario?time=${teamName}`) },
+  
   { icon: Briefcase, label: "Finanças", onClick: handlers.onFinances },
   { icon: LogOut, label: "Sair", onClick: handlers.onExit, isDestructive: true },
 ];

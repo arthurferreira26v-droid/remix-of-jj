@@ -4,6 +4,7 @@ import { ExitConfirmModal } from "@/components/ExitConfirmModal";
 import { AbandonDetector } from "@/components/AbandonDetector";
 import { GameMenu } from "@/components/GameMenu";
 import { MatchCard } from "@/components/MatchCard";
+import { RoundsCalendar } from "@/components/RoundsCalendar";
 import { TacticsManager } from "@/components/TacticsManager";
 import { SquadManager } from "@/components/SquadManager";
 import { TeamBudget } from "@/components/TeamBudget";
@@ -628,24 +629,29 @@ const Game = () => {
 
           {/* Match Section - Brasileirão */}
           {!showLibMatch && nextMatch && (
-            <div className="container mx-auto px-4 py-8">
-              <h3 className="text-sm font-bold text-white/60 mb-3">
-                Sábado • Brasileirão - {nextMatch.round}ª Rodada
-              </h3>
-              <MatchCard
-                userTeam={teamName}
-                userLogo={getTeamLogo(teamName, selectedTeam?.logo || "")}
-                userPosition={userPositionStr}
-                opponentTeam={opponentName}
-                opponentLogo={getTeamLogo(opponentName, opponentLogo)}
-                opponentPosition={opponentPositionStr}
-                round={`${nextMatch.round}ª Rodada`}
-                userForm={userForm}
-                opponentForm={opponentForm}
-                isHome={isHome}
-                onSimulated={handleSimulated}
-              />
-            </div>
+            <>
+              <div className="pt-4">
+                <RoundsCalendar teamName={teamName} currentRound={nextMatch.round} />
+              </div>
+              <div className="container mx-auto px-4 pt-8 pb-8">
+                <h3 className="text-sm font-bold text-white/60 mb-3">
+                  Sábado • Brasileirão - {nextMatch.round}ª Rodada
+                </h3>
+                <MatchCard
+                  userTeam={teamName}
+                  userLogo={getTeamLogo(teamName, selectedTeam?.logo || "")}
+                  userPosition={userPositionStr}
+                  opponentTeam={opponentName}
+                  opponentLogo={getTeamLogo(opponentName, opponentLogo)}
+                  opponentPosition={opponentPositionStr}
+                  round={`${nextMatch.round}ª Rodada`}
+                  userForm={userForm}
+                  opponentForm={opponentForm}
+                  isHome={isHome}
+                  onSimulated={handleSimulated}
+                />
+              </div>
+            </>
           )}
 
           {/* Tactics Manager Section */}
