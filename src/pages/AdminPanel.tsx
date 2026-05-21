@@ -620,15 +620,15 @@ const AdminPanel = () => {
             </TabsContent>
 
             <TabsContent value="icons" className="flex-1 overflow-y-auto mt-4">
-              <p className="text-zinc-500 text-xs mb-3">Clique em qualquer ícone para copiar o SVG automaticamente.</p>
-              <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
-                {[
+              {(() => {
+                const iconList = [
                   { name: "ShoppingCart", Icon: ShoppingCart },
                   { name: "Inbox", Icon: Inbox },
                   { name: "X", Icon: X },
                   { name: "Search", Icon: Search },
                   { name: "DollarSign", Icon: DollarSign },
                   { name: "Binoculars", Icon: Binoculars },
+                  { name: "Binoculars (Selecionado)", Icon: Binoculars, color: "#c8ff00" },
                   { name: "Send", Icon: Send },
                   { name: "TrendingUp", Icon: TrendingUp },
                   { name: "TrendingDown", Icon: TrendingDown },
@@ -681,28 +681,160 @@ const AdminPanel = () => {
                   { name: "LogOut", Icon: LogOut },
                   { name: "Download", Icon: Download },
                   { name: "Copy", Icon: Copy },
-                ].map(({ name, Icon }) => (
-                  <button
-                    key={name}
-                    title={name}
-                    onClick={(e) => {
-                      const svg = (e.currentTarget as HTMLButtonElement).querySelector("svg");
-                      if (!svg) return;
-                      const clone = svg.cloneNode(true) as SVGElement;
-                      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-                      const svgString = clone.outerHTML;
-                      navigator.clipboard.writeText(svgString).then(
-                        () => toast.success(`${name} copiado!`),
-                        () => toast.error("Falha ao copiar")
-                      );
-                    }}
-                    className="aspect-square flex flex-col items-center justify-center gap-1 bg-zinc-800 hover:bg-amber-500/20 border border-zinc-700 hover:border-amber-500 rounded-lg p-2 transition-colors group"
-                  >
-                    <Icon size={22} className="text-zinc-200 group-hover:text-amber-400" />
-                    <span className="text-[9px] text-zinc-500 truncate w-full text-center">{name}</span>
-                  </button>
-                ))}
-              </div>
+                ];
+
+                const previewRef = (el: HTMLDivElement | null) => {
+                  // noop, we read at click time
+                };
+
+                const getSelectedSvgString = (): string | null => {
+                  const node = document.getElementById("icon-preview-svg-wrapper");
+                  const svg = node?.querySelector("svg");
+                  if (!svg) return null;
+                  const clone = svg.cloneNode(true) as SVGElement;
+                  clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+                  return clone.outerHTML;
+                };
+
+                const handleCopy = () => {
+                  const s = getSelectedSvgString();
+                  if (!s) return;
+                  navigator.clipboard.writeText(s).then(
+                    () => toast.success(`${selectedIcon?.name} copiado!`),
+                    () => toast.error("Falha ao copiar")
+                  );
+                };
+
+                const handleDownloadSvg = () => {
+                  const s = getSelectedSvgString();
+                  if (!s || !selectedIcon) return;
+                  const blob = new Blob([s], { type: "image/svg+xml" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `${selectedIcon.name}.svg`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                };
+
+                const handleDownloadPng = () => {
+                  const s = getSelectedSvgString();
+                  if (!s || !selectedIcon) return;
+                  const img = new Image();
+                  const svgBlob = new Blob([s], { type: "image/svg+xml;charset=utf-8" });
+                  const url = URL.createObjectURL(svgBlob);
+                  img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    const scale = 4;
+                    canvas.width = iconSize * scale;
+                    canvas.height = iconSize * scale;
+                    const ctx = canvas.getContext("2d");
+                    if (ctx) {
+                      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                      const a = document.createElement("a");
+                      a.href = canvas.toDataURL("image/png");
+                      a.download = `${selectedIcon.name}.png`;
+                      a.click();
+                    }
+                    URL.revokeObjectURL(url);
+                  };
+                  img.src = url;
+                };
+
+                return (
+                  <div className="flex flex-col md:flex-row gap-4">
+                    {/* Grid */}
+                    <div className="flex-1">
+                      <p className="text-zinc-500 text-xs mb-3">Clique em um ícone para visualizar e baixar.</p>
+                      <div className="grid grid-cols-5 sm:grid-cols-7 gap-2">
+                        {iconList.map(({ name, Icon, color }) => {
+                          const isActive = selectedIcon?.name === name;
+                          return (
+                            <button
+                              key={name}
+                              title={name}
+                              onClick={() => {
+                                setSelectedIcon({ name, Icon, color });
+                                setIconColor(color ?? "#E3E3E3");
+                              }}
+                              className={`aspect-square flex flex-col items-center justify-center gap-1 rounded-lg p-2 transition-colors border ${
+                                isActive
+                                  ? "bg-amber-500/20 border-amber-500"
+                                  : "bg-zinc-800 border-zinc-700 hover:bg-zinc-700 hover:border-zinc-500"
+                              }`}
+                            >
+                              <Icon size={22} style={{ color: color ?? "#E3E3E3" }} />
+                              <span className="text-[9px] text-zinc-500 truncate w-full text-center">{name}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Detail panel */}
+                    <div className="md:w-[300px] flex-shrink-0">
+                      {selectedIcon ? (
+                        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sticky top-0">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm font-semibold text-white truncate">{selectedIcon.name}</span>
+                            <button onClick={() => setSelectedIcon(null)} className="text-zinc-500 hover:text-white">
+                              <X size={16} />
+                            </button>
+                          </div>
+
+                          {/* Preview */}
+                          <div id="icon-preview-svg-wrapper" className="aspect-square bg-zinc-900 border border-zinc-700 rounded-xl flex items-center justify-center mb-3 relative">
+                            <selectedIcon.Icon size={iconSize * 3} style={{ color: iconColor }} />
+                            <button onClick={handleCopy} title="Copiar SVG" className="absolute bottom-2 left-2 p-1.5 rounded-md bg-zinc-800 hover:bg-amber-500 hover:text-black text-zinc-300 transition-colors">
+                              <Copy size={14} />
+                            </button>
+                          </div>
+
+                          {/* Size + Color controls */}
+                          <div className="space-y-3 mb-4">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-zinc-400 text-xs">Tamanho</Label>
+                              <div className="flex items-center bg-zinc-800 border border-zinc-700 rounded-full">
+                                <button onClick={() => setIconSize((s) => Math.max(12, s - 2))} className="w-7 h-7 text-white">−</button>
+                                <span className="w-10 text-center text-sm text-white">{iconSize}</span>
+                                <button onClick={() => setIconSize((s) => Math.min(96, s + 2))} className="w-7 h-7 text-white">+</button>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <Label className="text-zinc-400 text-xs">Cor</Label>
+                              <div className="flex items-center bg-zinc-800 border border-zinc-700 rounded-full px-2 py-1 gap-2">
+                                <input
+                                  type="color"
+                                  value={iconColor}
+                                  onChange={(e) => setIconColor(e.target.value)}
+                                  className="w-5 h-5 rounded-full border border-zinc-600 bg-transparent cursor-pointer"
+                                />
+                                <span className="text-xs text-white">{iconColor.toUpperCase()}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Buttons */}
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button onClick={handleDownloadSvg} className="gap-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 rounded-full">
+                              <Download size={14} /> SVG
+                            </Button>
+                            <Button onClick={handleDownloadPng} className="gap-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 rounded-full">
+                              <Download size={14} /> PNG
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-zinc-950 border border-dashed border-zinc-800 rounded-2xl p-6 text-center text-zinc-600 text-xs">
+                          Selecione um ícone para visualizar
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
             </TabsContent>
           </Tabs>
         </DialogContent>
