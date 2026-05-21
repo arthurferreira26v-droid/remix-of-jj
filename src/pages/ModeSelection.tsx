@@ -26,14 +26,6 @@ const modes = [
     cta: "Jogar Agora",
   },
   {
-    id: "campaign2p",
-    label: "Modo Campanha 2P",
-    description: "Modo campanha em dupla",
-    route: "/campanha-2p/jogador1",
-    bg: heroCampaign2p,
-    cta: "Jogar com Amigo",
-  },
-  {
     id: "store",
     label: "Loja",
     description: "Jogadores premium e reforços",

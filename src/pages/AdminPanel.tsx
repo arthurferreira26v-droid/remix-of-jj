@@ -17,7 +17,8 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LogOut, Plus, Pencil, Trash2, Shield, Globe, Search, Loader2, CheckCircle2, Copy, Download } from "lucide-react";
+import { LogOut, Plus, Pencil, Trash2, Shield, Globe, Search, Loader2, CheckCircle2, Copy, Download, ShoppingCart, Inbox, X, DollarSign, Binoculars, Send, TrendingUp, TrendingDown, Trophy, Users, Briefcase, Menu, ChevronsRight, ChevronsLeft, Calendar, Settings, Home, ArrowLeft, ArrowRight, RotateCw, Star, Filter, Eye, EyeOff, Heart, Bell, MessageCircle, Mic, Upload, Share2, MoreHorizontal, Check, AlertCircle, Info, Lock, Unlock, User, UserPlus, UserMinus, Award, Target, Zap, Flag, Clock, Play, Pause, SkipForward, SkipBack } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useAdminData, invalidateAdminCache } from "@/hooks/useAdminData";
 
@@ -46,6 +47,7 @@ const AdminPanel = () => {
   const [search, setSearch] = useState("");
   const [showLogoDialog, setShowLogoDialog] = useState(false);
   const [logoUrl, setLogoUrl] = useState("");
+  const [showEditDialog, setShowEditDialog] = useState(false);
   // Modals
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -300,11 +302,8 @@ const AdminPanel = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Button onClick={handleCopyFieldSvg} variant="outline" className="gap-2 border-zinc-700 text-zinc-200 hover:bg-zinc-800">
-                  <Copy size={16} /> Copiar Campo SVG
-                </Button>
-                <Button onClick={handleDownloadFieldSvg} variant="outline" className="gap-2 border-zinc-700 text-zinc-200 hover:bg-zinc-800">
-                  <Download size={16} /> Baixar SVG
+                <Button onClick={() => setShowEditDialog(true)} variant="outline" className="gap-2 border-zinc-700 text-zinc-200 hover:bg-zinc-800">
+                  <Pencil size={16} /> Edit
                 </Button>
                 <Button onClick={() => {
                   invalidateAdminCache();
@@ -587,6 +586,122 @@ const AdminPanel = () => {
               Salvar
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog (Campo + Icons) */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="bg-zinc-900 border-zinc-700 text-white max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Edit</DialogTitle>
+            <DialogDescription className="text-zinc-400">Campo e ícones do jogo</DialogDescription>
+          </DialogHeader>
+          <Tabs defaultValue="campo" className="flex-1 flex flex-col overflow-hidden">
+            <TabsList className="bg-zinc-800 border border-zinc-700 w-fit">
+              <TabsTrigger value="campo" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black">Campo</TabsTrigger>
+              <TabsTrigger value="icons" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black">Icons</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="campo" className="flex-1 overflow-y-auto mt-4">
+              <div className="flex flex-col items-center gap-4">
+                <div className="bg-zinc-800 p-4 rounded-lg border border-zinc-700" dangerouslySetInnerHTML={{ __html: buildFieldSvg() }} />
+                <div className="flex gap-3">
+                  <Button onClick={handleDownloadFieldSvg} className="gap-2 bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-600">
+                    <Download size={16} /> Baixar campo SVG
+                  </Button>
+                  <Button onClick={handleCopyFieldSvg} className="gap-2 bg-amber-500 hover:bg-amber-400 text-black font-semibold">
+                    <Copy size={16} /> Copiar
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="icons" className="flex-1 overflow-y-auto mt-4">
+              <p className="text-zinc-500 text-xs mb-3">Clique em qualquer ícone para copiar o SVG automaticamente.</p>
+              <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
+                {[
+                  { name: "ShoppingCart", Icon: ShoppingCart },
+                  { name: "Inbox", Icon: Inbox },
+                  { name: "X", Icon: X },
+                  { name: "Search", Icon: Search },
+                  { name: "DollarSign", Icon: DollarSign },
+                  { name: "Binoculars", Icon: Binoculars },
+                  { name: "Send", Icon: Send },
+                  { name: "TrendingUp", Icon: TrendingUp },
+                  { name: "TrendingDown", Icon: TrendingDown },
+                  { name: "Trophy", Icon: Trophy },
+                  { name: "Users", Icon: Users },
+                  { name: "Briefcase", Icon: Briefcase },
+                  { name: "Menu", Icon: Menu },
+                  { name: "ChevronsRight", Icon: ChevronsRight },
+                  { name: "ChevronsLeft", Icon: ChevronsLeft },
+                  { name: "Calendar", Icon: Calendar },
+                  { name: "Settings", Icon: Settings },
+                  { name: "Home", Icon: Home },
+                  { name: "ArrowLeft", Icon: ArrowLeft },
+                  { name: "ArrowRight", Icon: ArrowRight },
+                  { name: "RotateCw", Icon: RotateCw },
+                  { name: "Star", Icon: Star },
+                  { name: "Filter", Icon: Filter },
+                  { name: "Eye", Icon: Eye },
+                  { name: "EyeOff", Icon: EyeOff },
+                  { name: "Heart", Icon: Heart },
+                  { name: "Bell", Icon: Bell },
+                  { name: "MessageCircle", Icon: MessageCircle },
+                  { name: "Mic", Icon: Mic },
+                  { name: "Upload", Icon: Upload },
+                  { name: "Share2", Icon: Share2 },
+                  { name: "MoreHorizontal", Icon: MoreHorizontal },
+                  { name: "Check", Icon: Check },
+                  { name: "CheckCircle2", Icon: CheckCircle2 },
+                  { name: "AlertCircle", Icon: AlertCircle },
+                  { name: "Info", Icon: Info },
+                  { name: "Lock", Icon: Lock },
+                  { name: "Unlock", Icon: Unlock },
+                  { name: "User", Icon: User },
+                  { name: "UserPlus", Icon: UserPlus },
+                  { name: "UserMinus", Icon: UserMinus },
+                  { name: "Award", Icon: Award },
+                  { name: "Target", Icon: Target },
+                  { name: "Zap", Icon: Zap },
+                  { name: "Flag", Icon: Flag },
+                  { name: "Clock", Icon: Clock },
+                  { name: "Play", Icon: Play },
+                  { name: "Pause", Icon: Pause },
+                  { name: "SkipForward", Icon: SkipForward },
+                  { name: "SkipBack", Icon: SkipBack },
+                  { name: "Plus", Icon: Plus },
+                  { name: "Pencil", Icon: Pencil },
+                  { name: "Trash2", Icon: Trash2 },
+                  { name: "Shield", Icon: Shield },
+                  { name: "Globe", Icon: Globe },
+                  { name: "LogOut", Icon: LogOut },
+                  { name: "Download", Icon: Download },
+                  { name: "Copy", Icon: Copy },
+                ].map(({ name, Icon }) => (
+                  <button
+                    key={name}
+                    title={name}
+                    onClick={(e) => {
+                      const svg = (e.currentTarget as HTMLButtonElement).querySelector("svg");
+                      if (!svg) return;
+                      const clone = svg.cloneNode(true) as SVGElement;
+                      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+                      const svgString = clone.outerHTML;
+                      navigator.clipboard.writeText(svgString).then(
+                        () => toast.success(`${name} copiado!`),
+                        () => toast.error("Falha ao copiar")
+                      );
+                    }}
+                    className="aspect-square flex flex-col items-center justify-center gap-1 bg-zinc-800 hover:bg-amber-500/20 border border-zinc-700 hover:border-amber-500 rounded-lg p-2 transition-colors group"
+                  >
+                    <Icon size={22} className="text-zinc-200 group-hover:text-amber-400" />
+                    <span className="text-[9px] text-zinc-500 truncate w-full text-center">{name}</span>
+                  </button>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>
