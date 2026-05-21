@@ -17,7 +17,8 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LogOut, Plus, Pencil, Trash2, Shield, Globe, Search, Loader2, CheckCircle2, Copy, Download } from "lucide-react";
+import { LogOut, Plus, Pencil, Trash2, Shield, Globe, Search, Loader2, CheckCircle2, Copy, Download, ShoppingCart, Inbox, X, DollarSign, Binoculars, Send, TrendingUp, TrendingDown, Trophy, Users, Briefcase, Menu, ChevronsRight, ChevronsLeft, Calendar, Settings, Home, ArrowLeft, ArrowRight, RotateCw, Star, Filter, Eye, EyeOff, Heart, Bell, MessageCircle, Mic, Upload, Share2, MoreHorizontal, Check, AlertCircle, Info, Lock, Unlock, User, UserPlus, UserMinus, Award, Target, Zap, Flag, Clock, Play, Pause, SkipForward, SkipBack } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useAdminData, invalidateAdminCache } from "@/hooks/useAdminData";
 
