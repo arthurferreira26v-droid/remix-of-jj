@@ -47,6 +47,7 @@ const AdminPanel = () => {
   const [search, setSearch] = useState("");
   const [showLogoDialog, setShowLogoDialog] = useState(false);
   const [logoUrl, setLogoUrl] = useState("");
+  const [showEditDialog, setShowEditDialog] = useState(false);
   // Modals
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -301,11 +302,8 @@ const AdminPanel = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Button onClick={handleCopyFieldSvg} variant="outline" className="gap-2 border-zinc-700 text-zinc-200 hover:bg-zinc-800">
-                  <Copy size={16} /> Copiar Campo SVG
-                </Button>
-                <Button onClick={handleDownloadFieldSvg} variant="outline" className="gap-2 border-zinc-700 text-zinc-200 hover:bg-zinc-800">
-                  <Download size={16} /> Baixar SVG
+                <Button onClick={() => setShowEditDialog(true)} variant="outline" className="gap-2 border-zinc-700 text-zinc-200 hover:bg-zinc-800">
+                  <Pencil size={16} /> Edit
                 </Button>
                 <Button onClick={() => {
                   invalidateAdminCache();
