@@ -703,6 +703,7 @@ const AdminPanel = () => {
             </TabsContent>
           </Tabs>
         </DialogContent>
+      </Dialog>
     </div>
   );
 };
