@@ -48,6 +48,9 @@ const AdminPanel = () => {
   const [showLogoDialog, setShowLogoDialog] = useState(false);
   const [logoUrl, setLogoUrl] = useState("");
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedIcon, setSelectedIcon] = useState<{ name: string; Icon: any; color?: string } | null>(null);
+  const [iconSize, setIconSize] = useState(24);
+  const [iconColor, setIconColor] = useState("#E3E3E3");
   // Modals
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
   const [isAdding, setIsAdding] = useState(false);
