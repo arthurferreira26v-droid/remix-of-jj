@@ -681,6 +681,7 @@ const AdminPanel = () => {
                   { name: "LogOut", Icon: LogOut },
                   { name: "Download", Icon: Download },
                   { name: "Copy", Icon: Copy },
+                  { name: "Repeat (Trocar Modo)", Icon: Repeat },
                 ];
 
                 const previewRef = (el: HTMLDivElement | null) => {
