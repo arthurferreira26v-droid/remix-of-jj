@@ -785,8 +785,13 @@ const AdminPanel = () => {
                           </div>
 
                           {/* Preview */}
-                          <div id="icon-preview-svg-wrapper" className="aspect-square bg-zinc-900 border border-zinc-700 rounded-xl flex items-center justify-center mb-3 relative">
-                            <selectedIcon.Icon size={iconSize * 3} style={{ color: iconColor }} />
+                          <div id="icon-preview-svg-wrapper" className="aspect-square bg-zinc-900 border border-zinc-700 rounded-xl flex items-center justify-center mb-3 relative overflow-hidden">
+                            <selectedIcon.Icon
+                              size={iconSize}
+                              absoluteStrokeWidth
+                              strokeWidth={1.5}
+                              style={{ color: iconColor, shapeRendering: "geometricPrecision" }}
+                            />
                             <button onClick={handleCopy} title="Copiar SVG" className="absolute bottom-2 left-2 p-1.5 rounded-md bg-zinc-800 hover:bg-amber-500 hover:text-black text-zinc-300 transition-colors">
                               <Copy size={14} />
                             </button>
@@ -797,9 +802,9 @@ const AdminPanel = () => {
                             <div className="flex items-center justify-between">
                               <Label className="text-zinc-400 text-xs">Tamanho</Label>
                               <div className="flex items-center bg-zinc-800 border border-zinc-700 rounded-full">
-                                <button onClick={() => setIconSize((s) => Math.max(12, s - 2))} className="w-7 h-7 text-white">−</button>
+                                <button onClick={() => setIconSize((s) => Math.max(12, s - 4))} className="w-7 h-7 text-white">−</button>
                                 <span className="w-10 text-center text-sm text-white">{iconSize}</span>
-                                <button onClick={() => setIconSize((s) => Math.min(96, s + 2))} className="w-7 h-7 text-white">+</button>
+                                <button onClick={() => setIconSize((s) => Math.min(256, s + 4))} className="w-7 h-7 text-white">+</button>
                               </div>
                             </div>
                             <div className="flex items-center justify-between">
