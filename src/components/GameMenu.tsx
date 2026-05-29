@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Menu, Users, TrendingUp, Briefcase, Trophy, LogOut, X, Inbox } from "lucide-react";
+import { Menu, Users, TrendingUp, Briefcase, Trophy, LogOut, X, Inbox, Calendar } from "lucide-react";
+
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -19,6 +20,7 @@ const menuItemsData = (
   handlers: Pick<GameMenuProps, "onManageSquad" | "onTransferMarket" | "onFinances" | "onExit" | "onReceivedOffers">,
   offersCount: number
 ) => [
+  { icon: Calendar, label: "Calendário", onClick: () => navigate(`/calendario?time=${teamName}`) },
   { icon: Trophy, label: "Classificação", onClick: () => navigate(`/classificacao?time=${teamName}`) },
   { icon: Users, label: "Elenco", onClick: handlers.onManageSquad },
   { icon: TrendingUp, label: "Transferências", onClick: handlers.onTransferMarket },
