@@ -4,7 +4,7 @@ import { ExitConfirmModal } from "@/components/ExitConfirmModal";
 import { AbandonDetector } from "@/components/AbandonDetector";
 import { GameMenu } from "@/components/GameMenu";
 import { MatchCard } from "@/components/MatchCard";
-import { RoundsCalendar } from "@/components/RoundsCalendar";
+
 import { TacticsManager } from "@/components/TacticsManager";
 import { SquadManager } from "@/components/SquadManager";
 import { TeamBudget } from "@/components/TeamBudget";
