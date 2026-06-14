@@ -641,6 +641,42 @@ const AdminPanel = () => {
                   </svg>
                 );
 
+                // Save icon variants — inspired by major design systems
+                // 1) Google Material Design — geometric floppy, filled tab, 2px stroke
+                const SaveMaterial = (props: any) => (
+                  <svg {...props} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 3h11l3 3v15H5V3z" fill="currentColor" fillOpacity="0.12" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                    <path d="M7 3v6h9V3" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                    <rect x="13" y="4" width="2" height="4" fill="currentColor"/>
+                    <rect x="7" y="13" width="10" height="6" rx="0.5" stroke="currentColor" strokeWidth="2"/>
+                  </svg>
+                );
+                // 2) Apple SF Symbols — soft, rounded, thin stroke, arrow-into-tray
+                const SaveApple = (props: any) => (
+                  <svg {...props} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 3v11" stroke="currentColor" strokeWidth="1.6"/>
+                    <path d="M7.5 9.5L12 14l4.5-4.5" stroke="currentColor" strokeWidth="1.6"/>
+                    <path d="M4 15v3a2.5 2.5 0 0 0 2.5 2.5h11A2.5 2.5 0 0 0 20 18v-3" stroke="currentColor" strokeWidth="1.6"/>
+                  </svg>
+                );
+                // 3) Microsoft Fluent — duotone, rounded, accent tab
+                const SaveFluent = (props: any) => (
+                  <svg {...props} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 5a2 2 0 0 1 2-2h9.17a2 2 0 0 1 1.41.59l2.83 2.83A2 2 0 0 1 21 7.83V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5z" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1.5"/>
+                    <rect x="8" y="3" width="7" height="6" rx="1" fill="currentColor"/>
+                    <rect x="7.5" y="13" width="9" height="7.5" rx="1.5" fill="hsl(var(--background))" stroke="currentColor" strokeWidth="1.5"/>
+                  </svg>
+                );
+                // 4) IBM Carbon — minimal, sharp, uniform 2px stroke, no fill
+                const SaveCarbon = (props: any) => (
+                  <svg {...props} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M27 9.83L22.17 5H6a1 1 0 0 0-1 1v20a1 1 0 0 0 1 1h20a1 1 0 0 0 1-1V9.83z" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M10 5v7h11V5" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M10 27v-9h12v9" stroke="currentColor" strokeWidth="2"/>
+                    <line x1="18" y1="7" x2="18" y2="10" stroke="currentColor" strokeWidth="2"/>
+                  </svg>
+                );
+
                 const iconList = [
                   { name: "ShoppingCart", Icon: ShoppingCart },
                   { name: "Inbox", Icon: Inbox },
