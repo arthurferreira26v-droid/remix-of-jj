@@ -632,6 +632,14 @@ const AdminPanel = () => {
                     <rect x="6" y="3" width="12" height="18" rx="2" fill="#eab308" />
                   </svg>
                 );
+                const GoalIcon = (props: any) => (
+                  <svg {...props} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4h16v4H4z" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M4 8v12M20 8v12M4 12h16M4 16h16" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+                    <circle cx="12" cy="18" r="3" fill="#22c55e" />
+                    <circle cx="12" cy="18" r="3" stroke="currentColor" strokeWidth="1" />
+                  </svg>
+                );
 
                 const iconList = [
                   { name: "ShoppingCart", Icon: ShoppingCart },
@@ -696,6 +704,7 @@ const AdminPanel = () => {
                   { name: "Repeat (Trocar Modo)", Icon: Repeat },
                   { name: "Cartão Vermelho", Icon: RedCardIcon },
                   { name: "Cartão Amarelo", Icon: YellowCardIcon },
+                  { name: "Gol", Icon: GoalIcon },
                 ];
 
                 const previewRef = (el: HTMLDivElement | null) => {
