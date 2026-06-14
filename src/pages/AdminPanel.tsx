@@ -741,6 +741,10 @@ const AdminPanel = () => {
                   { name: "Cartão Vermelho", Icon: RedCardIcon },
                   { name: "Cartão Amarelo", Icon: YellowCardIcon },
                   { name: "Gol", Icon: GoalIcon },
+                  { name: "Save (Material)", Icon: SaveMaterial },
+                  { name: "Save (Apple SF)", Icon: SaveApple },
+                  { name: "Save (Fluent)", Icon: SaveFluent },
+                  { name: "Save (Carbon)", Icon: SaveCarbon },
                 ];
 
                 const previewRef = (el: HTMLDivElement | null) => {
