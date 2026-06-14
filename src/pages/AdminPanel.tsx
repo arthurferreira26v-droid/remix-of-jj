@@ -621,6 +621,18 @@ const AdminPanel = () => {
 
             <TabsContent value="icons" className="flex-1 overflow-y-auto mt-4">
               {(() => {
+                // Simple card icon components (not in lucide-react)
+                const RedCardIcon = (props: any) => (
+                  <svg {...props} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="6" y="3" width="12" height="18" rx="2" fill="#ef4444" />
+                  </svg>
+                );
+                const YellowCardIcon = (props: any) => (
+                  <svg {...props} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="6" y="3" width="12" height="18" rx="2" fill="#eab308" />
+                  </svg>
+                );
+
                 const iconList = [
                   { name: "ShoppingCart", Icon: ShoppingCart },
                   { name: "Inbox", Icon: Inbox },
@@ -682,6 +694,8 @@ const AdminPanel = () => {
                   { name: "Download", Icon: Download },
                   { name: "Copy", Icon: Copy },
                   { name: "Repeat (Trocar Modo)", Icon: Repeat },
+                  { name: "Cartão Vermelho", Icon: RedCardIcon },
+                  { name: "Cartão Amarelo", Icon: YellowCardIcon },
                 ];
 
                 const previewRef = (el: HTMLDivElement | null) => {
