@@ -704,6 +704,7 @@ const AdminPanel = () => {
                   { name: "Repeat (Trocar Modo)", Icon: Repeat },
                   { name: "Cartão Vermelho", Icon: RedCardIcon },
                   { name: "Cartão Amarelo", Icon: YellowCardIcon },
+                  { name: "Gol", Icon: GoalIcon },
                 ];
 
                 const previewRef = (el: HTMLDivElement | null) => {
