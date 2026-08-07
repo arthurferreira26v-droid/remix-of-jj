@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useSearchParams } from "react-router-dom";
 import Index from "./pages/Index";
+import ConfirmTeam from "./pages/ConfirmTeam";
+
 import Game from "./pages/Game";
 import Game2P from "./pages/Game2P";
 import Match from "./pages/Match";
