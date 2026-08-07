@@ -36,7 +36,7 @@ import { toast } from "sonner";
 import { useSwipePages } from "@/hooks/useSwipePages";
 
 const Game = () => {
-  const [rosterTab, setRosterTab] = useState<'reserves' | 'unlisted'>('reserves');
+  
   const [showExitModal, setShowExitModal] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
