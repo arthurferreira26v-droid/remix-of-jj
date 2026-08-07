@@ -43,20 +43,10 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<ModeSelection />} />
-          <Route path="/loja" element={<Store />} />
+          <Route path="/" element={<Index />} />
+          <Route path="/confirmar-time" element={<ConfirmTeam />} />
           <Route path="/selecionar-time" element={<Index />} />
-          
-          <Route path="/campanha-2p/jogador1" element={<Campaign2PSelectPlayer1 />} />
-          <Route path="/campanha-2p/jogador2" element={<Campaign2PSelectPlayer2 />} />
-          
-          <Route path="/jogo-rapido" element={<QuickMatchMenu />} />
-          <Route path="/jogo-rapido/criar" element={<QuickMatchTeamSelect />} />
-          <Route path="/jogo-rapido/sala" element={<QuickMatchRoom />} />
-          <Route path="/jogo-rapido/entrar" element={<QuickMatchJoinRoom />} />
-          <Route path="/jogo-rapido/entrar/time" element={<QuickMatchJoinTeamSelect />} />
-          <Route path="/admin-login" element={<AdminLogin />} />
-          <Route path="/admin-panel" element={<AdminPanel />} />
+
           <Route path="/jogo" element={<GameRouter />} />
           <Route path="/partida" element={<MatchRouter />} />
           <Route path="/classificacao" element={<Standings />} />
