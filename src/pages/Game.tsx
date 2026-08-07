@@ -665,126 +665,109 @@ const Game = () => {
             />
 
             <div className="bg-zinc-900 rounded-lg p-4">
-              {/* Tabs */}
-              <div className="flex mb-4 bg-zinc-800 rounded-lg p-1">
-                <button
-                  onClick={() => setRosterTab('reserves')}
-                  className={`flex-1 py-2 text-sm font-bold rounded-md transition-colors ${
-                    rosterTab === 'reserves' ? 'bg-[#c8ff00] text-black' : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  Reservas ({reserves.length})
-                </button>
-                <button
-                  onClick={() => setRosterTab('unlisted')}
-                  className={`flex-1 py-2 text-sm font-bold rounded-md transition-colors ${
-                    rosterTab === 'unlisted' ? 'bg-[#c8ff00] text-black' : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  Não Relacionados ({unlisted.length})
-                </button>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-white text-sm font-bold uppercase tracking-wide">Reservas</h3>
+                <span className="text-xs font-bold text-[#c8ff00]">{reserves.length}/10</span>
               </div>
+              <p className="text-xs text-zinc-400 mb-3">Clique para selecionar e trocar com um titular.</p>
+              <div className="space-y-2">
+                {reserves.map((player) => {
+                  const energy = player.energy ?? 100;
+                  const energyColor = energy >= 80 ? 'hsl(142 70% 50%)' : energy >= 60 ? 'hsl(45 100% 50%)' : 'hsl(0 80% 55%)';
+                  const isSuspended = (player.suspensionMatches || 0) > 0;
+                  const isSelected = selectedReserve?.id === player.id;
+                  return (
+                    <button
+                      key={player.id}
+                      onClick={() => handleReserveClick(player)}
+                      className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                        isSelected
+                          ? "bg-[#c8ff00] text-black"
+                          : isSuspended
+                          ? "bg-red-900/30 text-white/50 border border-red-500/40"
+                          : "bg-zinc-800 text-white hover:bg-zinc-700"
+                      }`}
+                      style={isSuspended ? { opacity: 0.6 } : {}}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`font-bold text-lg w-8 ${isSelected ? 'text-black' : isSuspended ? 'text-red-400' : 'text-blue-800'}`}>{player.overall}</span>
+                        <div className="text-left">
+                          <div className="flex items-center gap-1.5">
+                            <span className={`font-medium ${isSuspended ? 'line-through' : ''}`}>{player.name}</span>
+                            {isSuspended && (
+                              <span className="text-[9px] bg-red-500/20 text-red-400 px-1 py-0.5 rounded font-bold">SUSPENSO</span>
+                            )}
+                          </div>
+                          <span className="text-sm opacity-70">{player.position}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Zap className="w-3.5 h-3.5" style={{ color: isSelected ? 'black' : energyColor }} />
+                        <span className="text-[12px] font-bold" style={{ color: isSelected ? 'black' : energyColor }}>{energy}%</span>
+                      </div>
+                    </button>
+                  );
+                })}
+                {reserves.length === 0 && (
+                  <p className="text-zinc-500 text-xs text-center py-2">Nenhum reserva</p>
+                )}
+              </div>
+              {selectedReserve && (
+                <p className="mt-3 text-xs text-[#c8ff00]">
+                  Selecione um titular no campo para substituir.
+                </p>
+              )}
 
-              {rosterTab === 'reserves' && (
-                <>
-                  <p className="text-xs text-zinc-400 mb-3">Clique para selecionar e trocar com um titular.</p>
-                  <div className="space-y-2">
-                    {reserves.map((player) => {
-                      const energy = player.energy ?? 100;
-                      const energyColor = energy >= 80 ? 'hsl(142 70% 50%)' : energy >= 60 ? 'hsl(45 100% 50%)' : 'hsl(0 80% 55%)';
-                      const isSuspended = (player.suspensionMatches || 0) > 0;
-                      const isSelected = selectedReserve?.id === player.id;
-                      return (
-                        <button
-                            key={player.id}
-                            onClick={() => handleReserveClick(player)}
-                            className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
-                              isSelected
-                                ? "bg-[#c8ff00] text-black"
-                                : isSuspended
-                                ? "bg-red-900/30 text-white/50 border border-red-500/40"
-                                : "bg-zinc-800 text-white hover:bg-zinc-700"
-                            }`}
-                            style={isSuspended ? { opacity: 0.6 } : {}}
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className={`font-bold text-lg w-8 ${isSelected ? 'text-black' : isSuspended ? 'text-red-400' : 'text-blue-800'}`}>{player.overall}</span>
-                              <div className="text-left">
-                                <div className="flex items-center gap-1.5">
-                                  <span className={`font-medium ${isSuspended ? 'line-through' : ''}`}>{player.name}</span>
-                                  {isSuspended && (
-                                    <span className="text-[9px] bg-red-500/20 text-red-400 px-1 py-0.5 rounded font-bold">SUSPENSO</span>
-                                  )}
-                                </div>
-                                <span className="text-sm opacity-70">{player.position}</span>
-                              </div>
+              {/* Não Relacionados */}
+              <div className="mt-8 pt-6 border-t border-zinc-800">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-white/60 text-sm font-bold uppercase tracking-wide">Não Relacionados</h3>
+                  <span className="text-xs font-bold text-zinc-500">{unlisted.length}</span>
+                </div>
+                <p className="text-xs text-zinc-400 mb-3">Clique para selecionar e trocar com um reserva ou titular.</p>
+                <div className="space-y-2">
+                  {unlisted.map((player) => {
+                    const energy = player.energy ?? 100;
+                    const energyColor = energy >= 80 ? 'hsl(142 70% 50%)' : energy >= 60 ? 'hsl(45 100% 50%)' : 'hsl(0 80% 55%)';
+                    const isSuspended = (player.suspensionMatches || 0) > 0;
+                    const isSelected = selectedReserve?.id === player.id;
+                    return (
+                      <button
+                        key={player.id}
+                        onClick={() => handleReserveClick(player)}
+                        className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                          isSelected
+                            ? "bg-[#c8ff00] text-black"
+                            : isSuspended
+                            ? "bg-red-900/20 text-white/40 border border-red-500/30"
+                            : "bg-zinc-800/50 text-white/60 hover:bg-zinc-700/60"
+                        }`}
+                        style={isSuspended ? { opacity: 0.5 } : {}}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className={`font-bold text-lg w-8 ${isSelected ? 'text-black' : isSuspended ? 'text-red-400/60' : 'text-zinc-500'}`}>{player.overall}</span>
+                          <div className="text-left">
+                            <div className="flex items-center gap-1.5">
+                              <span className={`font-medium ${isSuspended ? 'line-through' : ''}`}>{player.name}</span>
+                              {isSuspended && (
+                                <span className="text-[9px] bg-red-500/20 text-red-400 px-1 py-0.5 rounded font-bold">SUSPENSO ({player.suspensionMatches})</span>
+                              )}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Zap className="w-3.5 h-3.5" style={{ color: isSelected ? 'black' : energyColor }} />
-                              <span className="text-[12px] font-bold" style={{ color: isSelected ? 'black' : energyColor }}>{energy}%</span>
-                            </div>
-                          </button>
-                      );
-                    })}
-                    {reserves.length === 0 && (
-                      <p className="text-zinc-500 text-xs text-center py-2">Nenhum reserva</p>
-                    )}
-                  </div>
-                  {selectedReserve && (
-                    <p className="mt-3 text-xs text-[#c8ff00]">
-                      Selecione um titular no campo para substituir.
-                    </p>
+                            <span className="text-sm opacity-70">{player.position}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Zap className="w-3.5 h-3.5" style={{ color: isSelected ? 'black' : energyColor }} />
+                          <span className="text-[12px] font-bold" style={{ color: isSelected ? 'black' : energyColor }}>{energy}%</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                  {unlisted.length === 0 && (
+                    <p className="text-zinc-500 text-xs text-center py-2">Nenhum jogador não relacionado</p>
                   )}
-                </>
-              )}
-
-              {rosterTab === 'unlisted' && (
-                <>
-                  <p className="text-xs text-zinc-400 mb-3">Clique para selecionar e trocar com reserva ou titular.</p>
-                  <div className="space-y-2">
-                    {unlisted.map((player) => {
-                      const energy = player.energy ?? 100;
-                      const energyColor = energy >= 80 ? 'hsl(142 70% 50%)' : energy >= 60 ? 'hsl(45 100% 50%)' : 'hsl(0 80% 55%)';
-                      const isSuspended = (player.suspensionMatches || 0) > 0;
-                      const isSelected = selectedReserve?.id === player.id;
-                      return (
-                        <button
-                            key={player.id}
-                            onClick={() => handleReserveClick(player)}
-                            className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
-                              isSelected
-                                ? "bg-[#c8ff00] text-black"
-                                : isSuspended
-                                ? "bg-red-900/20 text-white/40 border border-red-500/30"
-                                : "bg-zinc-800/50 text-white/60 hover:bg-zinc-700/60"
-                            }`}
-                            style={isSuspended ? { opacity: 0.5 } : {}}
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className={`font-bold text-lg w-8 ${isSelected ? 'text-black' : isSuspended ? 'text-red-400/60' : 'text-zinc-500'}`}>{player.overall}</span>
-                              <div className="text-left">
-                                <div className="flex items-center gap-1.5">
-                                  <span className={`font-medium ${isSuspended ? 'line-through' : ''}`}>{player.name}</span>
-                                  {isSuspended && (
-                                    <span className="text-[9px] bg-red-500/20 text-red-400 px-1 py-0.5 rounded font-bold">SUSPENSO ({player.suspensionMatches})</span>
-                                  )}
-                                </div>
-                                <span className="text-sm opacity-70">{player.position}</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Zap className="w-3.5 h-3.5" style={{ color: isSelected ? 'black' : energyColor }} />
-                              <span className="text-[12px] font-bold" style={{ color: isSelected ? 'black' : energyColor }}>{energy}%</span>
-                            </div>
-                          </button>
-                      );
-                    })}
-                    {unlisted.length === 0 && (
-                      <p className="text-zinc-500 text-xs text-center py-2">Nenhum jogador não relacionado</p>
-                    )}
-                  </div>
-                </>
-              )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
