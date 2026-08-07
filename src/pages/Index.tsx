@@ -2,8 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TeamCard } from "@/components/TeamCard";
 import { teams } from "@/data/teams";
-import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+
 
 const Index = () => {
   const navigate = useNavigate();
