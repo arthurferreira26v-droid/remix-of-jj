@@ -193,15 +193,10 @@ export const removePlayerFromTeamRoster = (teamName: string, playerId: string) =
 export const adjustSquadBalance = (players: Player[]): Player[] => {
   const starters = players.filter(p => p.isStarter);
   const nonStarters = players.filter(p => !p.isStarter);
-  const total = players.length;
 
-  // Calculate target reserve count
-  let targetReserves: number;
-  if (total >= 21) {
-    targetReserves = 10;
-  } else {
-    targetReserves = Math.max(7, Math.min(10, total - 11));
-  }
+  // Regra fixa: sempre 10 reservas (limitado pelos jogadores disponíveis)
+  const targetReserves = 10;
+
 
   // Separate suspended from available
   const suspended = nonStarters.filter(p => (p.suspensionMatches || 0) > 0);
