@@ -25,7 +25,7 @@ import { useLibertadores } from "@/hooks/useLibertadores";
 import { useTeamForm } from "@/hooks/useTeamForm";
 import { useTeamBudget } from "@/hooks/useTeamBudget";
 import { getTeamLogo } from "@/utils/teamLogos";
-import { getLocalStandings, deleteLocalChampionship, getLocalBudget } from "@/utils/localChampionship";
+import { getLocalStandings, deleteLocalChampionship, getLocalBudget, setTempMode, isTempMode, clearTempMode } from "@/utils/localChampionship";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { isMarketOpen } from "@/utils/marketWindow";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
@@ -41,8 +41,30 @@ const Game = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const teamName = searchParams.get("time") || "Seu Time";
+  const isTemp = searchParams.get("temp") === "1";
 
   useEffect(() => { document.title = `${teamName} - Painel | Gerenciador`; }, [teamName]);
+
+  // Modo temporário: inicia uma sessão limpa e apaga os dados ao sair
+  useEffect(() => {
+    if (isTemp) {
+      setTempMode(teamName, true);
+      const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
+      brazilianTeams.forEach(t => {
+        localStorage.removeItem(`players_${t}`);
+        localStorage.removeItem(`starter_order_${t}`);
+        localStorage.removeItem(`investment_${t}`);
+        localStorage.removeItem(`local_budget_${t}`);
+      });
+      deleteLocalChampionship(teamName);
+      localStorage.removeItem(`lib_championship_${teamName}`);
+      localStorage.removeItem(`lib_matches_${teamName}`);
+      localStorage.removeItem(`lib_standings_${teamName}`);
+      localStorage.removeItem(`lib_prelib_teams`);
+      localStorage.removeItem(`lib_direct_qualifiers`);
+      clearAllOffers();
+    }
+  }, [isTemp, teamName]);
 
   const [showTransferMarket, setShowTransferMarketRaw] = useState(false);
   const [showReceivedOffers, setShowReceivedOffersRaw] = useState(false);
@@ -561,7 +583,6 @@ const Game = () => {
         offersCount={offersCount}
         onReceivedOffers={() => setShowReceivedOffers(true)}
         onExit={() => {
-          // Limpar dados de todos os times do campeonato
           const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
           brazilianTeams.forEach(t => {
             localStorage.removeItem(`players_${t}`);
@@ -575,8 +596,10 @@ const Game = () => {
           localStorage.removeItem(`lib_standings_${teamName}`);
           localStorage.removeItem(`lib_prelib_teams`);
           localStorage.removeItem(`lib_direct_qualifiers`);
-          // Limpar todas as ofertas de transferência
           clearAllOffers();
+          if (isTempMode(teamName)) {
+            clearTempMode(teamName);
+          }
           navigate("/");
         }}
       />
