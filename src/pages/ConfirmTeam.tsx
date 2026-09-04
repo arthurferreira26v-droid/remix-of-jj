@@ -22,9 +22,8 @@ const ConfirmTeam = () => {
     navigate(`/jogo?time=${encodeURIComponent(teamName)}`);
   };
 
-  const handleContinueWithoutSave = () => {
-    navigate(`/jogo?time=${encodeURIComponent(teamName)}&temp=1`);
-  };
+
+
 
   return (
     <div className="min-h-screen flex flex-col bg-[#4ade80]">
