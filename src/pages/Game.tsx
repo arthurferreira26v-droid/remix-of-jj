@@ -25,7 +25,7 @@ import { useLibertadores } from "@/hooks/useLibertadores";
 import { useTeamForm } from "@/hooks/useTeamForm";
 import { useTeamBudget } from "@/hooks/useTeamBudget";
 import { getTeamLogo } from "@/utils/teamLogos";
-import { getLocalStandings, deleteLocalChampionship, getLocalBudget } from "@/utils/localChampionship";
+import { getLocalStandings, deleteLocalChampionship, getLocalBudget, setTempMode, isTempMode, clearTempMode } from "@/utils/localChampionship";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { isMarketOpen } from "@/utils/marketWindow";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
