@@ -52,6 +52,21 @@ const KEYS = {
   budget: (team: string) => `local_budget_${team}`,
 };
 
+const TEMP_KEY = (team: string) => `temp_mode_${team}`;
+
+export function setTempMode(teamName: string, value: boolean) {
+  if (value) sessionStorage.setItem(TEMP_KEY(teamName), "true");
+  else sessionStorage.removeItem(TEMP_KEY(teamName));
+}
+
+export function isTempMode(teamName: string): boolean {
+  return sessionStorage.getItem(TEMP_KEY(teamName)) === "true";
+}
+
+export function clearTempMode(teamName: string) {
+  sessionStorage.removeItem(TEMP_KEY(teamName));
+}
+
 // ─── In-memory cache ─────────────────────────────────────────────────────────
 // Avoids repeated JSON.parse on every read. Cache is invalidated on write.
 
