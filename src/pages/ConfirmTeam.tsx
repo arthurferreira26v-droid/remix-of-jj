@@ -22,9 +22,8 @@ const ConfirmTeam = () => {
     navigate(`/jogo?time=${encodeURIComponent(teamName)}`);
   };
 
-  const handleContinueWithoutSave = () => {
-    navigate(`/jogo?time=${encodeURIComponent(teamName)}&temp=1`);
-  };
+
+
 
   return (
     <div className="min-h-screen flex flex-col bg-[#4ade80]">
@@ -57,20 +56,15 @@ const ConfirmTeam = () => {
         </div>
       </div>
 
-      <div className="p-4 space-y-3">
+      <div className="p-4">
         <button
           onClick={handleConfirm}
           className="w-full py-4 rounded-xl bg-black text-white font-bold text-base uppercase tracking-wide active:scale-[0.98] transition-transform"
         >
-          Confirmar
-        </button>
-        <button
-          onClick={handleContinueWithoutSave}
-          className="w-full py-3 rounded-xl text-black/80 font-semibold text-sm hover:text-black active:scale-[0.98] transition-transform"
-        >
-          Continuar sem salvar
+          Continuar
         </button>
       </div>
+
     </div>
   );
 };
