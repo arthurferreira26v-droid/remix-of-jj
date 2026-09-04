@@ -38,20 +38,20 @@ const ConfirmTeam = () => {
         </button>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6">
-        <h1 className="text-white text-2xl sm:text-3xl font-extrabold uppercase leading-tight text-center mb-10">
+      <div className="flex-1 flex flex-col px-4 pt-8">
+        <h1 className="text-white text-3xl sm:text-4xl font-extrabold uppercase leading-tight text-left">
           Conquiste o mundo
           <br />
           com seu time
         </h1>
 
-        <div className="flex flex-col items-center">
+        <div className="flex-1 flex flex-col items-center justify-center">
           <img
             src={getTeamLogo(teamName, team?.logo)}
             alt={`Escudo do ${teamName}`}
-            className="w-32 h-32 sm:w-40 sm:h-40 object-contain drop-shadow-lg"
+            className="w-24 h-24 object-contain drop-shadow-lg"
           />
-          <h2 className="mt-5 text-2xl sm:text-3xl font-extrabold text-black text-center">
+          <h2 className="mt-4 text-2xl sm:text-3xl font-extrabold text-black text-center">
             {teamName}
           </h2>
         </div>
