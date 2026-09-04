@@ -1,15 +1,15 @@
-import { ArrowLeftRight, ChevronsRight, ChevronsLeft } from "lucide-react";
+import { ArrowLeftRight } from "lucide-react";
 import { getLocalMatches } from "@/utils/localChampionship";
 import { getTeamLogo } from "@/utils/teamLogos";
-import { isMarketOpen } from "@/utils/marketWindow";
 import { useEffect, useRef } from "react";
 
 interface RoundsCalendarProps {
   teamName: string;
   currentRound: number;
+  onMarketClick?: () => void;
 }
 
-export const RoundsCalendar = ({ teamName, currentRound }: RoundsCalendarProps) => {
+export const RoundsCalendar = ({ teamName, currentRound, onMarketClick }: RoundsCalendarProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const currentRef = useRef<HTMLDivElement>(null);
 
@@ -17,15 +17,10 @@ export const RoundsCalendar = ({ teamName, currentRound }: RoundsCalendarProps) 
     .filter((m) => m.home_team_name === teamName || m.away_team_name === teamName)
     .sort((a, b) => a.round - b.round);
 
-  const marketOpen = isMarketOpen(currentRound);
-
-  // Auto-scroll to keep the current round in view
   useEffect(() => {
     if (currentRef.current && scrollRef.current) {
-      const el = currentRef.current;
       const parent = scrollRef.current;
-      const offset = el.offsetLeft - 16;
-      parent.scrollTo({ left: offset, behavior: "smooth" });
+      parent.scrollTo({ left: Math.max(0, currentRef.current.offsetLeft - 16), behavior: "smooth" });
     }
   }, [currentRound, matches.length]);
 
@@ -37,21 +32,17 @@ export const RoundsCalendar = ({ teamName, currentRound }: RoundsCalendarProps) 
       className="w-full overflow-x-auto overflow-y-hidden no-scrollbar"
       style={{ scrollbarWidth: "none" }}
     >
-      <div className="flex gap-3 px-4 py-2 w-max">
-        {/* Mercado card */}
-        <div
-          className={`shrink-0 w-[104px] h-[104px] rounded-2xl flex flex-col items-start justify-between p-3 ${
-            marketOpen ? "bg-white text-black" : "bg-zinc-900 text-zinc-500 border border-zinc-800"
-          }`}
+      <div className="flex gap-2.5 px-4 py-1 w-max">
+        {/* Mercado */}
+        <button
+          onClick={onMarketClick}
+          className="shrink-0 w-[86px] h-[86px] rounded-xl flex flex-col items-start justify-between p-2.5 bg-[#111113] border border-zinc-800 active:scale-95 transition-transform"
         >
-          <ArrowLeftRight className="w-6 h-6" strokeWidth={2.5} />
-          <div className="text-left leading-tight">
-            <div className="text-[11px] font-extrabold tracking-wide uppercase">Mercado</div>
-            <div className="text-[9px] font-semibold uppercase opacity-70">
-              {marketOpen ? "Aberto" : "Fechado"}
-            </div>
-          </div>
-        </div>
+          <ArrowLeftRight className="w-5 h-5 text-white" strokeWidth={2.5} />
+          <span className="text-[10px] font-extrabold tracking-wide uppercase text-white text-left leading-tight">
+            Mercado
+          </span>
+        </button>
 
         {matches.map((m) => {
           const isHome = m.home_team_name === teamName;
@@ -64,38 +55,21 @@ export const RoundsCalendar = ({ teamName, currentRound }: RoundsCalendarProps) 
             <div
               key={m.id}
               ref={isCurrent ? currentRef : undefined}
-              className={`relative shrink-0 w-[104px] h-[104px] rounded-2xl flex flex-col justify-between p-3 overflow-hidden bg-[#0a0f24] border transition-all ${
+              className={`shrink-0 w-[86px] h-[86px] rounded-xl flex flex-col justify-between p-2.5 border transition-all ${
                 isCurrent
-                  ? "border-[#c8ff00] shadow-[0_0_18px_rgba(200,255,0,0.25)]"
-                  : "border-zinc-800/80"
+                  ? "bg-white border-white"
+                  : "bg-[#111113] border-zinc-800"
               } ${past ? "opacity-40" : ""}`}
             >
-              {isCurrent && (
-                <>
-                  <ChevronsRight
-                    className="absolute -left-1 top-1/2 -translate-y-1/2 w-5 h-5 text-[#c8ff00]"
-                    strokeWidth={3}
-                  />
-                  <ChevronsLeft
-                    className="absolute -right-1 top-1/2 -translate-y-1/2 w-5 h-5 text-[#c8ff00]"
-                    strokeWidth={3}
-                  />
-                </>
-              )}
-
-              <div className="flex justify-end">
-                <img
-                  src={getTeamLogo(opp, oppLogo)}
-                  alt={opp}
-                  className="w-9 h-9 object-contain"
-                />
+              <div className="flex justify-center">
+                <img src={getTeamLogo(opp, oppLogo)} alt={opp} className="w-8 h-8 object-contain" />
               </div>
 
               <div className="text-left leading-tight">
-                <div className="text-[12px] font-extrabold text-white tracking-wide">
+                <div className={`text-[10px] font-extrabold tracking-wide ${isCurrent ? "text-black" : "text-white"}`}>
                   {isHome ? "CASA" : "FORA"}
                 </div>
-                <div className="text-[8.5px] font-semibold text-zinc-400 uppercase tracking-wider">
+                <div className={`text-[8px] font-bold uppercase tracking-wider ${isCurrent ? "text-black/60" : "text-zinc-400"}`}>
                   Brasileirão
                 </div>
               </div>
