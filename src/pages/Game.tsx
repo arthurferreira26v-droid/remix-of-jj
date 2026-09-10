@@ -4,6 +4,7 @@ import { ExitConfirmModal } from "@/components/ExitConfirmModal";
 import { AbandonDetector } from "@/components/AbandonDetector";
 import { GameMenu } from "@/components/GameMenu";
 import { MatchCard } from "@/components/MatchCard";
+import { RoundsCalendar } from "@/components/RoundsCalendar";
 
 import { TacticsManager } from "@/components/TacticsManager";
 import { SquadManager } from "@/components/SquadManager";
@@ -653,7 +654,14 @@ const Game = () => {
           {/* Match Section - Brasileirão */}
           {!showLibMatch && nextMatch && (
             <>
-              <div className="container mx-auto px-4 pt-8 pb-8">
+              <div className="pt-6 pb-2">
+                <RoundsCalendar
+                  teamName={teamName}
+                  currentRound={nextMatch.round}
+                  onMarketClick={() => setShowTransferMarket(true)}
+                />
+              </div>
+              <div className="container mx-auto px-4 pt-4 pb-8">
 
                 <h3 className="text-sm font-bold text-white/60 mb-3">
                   Sábado • Brasileirão - {nextMatch.round}ª Rodada

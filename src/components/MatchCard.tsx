@@ -6,6 +6,7 @@ import { getTeamLogo } from "@/utils/teamLogos";
 import { MatchResult } from "@/hooks/useTeamForm";
 import { instantaneo } from "@/config/gameSettings";
 import { toast } from "sonner";
+import { Swords } from "lucide-react";
 import { getSuspendedStarters } from "@/utils/cardSystem";
 import { getTeamRosterPlayers, saveTeamRosterPlayers } from "@/utils/teamRoster";
 
