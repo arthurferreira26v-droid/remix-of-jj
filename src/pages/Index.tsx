@@ -8,18 +8,24 @@ import { ChevronDown } from "lucide-react";
 const BrasileiroIcon = () => (
   <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
     <path
-      d="M24 2L42 12V36L24 46L6 36V12L24 2Z"
+      d="M24 4L40 13V34L24 44L8 34V13L24 4Z"
       fill="white"
       stroke="white"
       strokeWidth="2"
       strokeLinejoin="round"
     />
     <path
-      d="M24 8L36 15V31L24 38L12 31V15L24 8Z"
+      d="M24 10L34 16V30L24 36L14 30V16L24 10Z"
       fill="#0a0a0b"
     />
-    <circle cx="24" cy="23" r="6" fill="white" />
-    <path d="M18 28C18 28 21 32 24 32C27 32 30 28 30 28" stroke="white" strokeWidth="2" fill="none" />
+    <circle cx="24" cy="23" r="7" fill="white" />
+    <path
+      d="M18 28C20 30 22 31 24 31C26 31 28 30 30 28"
+      stroke="#0a0a0b"
+      strokeWidth="2"
+      strokeLinecap="round"
+      fill="none"
+    />
   </svg>
 );
 
@@ -27,30 +33,46 @@ const InglesIcon = () => (
   <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
     <circle cx="24" cy="24" r="22" fill="white" />
     <path
-      d="M32 14C30 12 26 11 24 14C22 11 18 12 16 14C12 18 12 24 16 28C18 31 22 34 24 36C26 34 30 31 32 28C36 24 36 18 32 14Z"
+      d="M24 10C24 10 18 14 16 19C14 24 16 30 24 36C32 30 34 24 32 19C30 14 24 10 24 10Z"
       fill="#0a0a0b"
     />
-    <circle cx="20" cy="21" r="2" fill="white" />
-    <circle cx="28" cy="21" r="2" fill="white" />
-    <path d="M22 27C23 28 25 28 26 27" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+    <circle cx="20" cy="22" r="2" fill="white" />
+    <circle cx="28" cy="22" r="2" fill="white" />
+    <path d="M21 28C22 29 26 29 27 28" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+    <path
+      d="M18 16C20 15 22 15 24 17C26 15 28 15 30 16"
+      stroke="#0a0a0b"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      fill="none"
+    />
   </svg>
 );
 
 const EspanholIcon = () => (
   <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-    <rect x="4" y="10" width="40" height="28" rx="6" fill="white" />
+    <rect x="3" y="8" width="42" height="32" rx="7" fill="white" />
     <text
       x="24"
       y="30"
       textAnchor="middle"
-      fill="#ef4444"
-      fontSize="11"
+      fill="#dc2626"
+      fontSize="13"
       fontWeight="900"
-      fontFamily="Arial, sans-serif"
-      letterSpacing="0.5"
+      fontFamily="Arial, Helvetica, sans-serif"
+      letterSpacing="0"
     >
       LALIGA
     </text>
+  </svg>
+);
+
+const BrazilFlagIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
+    <rect width="24" height="24" rx="4" fill="#009c3b" />
+    <path d="M12 3L22 12L12 21L2 12L12 3Z" fill="#ffdf00" />
+    <circle cx="12" cy="12" r="5" fill="#002776" />
+    <path d="M8 12C10 11 14 11 16 12C14 13 10 13 8 12Z" fill="white" />
   </svg>
 );
 
