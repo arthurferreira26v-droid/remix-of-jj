@@ -8,24 +8,23 @@ import { ChevronDown } from "lucide-react";
 const BrasileiroIcon = () => (
   <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
     <path
-      d="M24 4L40 13V34L24 44L8 34V13L24 4Z"
+      d="M24 3L40 13V34L24 45L8 34V13L24 3Z"
       fill="white"
       stroke="white"
-      strokeWidth="2"
+      strokeWidth="2.5"
       strokeLinejoin="round"
     />
-    <path
-      d="M24 10L34 16V30L24 36L14 30V16L24 10Z"
+    <text
+      x="24"
+      y="31"
+      textAnchor="middle"
       fill="#0a0a0b"
-    />
-    <circle cx="24" cy="23" r="7" fill="white" />
-    <path
-      d="M18 28C20 30 22 31 24 31C26 31 28 30 30 28"
-      stroke="#0a0a0b"
-      strokeWidth="2"
-      strokeLinecap="round"
-      fill="none"
-    />
+      fontSize="14"
+      fontWeight="900"
+      fontFamily="Arial, Helvetica, sans-serif"
+    >
+      BR
+    </text>
   </svg>
 );
 
@@ -33,14 +32,14 @@ const InglesIcon = () => (
   <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
     <circle cx="24" cy="24" r="22" fill="white" />
     <path
-      d="M24 10C24 10 18 14 16 19C14 24 16 30 24 36C32 30 34 24 32 19C30 14 24 10 24 10Z"
+      d="M24 8C20 8 14 12 14 20C14 28 22 34 24 38C26 34 34 28 34 20C34 12 28 8 24 8Z"
       fill="#0a0a0b"
     />
-    <circle cx="20" cy="22" r="2" fill="white" />
-    <circle cx="28" cy="22" r="2" fill="white" />
-    <path d="M21 28C22 29 26 29 27 28" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+    <circle cx="20" cy="21" r="2" fill="white" />
+    <circle cx="28" cy="21" r="2" fill="white" />
+    <path d="M20 28C21 29 23 30 24 30C25 30 27 29 28 28" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
     <path
-      d="M18 16C20 15 22 15 24 17C26 15 28 15 30 16"
+      d="M16 16C19 14 21 14 24 17C27 14 29 14 32 16"
       stroke="#0a0a0b"
       strokeWidth="1.5"
       strokeLinecap="round"
@@ -51,18 +50,28 @@ const InglesIcon = () => (
 
 const EspanholIcon = () => (
   <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-    <rect x="3" y="8" width="42" height="32" rx="7" fill="white" />
+    <rect x="3" y="7" width="42" height="34" rx="8" fill="white" />
     <text
       x="24"
-      y="30"
+      y="23"
       textAnchor="middle"
       fill="#dc2626"
-      fontSize="13"
+      fontSize="11"
       fontWeight="900"
       fontFamily="Arial, Helvetica, sans-serif"
-      letterSpacing="0"
     >
-      LALIGA
+      LA
+    </text>
+    <text
+      x="24"
+      y="36"
+      textAnchor="middle"
+      fill="#dc2626"
+      fontSize="11"
+      fontWeight="900"
+      fontFamily="Arial, Helvetica, sans-serif"
+    >
+      LIGA
     </text>
   </svg>
 );
