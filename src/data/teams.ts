@@ -149,4 +149,6 @@ export const teams: Team[] = [
 
 export const leagues = [
   { id: "brasileiro", name: "Brasileiro", flag: "🇧🇷" },
+  { id: "ingles", name: "Inglês", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
+  { id: "espanhol", name: "Espanhol", flag: "🇪🇸" },
 ];
