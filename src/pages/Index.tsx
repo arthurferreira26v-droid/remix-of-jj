@@ -123,7 +123,7 @@ const Index = () => {
             className="w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-xl bg-[#141414] border border-white/5 text-white/40 cursor-not-allowed"
           >
             <div className="flex items-center gap-3">
-              <span className="text-xl">🇧🇷</span>
+              <BrazilFlagIcon />
               <span className="text-sm font-semibold">Campeonato Brasileiro Série A</span>
             </div>
             <ChevronDown className="w-5 h-5" />
