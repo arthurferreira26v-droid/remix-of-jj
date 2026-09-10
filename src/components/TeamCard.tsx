@@ -5,18 +5,7 @@ interface TeamCardProps {
   onClick: () => void;
 }
 
-const PointedStar = ({ filled }: { filled: boolean }) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M12 2L14.9 8.6L22 9.3L16.8 14L18.2 21L12 17.3L5.8 21L7.2 14L2 9.3L9.1 8.6L12 2Z"
-      fill={filled ? "#facc15" : "rgba(255,255,255,0.12)"}
-      stroke={filled ? "#facc15" : "rgba(255,255,255,0.12)"}
-      strokeWidth="0.5"
-    />
-  </svg>
-);
-
-export const TeamCard = ({ name, logo, rating, onClick }: TeamCardProps) => {
+export const TeamCard = ({ name, logo, onClick }: TeamCardProps) => {
   return (
     <button
       onClick={onClick}
@@ -30,15 +19,9 @@ export const TeamCard = ({ name, logo, rating, onClick }: TeamCardProps) => {
         />
       </div>
 
-      <span className="text-[11px] font-bold text-foreground text-center uppercase leading-tight tracking-wide line-clamp-1 w-full mb-1.5">
+      <span className="text-[11px] font-bold text-foreground text-center uppercase leading-tight tracking-wide line-clamp-1 w-full">
         {name}
       </span>
-
-      <div className="flex gap-0.5">
-        {[...Array(5)].map((_, i) => (
-          <PointedStar key={i} filled={i < rating} />
-        ))}
-      </div>
     </button>
   );
 };
