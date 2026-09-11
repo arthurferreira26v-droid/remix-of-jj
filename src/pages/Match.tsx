@@ -480,7 +480,7 @@ const Match = () => {
 
   // Timer: 90 minutos em 30 segundos reais (333ms por minuto)
   useEffect(() => {
-    if (!isPlaying || minute >= 90 || showPenaltyModal || isHalftime || isQMGuest) return;
+    if (!isPlaying || minute >= 90 || showPenaltyModal || showPenaltyShot || isHalftime || isQMGuest) return;
 
     const interval = setInterval(() => {
       // Drain energy for all user starters each minute
@@ -1209,6 +1209,13 @@ const Match = () => {
           players={userStarters}
           onSelectKicker={handlePenaltyKickerSelected}
           teamName={teamName}
+        />
+
+        {/* Tela de cobrança de pênalti — escolha do canto */}
+        <PenaltyShotModal
+          isOpen={showPenaltyShot}
+          kicker={penaltyKicker}
+          onResolve={handlePenaltyShotResolved}
         />
       </div>
     </div>
