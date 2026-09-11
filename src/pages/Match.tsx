@@ -441,13 +441,17 @@ const Match = () => {
   // Callback para quando o usuário escolhe o batedor de pênalti
   const handlePenaltyKickerSelected = (player: Player) => {
     if (pendingPenaltyMinute !== null) {
-      // Calcular chance de acerto baseado na posição
-      // Atacantes (ATA, PE, PD): 80% de acerto
-      // Meias e outros: 50% de acerto
-      const isAttacker = ['ATA', 'PE', 'PD'].includes(player.position);
-      const successChance = isAttacker ? 0.80 : 0.50;
-      const isGoal = Math.random() < successChance;
-      
+      setPenaltyKicker(player);
+      setShowPenaltyShot(true);
+    }
+  };
+
+  // Resultado da cobrança (usuário escolhe o canto)
+  const handlePenaltyShotResolved = (isGoal: boolean) => {
+    const player = penaltyKicker;
+    setShowPenaltyShot(false);
+    setPenaltyKicker(null);
+    if (pendingPenaltyMinute !== null && player) {
       if (isGoal) {
         setAwayScore(s => s + 1);
         setMatchEvents(events => [...events, {
