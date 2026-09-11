@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 // Evolução de jogadores ocorre apenas no final da temporada
 import { applyEnergyChanges, drainEnergyPerMinute, getEffectiveOverall, initMatchEnergy, finalizeMatchEnergy } from "@/utils/energySystem";
 import { PenaltyKickerModal } from "@/components/PenaltyKickerModal";
+import { PenaltyShotModal } from "@/components/PenaltyShotModal";
 import { applySuspensions } from "@/utils/cardSystem";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { flushPendingWrites } from "@/utils/localChampionship";
@@ -89,6 +90,8 @@ const Match = () => {
   const [matchEvents, setMatchEvents] = useState<MatchEvent[]>([]);
   const [showPenaltyModal, setShowPenaltyModal] = useState(false);
   const [pendingPenaltyMinute, setPendingPenaltyMinute] = useState<number | null>(null);
+  const [showPenaltyShot, setShowPenaltyShot] = useState(false);
+  const [penaltyKicker, setPenaltyKicker] = useState<Player | null>(null);
   const [isHalftime, setIsHalftime] = useState(false);
   const [halftimeDone, setHalftimeDone] = useState(false);
   const [isPausedBySquad, setIsPausedBySquad] = useState(false);
@@ -441,13 +444,17 @@ const Match = () => {
   // Callback para quando o usuário escolhe o batedor de pênalti
   const handlePenaltyKickerSelected = (player: Player) => {
     if (pendingPenaltyMinute !== null) {
-      // Calcular chance de acerto baseado na posição
-      // Atacantes (ATA, PE, PD): 80% de acerto
-      // Meias e outros: 50% de acerto
-      const isAttacker = ['ATA', 'PE', 'PD'].includes(player.position);
-      const successChance = isAttacker ? 0.80 : 0.50;
-      const isGoal = Math.random() < successChance;
-      
+      setPenaltyKicker(player);
+      setShowPenaltyShot(true);
+    }
+  };
+
+  // Resultado da cobrança (usuário escolhe o canto)
+  const handlePenaltyShotResolved = (isGoal: boolean) => {
+    const player = penaltyKicker;
+    setShowPenaltyShot(false);
+    setPenaltyKicker(null);
+    if (pendingPenaltyMinute !== null && player) {
       if (isGoal) {
         setAwayScore(s => s + 1);
         setMatchEvents(events => [...events, {
@@ -473,7 +480,7 @@ const Match = () => {
 
   // Timer: 90 minutos em 30 segundos reais (333ms por minuto)
   useEffect(() => {
-    if (!isPlaying || minute >= 90 || showPenaltyModal || isHalftime || isQMGuest) return;
+    if (!isPlaying || minute >= 90 || showPenaltyModal || showPenaltyShot || isHalftime || isQMGuest) return;
 
     const interval = setInterval(() => {
       // Drain energy for all user starters each minute
@@ -1202,6 +1209,13 @@ const Match = () => {
           players={userStarters}
           onSelectKicker={handlePenaltyKickerSelected}
           teamName={teamName}
+        />
+
+        {/* Tela de cobrança de pênalti — escolha do canto */}
+        <PenaltyShotModal
+          isOpen={showPenaltyShot}
+          kicker={penaltyKicker}
+          onResolve={handlePenaltyShotResolved}
         />
       </div>
     </div>
