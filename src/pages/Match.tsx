@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 // Evolução de jogadores ocorre apenas no final da temporada
 import { applyEnergyChanges, drainEnergyPerMinute, getEffectiveOverall, initMatchEnergy, finalizeMatchEnergy } from "@/utils/energySystem";
 import { PenaltyKickerModal } from "@/components/PenaltyKickerModal";
+import { PenaltyShotModal } from "@/components/PenaltyShotModal";
 import { applySuspensions } from "@/utils/cardSystem";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { flushPendingWrites } from "@/utils/localChampionship";
@@ -89,6 +90,8 @@ const Match = () => {
   const [matchEvents, setMatchEvents] = useState<MatchEvent[]>([]);
   const [showPenaltyModal, setShowPenaltyModal] = useState(false);
   const [pendingPenaltyMinute, setPendingPenaltyMinute] = useState<number | null>(null);
+  const [showPenaltyShot, setShowPenaltyShot] = useState(false);
+  const [penaltyKicker, setPenaltyKicker] = useState<Player | null>(null);
   const [isHalftime, setIsHalftime] = useState(false);
   const [halftimeDone, setHalftimeDone] = useState(false);
   const [isPausedBySquad, setIsPausedBySquad] = useState(false);
