@@ -1,30 +1,44 @@
+# Responsividade mobile do aplicativo existente
 
-## Plan
+## Objetivo
+Usar 402 × 874 px como referência visual, mantendo o design atual, e fazer todas as telas funcionarem sem cortes, sobreposição ou rolagem horizontal em celulares menores e telas maiores.
 
-### 1. Pressão Final Verification
-The system logic is correctly implemented in `Match.tsx` (lines 703-778):
-- At minute 83, a 20% roll decides if it triggers
-- A random minute between 83-88 is picked for activation
-- 2 minutes after activation, a mandatory event fires with score-biased probabilities
-- Visual overlay deactivates after 3 seconds
-- The `PressaoFinal` component renders the red pulsing vignette
+## Ajustes planejados
 
-No code changes needed here — the system is wired correctly.
+1. **Base responsiva global**
+   - Garantir largura máxima da página, imagens e elementos flexíveis dentro da viewport.
+   - Usar altura dinâmica do aparelho e áreas seguras, sem fixar 874 px.
+   - Impedir overflow horizontal acidental sem bloquear os carrosséis que devem rolar lateralmente.
 
-### 2. "Formações" Button: Black Background + Full-Screen Modal
+2. **Seleção e confirmação do time**
+   - Adaptar os três cards de ligas para caberem em larguras menores que 402 px, mantendo a mesma ordem e proporção.
+   - Manter o grid de três times na referência e reduzir espaçamentos/tamanhos apenas quando a largura exigir.
+   - Preservar o posicionamento do título, escudo e botão de confirmação, usando altura disponível e safe areas.
 
-**Current**: The "Formações" button is white with black text, opens a small dropdown that overlaps the reserves section (cramped).
+3. **Tela principal da campanha**
+   - Manter Mercado fixo e jogos roláveis, mas dimensionar os cards conforme a largura disponível.
+   - Ajustar card da partida, cabeçalho, menu flutuante, campo, reservas e não relacionados para nomes longos e telas estreitas.
+   - Preservar o gesto horizontal entre início e elenco sem criar largura visível fora da tela.
 
-**Change**: 
-- Style the "Formações" button with **black background, white text** (matching dark theme)
-- Replace the dropdown with a **full-screen modal/overlay** (fixed, black background) that opens when clicked
-- The modal contains:
-  - Header with title "Formações Salvas" and an X close button
-  - "Salvar formação atual" button with name input
-  - List of saved formations with load/delete actions
-  - Much more breathing room than the current tiny dropdown
+4. **Partida e gerenciamento do elenco**
+   - Adaptar placar, eventos, estatísticas, campo, listas e telas de intervalo/fim de jogo a alturas curtas e larguras estreitas.
+   - Ajustar seleção e cobrança de pênalti para caber na área visível sem cortar os cinco alvos.
 
-**File**: `src/components/TacticsManager.tsx`
-- Change button class from `bg-white text-black` to `bg-black text-white border border-zinc-700`
-- Replace the `openDropdown === "saved"` dropdown div with a full-screen fixed overlay (`fixed inset-0 z-50 bg-black`)
-- Keep all existing save/load/delete logic intact, just move the UI into the modal layout
+5. **Mercado, ofertas, finanças, classificação e calendário**
+   - Permitir quebra/truncamento de textos e reorganização natural de ações em telas pequenas.
+   - Manter rolagem horizontal somente nas tabelas esportivas que precisam exibir todas as colunas.
+   - Garantir que diálogos e painéis usem largura e altura disponíveis, com conteúdo rolável.
+
+6. **Telas auxiliares preservadas**
+   - Revisar também telas atualmente ocultas ou acessíveis por rotas existentes, sem reativá-las nem alterar sua aparência.
+   - Ajustar a área Admin apenas onde dimensões fixas causarem corte em celular.
+
+## Validação
+- Conferir visualmente e medir overflow em 320 × 568, 360 × 640, 402 × 874, 430 × 932, tablet e desktop.
+- Testar as rotas e sobreposições principais, incluindo seleção, confirmação, campanha, elenco, mercado, partida e pênalti.
+- Confirmar compilação sem erros e ausência de elementos fora da viewport.
+
+## Detalhes técnicos
+- Priorizar `min()`, `max()`, `clamp()`, porcentagens, grids fluidos, `min-w-0`, `flex-wrap`, `dvh` e safe-area insets.
+- Manter tamanhos fixos que são intencionais e já cabem; alterar somente os que impedem adaptação.
+- Não modificar cores, fontes, identidade, conteúdo, regras do jogo ou navegação.
