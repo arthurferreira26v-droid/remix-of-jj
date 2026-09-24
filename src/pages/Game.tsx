@@ -34,7 +34,6 @@ import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { getTeamRosterPlayers, removePlayerFromTeamRoster, saveTeamRosterPlayers, adjustSquadBalance } from "@/utils/teamRoster";
 import { sortPlayersByReserveOrder } from "@/utils/playerOrder";
 import { toast } from "sonner";
-import { useSwipePages } from "@/hooks/useSwipePages";
 
 const Game = () => {
   
@@ -143,8 +142,9 @@ const Game = () => {
   const [totalPurchases, setTotalPurchases] = useState(0);
   const [selectedPlayerForValue, setSelectedPlayerForValue] = useState<Player | null>(null);
 
-  // Swipe horizontal entre tela principal e gerenciamento de elenco
-  const swipe = useSwipePages({ threshold: 0.3 });
+  // Elenco aberto somente pelo menu flutuante (sem swipe lateral)
+  const [squadOpen, setSquadOpen] = useState(false);
+
   
   
   // Initialize players state - always prefer localStorage (preserves energy state)
@@ -578,7 +578,7 @@ const Game = () => {
       {/* FAB Menu flutuante */}
       <GameMenu 
         teamName={teamName} 
-        onManageSquad={() => swipe.goToPage(1)} 
+        onManageSquad={() => setSquadOpen(true)} 
         onTransferMarket={() => setShowTransferMarket(true)}
         onFinances={() => setShowFinances(true)}
         offersCount={offersCount}
@@ -605,20 +605,10 @@ const Game = () => {
         }}
       />
 
-      {/* Swipeable pages container */}
-      <div
-        className="flex h-full w-[200vw] pt-16"
-        style={{
-          transform: `translateX(${swipe.translateX}vw)`,
-          transition: swipe.isDragging ? 'none' : 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          touchAction: 'pan-y',
-        }}
-        onTouchStart={swipe.handleTouchStart}
-        onTouchMove={swipe.handleTouchMove}
-        onTouchEnd={swipe.handleTouchEnd}
-      >
-        {/* Page 0: Tela Principal */}
-        <div className="w-screen h-full overflow-y-auto">
+      {/* Conteúdo principal */}
+      <div className="h-full pt-16">
+        <div className="h-full overflow-y-auto">
+
           {/* Libertadores Match Section */}
           {showLibMatch && nextLibertadoresMatch && (
             <div className="container mx-auto px-4 pt-6">
@@ -801,13 +791,14 @@ const Game = () => {
               </div>
             </div>
           </div>
-        </div>
+      </div>
 
-        {/* Page 1: Gerenciar Elenco */}
-        <div className="relative w-screen h-full overflow-y-auto overflow-x-hidden">
+      {/* Gerenciar Elenco - acessível apenas pelo menu flutuante */}
+      {squadOpen && (
+        <div className="fixed inset-0 z-[60] bg-black overflow-y-auto">
           <SquadManager
             players={players}
-            onClose={() => swipe.goToPage(0)}
+            onClose={() => setSquadOpen(false)}
             onSquadChange={(updatedPlayers) => updatePlayers(updatedPlayers)}
             onSellPlayer={handleSellPlayer}
             userTeamName={teamName}
@@ -817,10 +808,11 @@ const Game = () => {
             marketOpen={isMarketOpen(nextMatch?.round ?? 1)}
           />
         </div>
-      </div>
+      )}
+
 
       {/* Player Value Modal - only on main page */}
-      {selectedPlayerForValue && swipe.currentPage === 0 && (
+      {selectedPlayerForValue && !squadOpen && (
         <PlayerValueModal
           player={selectedPlayerForValue}
           onClose={() => setSelectedPlayerForValue(null)}
