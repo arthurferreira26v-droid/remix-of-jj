@@ -27,11 +27,11 @@ export const RoundsCalendar = ({ teamName, currentRound, onMarketClick }: Rounds
   if (matches.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-2.5 w-full px-4 py-1">
+    <div className="flex w-full min-w-0 items-center gap-2 max-[401px]:gap-2 min-[402px]:gap-2.5 px-4 py-1">
       {/* Mercado fixo à esquerda */}
       <button
         onClick={onMarketClick}
-        className="shrink-0 w-[86px] h-[86px] rounded-xl flex flex-col items-start justify-between p-2.5 bg-[#111113] border border-zinc-800 active:scale-95 transition-transform"
+        className="flex aspect-square w-[clamp(76px,21.4vw,86px)] shrink-0 flex-col items-start justify-between rounded-xl border border-zinc-800 bg-[#111113] p-2.5 transition-transform active:scale-95"
       >
         <ArrowLeftRight className="w-5 h-5 text-white" strokeWidth={2.5} />
         <span className="text-[10px] font-extrabold tracking-wide uppercase text-white text-left leading-tight">
@@ -42,7 +42,7 @@ export const RoundsCalendar = ({ teamName, currentRound, onMarketClick }: Rounds
       {/* Scroll apenas dos jogos */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-x-auto overflow-y-hidden no-scrollbar"
+        className="min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain no-scrollbar"
         style={{ scrollbarWidth: "none" }}
       >
         <div className="flex gap-2.5 w-max">
@@ -57,7 +57,7 @@ export const RoundsCalendar = ({ teamName, currentRound, onMarketClick }: Rounds
               <div
                 key={m.id}
                 ref={isCurrent ? currentRef : undefined}
-                className={`shrink-0 w-[86px] h-[86px] rounded-xl flex flex-col justify-between p-2.5 border transition-all ${
+                className={`flex aspect-square w-[clamp(76px,21.4vw,86px)] shrink-0 flex-col justify-between rounded-xl border p-2.5 transition-all ${
                   isCurrent
                     ? "bg-white border-white"
                     : "bg-[#111113] border-zinc-800"
