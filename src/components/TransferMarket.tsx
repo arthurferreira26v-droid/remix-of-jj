@@ -124,7 +124,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
   const pendingCount = countPendingOffers(userTeamName);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 overflow-y-auto">
+    <div className="fixed inset-0 z-50 max-w-full overflow-x-hidden overflow-y-auto bg-black/95">
       {/* Closed market overlay */}
       {!marketOpen && (
         <div className="fixed inset-0 z-[55] flex items-center justify-center pointer-events-none">
@@ -165,10 +165,10 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
 
         {/* Budget */}
         <div className="px-4 pb-4">
-          <div className="flex items-center justify-center gap-3 bg-gradient-to-r from-green-900/40 via-green-800/40 to-green-900/40 border border-green-700/50 rounded-lg px-6 py-3">
+          <div className="flex min-w-0 items-center justify-center gap-3 bg-gradient-to-r from-green-900/40 via-green-800/40 to-green-900/40 border border-green-700/50 rounded-lg px-4 min-[402px]:px-6 py-3">
             <DollarSign className="w-5 h-5 text-green-400" />
             <span className="text-sm text-green-300/80 font-medium">Caixa:</span>
-            <span className="text-xl font-bold text-green-400">{formatMarketValue(budget)}</span>
+            <span className="min-w-0 text-lg min-[402px]:text-xl font-bold text-green-400">{formatMarketValue(budget)}</span>
           </div>
         </div>
 
@@ -187,7 +187,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
         </div>
 
         {/* Positions */}
-        <div className="px-4 pb-4 flex gap-2 overflow-x-auto">
+        <div className="flex max-w-full gap-2 overflow-x-auto overscroll-x-contain px-4 pb-4 scrollbar-hide">
           {positions.map((pos) => (
             <button
               key={pos}
@@ -203,7 +203,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
       </div>
 
       {/* Players List */}
-      <div className="p-4 space-y-3">
+      <div className="min-w-0 p-3 min-[402px]:p-4 space-y-3">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
             <Loader2 className="w-8 h-8 animate-spin mb-3" />
@@ -217,33 +217,33 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
               const hasSentOffer = sentOfferKeys.has(marketKey);
 
               return (
-                <div key={marketKey} className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-black border-2 border-white rounded-full flex items-center justify-center">
+                 <div key={marketKey} className="min-w-0 bg-zinc-900 rounded-lg p-3 min-[402px]:p-4 border border-zinc-800">
+                   <div className="flex min-w-0 items-center justify-between gap-3 max-[401px]:flex-col max-[401px]:items-stretch">
+                     <div className="flex min-w-0 items-center gap-3">
+                       <div className="w-12 h-12 shrink-0 bg-black border-2 border-white rounded-full flex items-center justify-center">
                         <span className="text-white font-bold text-lg">{player.overall}</span>
                       </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <h4 className="font-bold text-white">{player.name}</h4>
+                       <div className="min-w-0">
+                         <div className="flex min-w-0 items-center gap-1.5">
+                           <h4 className="min-w-0 truncate font-bold text-white">{player.name}</h4>
                           {player.age < 24 && <TrendingUp className="w-3.5 h-3.5 text-green-400" />}
                           {player.age >= 24 && player.age <= 30 && <Minus className="w-3.5 h-3.5 text-yellow-400" />}
                           {player.age > 30 && <TrendingDown className="w-3.5 h-3.5 text-red-400" />}
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
+                         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
                           <span className="text-sm text-zinc-400">{player.position}</span>
                           <span className="px-2 py-0.5 bg-blue-600 rounded text-xs font-bold text-white">#{player.number}</span>
                           <span className="text-xs text-zinc-500">{player.age} anos</span>
                         </div>
                         <span className="text-[11px] text-zinc-500 mt-0.5 block">
-                          Clube: <span className="text-zinc-300">{ownerTeam}</span>
+                           Clube: <span className="break-words text-zinc-300">{ownerTeam}</span>
                         </span>
                       </div>
                     </div>
 
-                    <div className="text-right">
+                     <div className="shrink-0 text-right max-[401px]:flex max-[401px]:items-center max-[401px]:justify-between max-[401px]:gap-3 max-[401px]:text-left">
                       <div className="text-sm font-bold text-green-400">{formatMarketValue(price)}</div>
-                      <div className="flex items-center gap-2 mt-2">
+                       <div className="flex items-center gap-2 mt-2 max-[401px]:mt-0">
                         {(() => {
                           const mk = getMarketKey(player.id, ownerTeam);
                           const watched = watchedKeys.has(mk) || isInWatchlist(userTeamName, player.id, ownerTeam);
@@ -278,7 +278,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
                         })()}
                         {hasSentOffer ? (
                           <span className="inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-yellow-600/20 text-yellow-400 border border-yellow-600/30">
-                            Oferta Enviada
+                             <span className="max-[340px]:hidden">Oferta </span>Enviada
                           </span>
                         ) : (
                           <button
@@ -317,8 +317,8 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
 
       {/* Offer Modal */}
       {offerModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 px-6">
-          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-sm">
+         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 px-4 min-[402px]:px-6">
+           <div className="w-full max-w-sm min-w-0 bg-zinc-900 border border-zinc-700 rounded-2xl p-4 min-[402px]:p-6">
             <h3 className="text-white font-bold text-lg mb-1">Fazer Oferta</h3>
             <p className="text-zinc-400 text-sm mb-4">
               {offerModal.player.name} ({offerModal.player.overall} OVR) — {offerModal.ownerTeam}
@@ -345,7 +345,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
               Seu caixa: {formatMarketValue(budget)}
             </p>
 
-            <div className="flex gap-3">
+             <div className="flex gap-2 min-[402px]:gap-3">
               <button
                 onClick={() => { setOfferModal(null); setOfferValue(""); }}
                 className="flex-1 py-3 rounded-lg font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"

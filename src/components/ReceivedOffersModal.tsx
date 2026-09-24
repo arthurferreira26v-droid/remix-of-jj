@@ -118,7 +118,7 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
   const totalSent = sentOffers.length;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 overflow-y-auto">
+    <div className="fixed inset-0 z-50 max-w-full overflow-x-hidden overflow-y-auto bg-black/95">
       <div className="sticky top-0 bg-black border-b border-zinc-800 z-10">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
@@ -131,10 +131,10 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
         </div>
 
         {/* Tabs */}
-        <div className="flex px-4 pb-3 gap-2">
+        <div className="grid grid-cols-3 gap-1.5 px-3 min-[402px]:gap-2 min-[402px]:px-4 pb-3">
           <button
             onClick={() => setTab("received")}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors ${
+            className={`min-w-0 px-1 py-2 rounded-lg text-[11px] min-[402px]:text-xs font-bold transition-colors ${
               tab === "received" ? "bg-[#c8ff00] text-black" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
             }`}
           >
@@ -142,7 +142,7 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
           </button>
           <button
             onClick={() => setTab("sent")}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors ${
+            className={`min-w-0 px-1 py-2 rounded-lg text-[11px] min-[402px]:text-xs font-bold transition-colors ${
               tab === "sent" ? "bg-[#c8ff00] text-black" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
             }`}
           >
@@ -150,7 +150,7 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
           </button>
           <button
             onClick={() => setTab("counter")}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors ${
+            className={`min-w-0 px-1 py-2 rounded-lg text-[11px] min-[402px]:text-xs font-bold transition-colors ${
               tab === "counter" ? "bg-[#c8ff00] text-black" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
             }`}
           >
@@ -159,7 +159,7 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="min-w-0 p-3 min-[402px]:p-4 space-y-4">
         {tab === "received" && (
           <>
             {Object.keys(grouped).length === 0 ? (
@@ -173,13 +173,13 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
                 const resolvedFirstPlayer = resolveReceivedPlayer(first);
                 return (
                   <div key={playerId} className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
-                    <div className="flex items-center gap-3 p-4 border-b border-zinc-800">
-                      <div className="w-10 h-10 bg-black border-2 border-white rounded-full flex items-center justify-center">
+                     <div className="flex min-w-0 items-center gap-3 p-3 min-[402px]:p-4 border-b border-zinc-800">
+                       <div className="w-10 h-10 shrink-0 bg-black border-2 border-white rounded-full flex items-center justify-center">
                         <span className="text-white font-bold">{resolvedFirstPlayer.overall}</span>
                       </div>
-                      <div>
-                        <h4 className="font-bold text-white">{resolvedFirstPlayer.name}</h4>
-                        <span className="text-xs text-zinc-400">{resolvedFirstPlayer.position} • Valor: {formatMarketValue(resolvedFirstPlayer.marketValue)}</span>
+                       <div className="min-w-0">
+                         <h4 className="truncate font-bold text-white">{resolvedFirstPlayer.name}</h4>
+                         <span className="block text-xs text-zinc-400">{resolvedFirstPlayer.position} • Valor: {formatMarketValue(resolvedFirstPlayer.marketValue)}</span>
                       </div>
                     </div>
 
@@ -190,12 +190,12 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
                         const ratioColor = ratio >= 1.0 ? "text-green-400" : ratio >= 0.9 ? "text-emerald-400" : ratio >= 0.7 ? "text-yellow-400" : "text-red-400";
 
                         return (
-                          <div key={offer.id} className="p-4 flex items-center justify-between">
-                            <div>
+                           <div key={offer.id} className="flex items-center justify-between gap-3 p-3 min-[402px]:p-4">
+                             <div className="min-w-0">
                               <div className="flex items-center gap-2">
                                 <span className="text-sm text-white font-medium">{offer.fromTeam}</span>
                               </div>
-                              <div className="flex items-center gap-2 mt-1">
+                               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
                                 <DollarSign className="w-3.5 h-3.5 text-green-400" />
                                 <span className={`text-sm font-bold ${ratioColor}`}>
                                   {formatMarketValue(offer.offerValue)}
@@ -206,7 +206,7 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                             <div className="flex shrink-0 items-center gap-2">
                               <button
                                 onClick={() => handleReject(offer)}
                                 className="w-10 h-10 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center hover:bg-red-500/30 transition-colors"
@@ -247,18 +247,18 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
                 const isResolved = isAccepted || isRejected;
 
                 return (
-                  <div key={offer.id} className="bg-zinc-900 rounded-lg border border-zinc-800 p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-black border-2 border-white rounded-full flex items-center justify-center">
+                   <div key={offer.id} className="min-w-0 bg-zinc-900 rounded-lg border border-zinc-800 p-3 min-[402px]:p-4">
+                     <div className="flex min-w-0 items-start justify-between gap-3">
+                       <div className="flex min-w-0 items-center gap-3">
+                         <div className="w-10 h-10 shrink-0 bg-black border-2 border-white rounded-full flex items-center justify-center">
                           <span className="text-white font-bold text-sm">{offer.playerOverall}</span>
                         </div>
-                        <div>
-                          <h4 className="font-bold text-white text-sm">{offer.playerName}</h4>
-                          <span className="text-xs text-zinc-400">{offer.playerPosition} • {offer.toTeam}</span>
+                         <div className="min-w-0">
+                           <h4 className="truncate font-bold text-white text-sm">{offer.playerName}</h4>
+                           <span className="block break-words text-xs text-zinc-400">{offer.playerPosition} • {offer.toTeam}</span>
                         </div>
                       </div>
-                      <div className="text-right">
+                       <div className="shrink-0 text-right">
                         <div className="text-sm font-bold text-green-400">{formatMarketValue(offer.offerValue)}</div>
                         {!isResolved && <div className="flex items-center gap-1 mt-1 justify-end">
                           <Clock className="w-3 h-3 text-zinc-500" />
@@ -327,26 +327,26 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
             ) : (
               counterOffers.map((offer) => (
                 <div key={offer.id} className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
-                  <div className="flex items-center gap-3 p-4 border-b border-zinc-800">
-                    <div className="w-10 h-10 bg-black border-2 border-white rounded-full flex items-center justify-center">
+                   <div className="flex min-w-0 items-center gap-3 p-3 min-[402px]:p-4 border-b border-zinc-800">
+                     <div className="w-10 h-10 shrink-0 bg-black border-2 border-white rounded-full flex items-center justify-center">
                       <span className="text-white font-bold">{offer.playerOverall}</span>
                     </div>
-                    <div>
-                      <h4 className="font-bold text-white">{offer.playerName}</h4>
-                      <span className="text-xs text-zinc-400">{offer.playerPosition} • {offer.toTeam}</span>
+                     <div className="min-w-0">
+                       <h4 className="truncate font-bold text-white">{offer.playerName}</h4>
+                       <span className="block break-words text-xs text-zinc-400">{offer.playerPosition} • {offer.toTeam}</span>
                     </div>
                   </div>
 
-                  <div className="p-4 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 bg-zinc-800 rounded-lg p-3 text-center">
+                   <div className="p-3 min-[402px]:p-4 space-y-3">
+                     <div className="flex min-w-0 items-center gap-2 min-[402px]:gap-3">
+                       <div className="min-w-0 flex-1 bg-zinc-800 rounded-lg p-2 min-[402px]:p-3 text-center">
                         <span className="text-[10px] text-zinc-500 block">Sua oferta</span>
-                        <span className="text-sm font-bold text-zinc-300">{formatMarketValue(offer.offerValue)}</span>
+                         <span className="block text-xs min-[402px]:text-sm font-bold text-zinc-300">{formatMarketValue(offer.offerValue)}</span>
                       </div>
                       <ArrowRight className="w-4 h-4 text-zinc-500 shrink-0" />
-                      <div className="flex-1 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-center">
+                       <div className="min-w-0 flex-1 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-2 min-[402px]:p-3 text-center">
                         <span className="text-[10px] text-yellow-400 block">Contraproposta</span>
-                        <span className="text-sm font-bold text-yellow-400">{formatMarketValue(offer.counterValue || 0)}</span>
+                         <span className="block text-xs min-[402px]:text-sm font-bold text-yellow-400">{formatMarketValue(offer.counterValue || 0)}</span>
                       </div>
                     </div>
 
@@ -354,16 +354,16 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
                       Valor de mercado: {formatMarketValue(offer.marketValue)}
                     </div>
 
-                    <div className="flex gap-3">
+                     <div className="grid grid-cols-2 gap-2 min-[402px]:gap-3">
                       <button
                         onClick={() => handleReject(offer)}
-                        className="flex-1 py-2.5 rounded-lg font-bold text-sm bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors"
+                         className="min-w-0 py-2.5 rounded-lg font-bold text-xs min-[402px]:text-sm bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors"
                       >
                         Recusar
                       </button>
                       <button
                         onClick={() => handleAcceptCounter(offer)}
-                        className="flex-1 py-2.5 rounded-lg font-bold text-sm bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 transition-colors"
+                         className="min-w-0 py-2.5 rounded-lg font-bold text-xs min-[402px]:text-sm bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 transition-colors"
                       >
                         Aceitar ({formatMarketValue(offer.counterValue || 0)})
                       </button>

@@ -14,7 +14,7 @@ interface LeagueSelectorProps {
 
 export const LeagueSelector = ({ leagues, selectedLeague, onSelect }: LeagueSelectorProps) => {
   return (
-    <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+    <div className="grid w-full min-w-0 grid-cols-3 gap-2 min-[402px]:gap-3 pb-1">
       {leagues.map((league) => {
         const isSelected = selectedLeague === league.id;
         const isDisabled = league.id !== "brasileiro";
@@ -25,7 +25,7 @@ export const LeagueSelector = ({ leagues, selectedLeague, onSelect }: LeagueSele
             disabled={isDisabled}
             onClick={() => !isDisabled && onSelect(league.id)}
             className={cn(
-              "flex-shrink-0 flex flex-col items-center justify-center gap-2 w-[100px] h-[100px] rounded-2xl border transition-all",
+              "flex min-w-0 w-full max-w-[100px] aspect-square flex-col items-center justify-center gap-2 rounded-2xl border transition-all",
               isSelected
                 ? "bg-white/10 border-white/30 text-white"
                 : "bg-[#141414] border-white/5 text-white/60",
@@ -33,7 +33,7 @@ export const LeagueSelector = ({ leagues, selectedLeague, onSelect }: LeagueSele
               !isDisabled && "active:scale-[0.97] cursor-pointer hover:bg-white/[0.08]"
             )}
           >
-            <div className="w-12 h-12 flex items-center justify-center">
+            <div className="flex h-[clamp(40px,12vw,48px)] w-[clamp(40px,12vw,48px)] items-center justify-center">
               {league.icon}
             </div>
             <span className="text-[10px] font-bold uppercase tracking-wider">
