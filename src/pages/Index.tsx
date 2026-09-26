@@ -4,29 +4,8 @@ import { TeamCard } from "@/components/TeamCard";
 import { teams, leagues } from "@/data/teams";
 import { LeagueSelector, type League } from "@/components/LeagueSelector";
 import { ChevronDown } from "lucide-react";
-
-const BrasileiroIcon = () => (
-  <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-    <path
-      d="M24 3L40 13V34L24 45L8 34V13L24 3Z"
-      fill="white"
-      stroke="white"
-      strokeWidth="2.5"
-      strokeLinejoin="round"
-    />
-    <text
-      x="24"
-      y="31"
-      textAnchor="middle"
-      fill="#0a0a0b"
-      fontSize="14"
-      fontWeight="900"
-      fontFamily="Arial, Helvetica, sans-serif"
-    >
-      BR
-    </text>
-  </svg>
-);
+import brasileiraoIcon from "@/assets/brasileirao-icon.png";
+import laligaIcon from "@/assets/laliga-icon.png";
 
 const InglesIcon = () => (
   <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
@@ -48,34 +27,6 @@ const InglesIcon = () => (
   </svg>
 );
 
-const EspanholIcon = () => (
-  <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-    <rect x="3" y="7" width="42" height="34" rx="8" fill="white" />
-    <text
-      x="24"
-      y="23"
-      textAnchor="middle"
-      fill="#dc2626"
-      fontSize="11"
-      fontWeight="900"
-      fontFamily="Arial, Helvetica, sans-serif"
-    >
-      LA
-    </text>
-    <text
-      x="24"
-      y="36"
-      textAnchor="middle"
-      fill="#dc2626"
-      fontSize="11"
-      fontWeight="900"
-      fontFamily="Arial, Helvetica, sans-serif"
-    >
-      LIGA
-    </text>
-  </svg>
-);
-
 const BrazilFlagIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
     <rect width="24" height="24" rx="4" fill="#009c3b" />
@@ -86,9 +37,23 @@ const BrazilFlagIcon = () => (
 );
 
 const leagueIcons: Record<string, React.ReactNode> = {
-  brasileiro: <BrasileiroIcon />,
+  brasileiro: (
+    <img
+      src={brasileiraoIcon}
+      alt="Brasileirão"
+      className="w-full h-full object-contain"
+      draggable={false}
+    />
+  ),
   ingles: <InglesIcon />,
-  espanhol: <EspanholIcon />,
+  espanhol: (
+    <img
+      src={laligaIcon}
+      alt="LaLiga"
+      className="w-full h-full object-contain"
+      draggable={false}
+    />
+  ),
 };
 
 const Index = () => {
