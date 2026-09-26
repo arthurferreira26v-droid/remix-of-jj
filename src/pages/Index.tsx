@@ -4,8 +4,8 @@ import { TeamCard } from "@/components/TeamCard";
 import { teams, leagues } from "@/data/teams";
 import { LeagueSelector, type League } from "@/components/LeagueSelector";
 import { ChevronDown } from "lucide-react";
-import brasileiraoIcon from "@/assets/brasileirao-icon.png.asset.json";
-import laligaIcon from "@/assets/laliga-icon.png.asset.json";
+import brasileiraoIcon from "@/assets/brasileirao-icon.png";
+import laligaIcon from "@/assets/laliga-icon.png";
 
 const InglesIcon = () => (
   <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
