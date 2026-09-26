@@ -4,6 +4,8 @@ import { TeamCard } from "@/components/TeamCard";
 import { teams, leagues } from "@/data/teams";
 import { LeagueSelector, type League } from "@/components/LeagueSelector";
 import { ChevronDown } from "lucide-react";
+import brasileiraoIcon from "@/assets/brasileirao-icon.png.asset.json";
+import laligaIcon from "@/assets/laliga-icon.png.asset.json";
 
 const BrasileiroIcon = () => (
   <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
@@ -28,67 +30,24 @@ const BrasileiroIcon = () => (
   </svg>
 );
 
-const InglesIcon = () => (
-  <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-    <circle cx="24" cy="24" r="22" fill="white" />
-    <path
-      d="M24 8C20 8 14 12 14 20C14 28 22 34 24 38C26 34 34 28 34 20C34 12 28 8 24 8Z"
-      fill="#0a0a0b"
-    />
-    <circle cx="20" cy="21" r="2" fill="white" />
-    <circle cx="28" cy="21" r="2" fill="white" />
-    <path d="M20 28C21 29 23 30 24 30C25 30 27 29 28 28" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-    <path
-      d="M16 16C19 14 21 14 24 17C27 14 29 14 32 16"
-      stroke="#0a0a0b"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      fill="none"
-    />
-  </svg>
-);
-
-const EspanholIcon = () => (
-  <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-    <rect x="3" y="7" width="42" height="34" rx="8" fill="white" />
-    <text
-      x="24"
-      y="23"
-      textAnchor="middle"
-      fill="#dc2626"
-      fontSize="11"
-      fontWeight="900"
-      fontFamily="Arial, Helvetica, sans-serif"
-    >
-      LA
-    </text>
-    <text
-      x="24"
-      y="36"
-      textAnchor="middle"
-      fill="#dc2626"
-      fontSize="11"
-      fontWeight="900"
-      fontFamily="Arial, Helvetica, sans-serif"
-    >
-      LIGA
-    </text>
-  </svg>
-);
-
-const BrazilFlagIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
-    <rect width="24" height="24" rx="4" fill="#009c3b" />
-    <path d="M12 3L22 12L12 21L2 12L12 3Z" fill="#ffdf00" />
-    <circle cx="12" cy="12" r="5" fill="#002776" />
-    <path d="M8 12C10 11 14 11 16 12C14 13 10 13 8 12Z" fill="white" />
-  </svg>
-);
-
 const leagueIcons: Record<string, React.ReactNode> = {
-  brasileiro: <BrasileiroIcon />,
+  brasileiro: (
+    <img
+      src={brasileiraoIcon.url}
+      alt="Brasileirão"
+      className="w-full h-full object-contain"
+      draggable={false}
+    />
+  ),
   ingles: <InglesIcon />,
-  espanhol: <EspanholIcon />,
+  espanhol: (
+    <img
+      src={laligaIcon.url}
+      alt="LaLiga"
+      className="w-full h-full object-contain"
+      draggable={false}
+    />
+  ),
 };
 
 const Index = () => {
