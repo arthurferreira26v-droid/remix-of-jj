@@ -26,7 +26,14 @@ const leagueIcons: Record<string, React.ReactNode> = {
       draggable={false}
     />
   ),
-  ingles: <InglesIcon />,
+  ingles: (
+    <img
+      src={premierLeagueIcon}
+      alt="Premier League"
+      className="w-full h-full object-contain"
+      draggable={false}
+    />
+  ),
   espanhol: (
     <img
       src={laligaIcon}
