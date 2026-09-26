@@ -6,6 +6,7 @@ import { LeagueSelector, type League } from "@/components/LeagueSelector";
 import { ChevronDown } from "lucide-react";
 import brasileiraoIcon from "@/assets/brasileirao-icon.png";
 import laligaIcon from "@/assets/laliga-icon.png";
+import premierLeagueIcon from "@/assets/premier-league-icon.svg";
 
 
 const BrazilFlagIcon = () => (
