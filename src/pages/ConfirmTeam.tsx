@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { teams } from "@/data/teams";
 import { getTeamLogo } from "@/utils/teamLogos";
+import { Button } from "@/components/ui/button";
 
 const ConfirmTeam = () => {
   const navigate = useNavigate();
@@ -28,17 +29,19 @@ const ConfirmTeam = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#4ade80]">
       <div className="p-4">
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => navigate(-1)}
           aria-label="Voltar"
-          className="p-2 -ml-2 text-black/70 hover:text-black transition-colors"
+          className="-ml-2 text-foreground hover:text-foreground hover:bg-transparent"
         >
-          <ArrowLeft className="w-6 h-6" />
-        </button>
+          <ArrowLeft className="!w-6 !h-6" />
+        </Button>
       </div>
 
       <div className="flex-1 flex flex-col px-4 pt-8">
-        <h1 className="text-white text-3xl sm:text-4xl font-extrabold uppercase leading-tight text-left">
+        <h1 className="text-foreground text-[28px] sm:text-4xl font-extrabold uppercase leading-tight text-left">
           Conquiste o mundo
           <br />
           com seu time
@@ -57,12 +60,12 @@ const ConfirmTeam = () => {
       </div>
 
       <div className="p-4">
-        <button
+        <Button
           onClick={handleConfirm}
-          className="w-full py-4 rounded-xl bg-black text-white font-bold text-base uppercase tracking-wide active:scale-[0.98] transition-transform"
+          className="w-full h-auto py-4 rounded-xl bg-black text-white font-bold text-base uppercase tracking-wide active:scale-[0.98] transition-transform"
         >
           Continuar
-        </button>
+        </Button>
       </div>
 
     </div>
