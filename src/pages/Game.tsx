@@ -791,6 +791,7 @@ const Game = () => {
               </div>
             </div>
           </div>
+        </div>
       </div>
 
       {/* Gerenciar Elenco - acessível apenas pelo menu flutuante */}
