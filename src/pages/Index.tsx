@@ -39,7 +39,7 @@ const BrazilFlagIcon = () => (
 const leagueIcons: Record<string, React.ReactNode> = {
   brasileiro: (
     <img
-      src={brasileiraoIcon.url}
+      src={brasileiraoIcon}
       alt="Brasileirão"
       className="w-full h-full object-contain"
       draggable={false}
@@ -48,7 +48,7 @@ const leagueIcons: Record<string, React.ReactNode> = {
   ingles: <InglesIcon />,
   espanhol: (
     <img
-      src={laligaIcon.url}
+      src={laligaIcon}
       alt="LaLiga"
       className="w-full h-full object-contain"
       draggable={false}
