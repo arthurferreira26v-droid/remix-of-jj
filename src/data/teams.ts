@@ -47,6 +47,50 @@ export const teams: Team[] = [
   { id: "mirassol", name: "Mirassol", league: "brasileiro", rating: 2, logo: mirassolLogo, playable: true },
   { id: "remo", name: "Remo", league: "brasileiro", rating: 2, logo: remoLogo, playable: true },
 
+  // Premier League 2025/26
+  { id: "bournemouth", name: "Bournemouth", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/989.png", playable: true },
+  { id: "sunderland", name: "Sunderland", league: "ingles", rating: 4, logo: "https://tmssl.akamaized.net/images/wappen/head/289.png", playable: true },
+  { id: "aston-villa", name: "Aston Villa", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/405.png", playable: true },
+  { id: "brighton", name: "Brighton", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/1237.png", playable: true },
+  { id: "crystal-palace", name: "Crystal Palace", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/873.png", playable: true },
+  { id: "arsenal", name: "Arsenal", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/11.png", playable: true },
+  { id: "brentford", name: "Brentford", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/1148.png", playable: true },
+  { id: "burnley", name: "Burnley", league: "ingles", rating: 4, logo: "https://tmssl.akamaized.net/images/wappen/head/1132.png", playable: true },
+  { id: "chelsea", name: "Chelsea", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/631.png", playable: true },
+  { id: "everton", name: "Everton", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/29.png", playable: true },
+  { id: "fulham", name: "Fulham", league: "ingles", rating: 4, logo: "https://tmssl.akamaized.net/images/wappen/head/931.png", playable: true },
+  { id: "liverpool", name: "Liverpool", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/31.png", playable: true },
+  { id: "leeds", name: "Leeds United", league: "ingles", rating: 4, logo: "https://tmssl.akamaized.net/images/wappen/head/399.png", playable: true },
+  { id: "man-city", name: "Manchester City", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/281.png", playable: true },
+  { id: "man-united", name: "Manchester United", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/985.png", playable: true },
+  { id: "newcastle", name: "Newcastle", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/762.png", playable: true },
+  { id: "nottingham-forest", name: "Nottingham Forest", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/703.png", playable: true },
+  { id: "tottenham", name: "Tottenham", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/148.png", playable: true },
+  { id: "west-ham", name: "West Ham", league: "ingles", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/379.png", playable: true },
+  { id: "wolves", name: "Wolverhampton", league: "ingles", rating: 4, logo: "https://tmssl.akamaized.net/images/wappen/head/543.png", playable: true },
+
+  // LaLiga 2025/26
+  { id: "athletic-bilbao", name: "Athletic Bilbao", league: "espanhol", rating: 4, logo: "https://tmssl.akamaized.net/images/wappen/head/621.png", playable: true },
+  { id: "atletico-madrid", name: "Atlético de Madrid", league: "espanhol", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/13.png", playable: true },
+  { id: "osasuna", name: "Osasuna", league: "espanhol", rating: 2, logo: "https://tmssl.akamaized.net/images/wappen/head/331.png", playable: true },
+  { id: "celta", name: "Celta de Vigo", league: "espanhol", rating: 4, logo: "https://tmssl.akamaized.net/images/wappen/head/940.png", playable: true },
+  { id: "alaves", name: "Alavés", league: "espanhol", rating: 2, logo: "https://tmssl.akamaized.net/images/wappen/head/1108.png", playable: true },
+  { id: "espanyol", name: "Espanyol", league: "espanhol", rating: 3, logo: "https://tmssl.akamaized.net/images/wappen/head/714.png", playable: true },
+  { id: "barcelona", name: "Barcelona", league: "espanhol", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/131.png", playable: true },
+  { id: "elche", name: "Elche", league: "espanhol", rating: 2, logo: "https://tmssl.akamaized.net/images/wappen/head/1531.png", playable: true },
+  { id: "getafe", name: "Getafe", league: "espanhol", rating: 2, logo: "https://tmssl.akamaized.net/images/wappen/head/3709.png", playable: true },
+  { id: "girona", name: "Girona", league: "espanhol", rating: 3, logo: "https://tmssl.akamaized.net/images/wappen/head/12321.png", playable: true },
+  { id: "sevilla", name: "Sevilla", league: "espanhol", rating: 3, logo: "https://tmssl.akamaized.net/images/wappen/head/368.png", playable: true },
+  { id: "valencia", name: "Valencia", league: "espanhol", rating: 3, logo: "https://tmssl.akamaized.net/images/wappen/head/1049.png", playable: true },
+  { id: "villarreal", name: "Villarreal", league: "espanhol", rating: 4, logo: "https://tmssl.akamaized.net/images/wappen/head/1050.png", playable: true },
+  { id: "rayo-vallecano", name: "Rayo Vallecano", league: "espanhol", rating: 3, logo: "https://tmssl.akamaized.net/images/wappen/head/367.png", playable: true },
+  { id: "mallorca", name: "Mallorca", league: "espanhol", rating: 2, logo: "https://tmssl.akamaized.net/images/wappen/head/237.png", playable: true },
+  { id: "real-betis", name: "Real Betis", league: "espanhol", rating: 4, logo: "https://tmssl.akamaized.net/images/wappen/head/150.png", playable: true },
+  { id: "real-madrid", name: "Real Madrid", league: "espanhol", rating: 5, logo: "https://tmssl.akamaized.net/images/wappen/head/418.png", playable: true },
+  { id: "real-oviedo", name: "Real Oviedo", league: "espanhol", rating: 2, logo: "https://tmssl.akamaized.net/images/wappen/head/2497.png", playable: true },
+  { id: "real-sociedad", name: "Real Sociedad", league: "espanhol", rating: 4, logo: "https://tmssl.akamaized.net/images/wappen/head/681.png", playable: true },
+  { id: "levante", name: "Levante", league: "espanhol", rating: 3, logo: "https://tmssl.akamaized.net/images/wappen/head/3368.png", playable: true },
+
   // === CLUBES CONTINENTAIS (IA-only, playable: false) ===
 
   // Argentina
@@ -148,7 +192,25 @@ export const teams: Team[] = [
 ];
 
 export const leagues = [
-  { id: "brasileiro", name: "Brasileiro", flag: "🇧🇷" },
-  { id: "ingles", name: "Inglês", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
-  { id: "espanhol", name: "Espanhol", flag: "🇪🇸" },
+  { id: "brasileiro", name: "Brasileiro", flag: "🇧🇷", competition: "Campeonato Brasileiro Série A" },
+  { id: "ingles", name: "Inglês", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", competition: "Premier League" },
+  { id: "espanhol", name: "Espanhol", flag: "🇪🇸", competition: "LaLiga" },
 ];
+
+/** Ligas jogáveis (campanha) */
+export const PLAYABLE_LEAGUES = ["brasileiro", "ingles", "espanhol"];
+
+/** Times da mesma liga de um time */
+export const getLeagueTeamNames = (teamName: string): string[] => {
+  const t = teams.find((x) => x.name === teamName);
+  const league = t?.league ?? "brasileiro";
+  return teams.filter((x) => x.league === league).map((x) => x.name);
+};
+
+export const getAllPlayableTeamNames = (): string[] =>
+  teams.filter((x) => PLAYABLE_LEAGUES.includes(x.league)).map((x) => x.name);
+
+export const getCompetitionShortName = (teamName: string): string => {
+  const l = teams.find((x) => x.name === teamName)?.league;
+  return l === "ingles" ? "Premier League" : l === "espanhol" ? "LaLiga" : "Brasileirão";
+};

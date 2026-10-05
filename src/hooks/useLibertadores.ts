@@ -82,6 +82,12 @@ export const useLibertadores = (userTeamName: string, brasileiraoChampionshipId:
       setLoading(false);
       return;
     }
+    // Libertadores só para clubes brasileiros
+    const ut = teams.find(t => t.name === userTeamName);
+    if (ut && ut.league !== "brasileiro") {
+      setLoading(false);
+      return;
+    }
     initLibertadores();
   }, [user, brasileiraoChampionshipId]);
 

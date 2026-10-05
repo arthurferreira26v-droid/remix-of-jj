@@ -17,7 +17,7 @@ export const LeagueSelector = ({ leagues, selectedLeague, onSelect }: LeagueSele
     <div className="grid w-full min-w-0 grid-cols-3 gap-2 min-[402px]:gap-3 pb-1">
       {leagues.map((league) => {
         const isSelected = selectedLeague === league.id;
-        const isDisabled = league.id !== "brasileiro";
+        const isDisabled = false;
 
         return (
           <button

@@ -1,3 +1,4 @@
+import { getCompetitionShortName } from "@/data/teams";
 import { ArrowLeftRight } from "lucide-react";
 import { getLocalMatches } from "@/utils/localChampionship";
 import { getTeamLogo } from "@/utils/teamLogos";
@@ -72,7 +73,7 @@ export const RoundsCalendar = ({ teamName, currentRound, onMarketClick }: Rounds
                     {isHome ? "CASA" : "FORA"}
                   </div>
                   <div className={`text-[8px] font-bold uppercase tracking-wider ${isCurrent ? "text-black/60" : "text-zinc-400"}`}>
-                    Brasileirão
+                    {getCompetitionShortName(teamName)}
                   </div>
                 </div>
               </div>
