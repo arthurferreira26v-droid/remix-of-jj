@@ -209,3 +209,8 @@ export const getLeagueTeamNames = (teamName: string): string[] => {
 
 export const getAllPlayableTeamNames = (): string[] =>
   teams.filter((x) => PLAYABLE_LEAGUES.includes(x.league)).map((x) => x.name);
+
+export const getCompetitionShortName = (teamName: string): string => {
+  const l = teams.find((x) => x.name === teamName)?.league;
+  return l === "ingles" ? "Premier League" : l === "espanhol" ? "LaLiga" : "Brasileirão";
+};

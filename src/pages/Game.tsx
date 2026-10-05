@@ -22,7 +22,7 @@ import {
 } from "@/data/players";
 import { Loader2, Zap, ShoppingCart } from "lucide-react";
 import { useChampionship } from "@/hooks/useChampionship";
-import { getLeagueTeamNames, getAllPlayableTeamNames } from "@/data/teams";
+import { getLeagueTeamNames, getAllPlayableTeamNames, getCompetitionShortName } from "@/data/teams";
 import { useLibertadores } from "@/hooks/useLibertadores";
 import { useTeamForm } from "@/hooks/useTeamForm";
 import { useTeamBudget } from "@/hooks/useTeamBudget";
@@ -505,7 +505,7 @@ const Game = () => {
                 {teamName}
               </p>
               <p className="text-lg text-muted-foreground">
-                Parabéns! Você conquistou o Brasileirão 2024!
+                Parabéns! Você conquistou o {getCompetitionShortName(teamName)}!
               </p>
             </div>
             
@@ -655,7 +655,7 @@ const Game = () => {
               <div className="container mx-auto px-4 pt-4 pb-8">
 
                 <h3 className="text-sm font-bold text-white/60 mb-3">
-                  Sábado • Brasileirão - {nextMatch.round}ª Rodada
+                  Sábado • {getCompetitionShortName(teamName)} - {nextMatch.round}ª Rodada
                 </h3>
                 <MatchCard
                   userTeam={teamName}
