@@ -73,7 +73,7 @@ export const RoundsCalendar = ({ teamName, currentRound, onMarketClick }: Rounds
                     {isHome ? "CASA" : "FORA"}
                   </div>
                   <div className={`text-[8px] font-bold uppercase tracking-wider ${isCurrent ? "text-black/60" : "text-zinc-400"}`}>
-                    {getCompetitionShortName(userTeam)}
+                    {getCompetitionShortName(teamName)}
                   </div>
                 </div>
               </div>
