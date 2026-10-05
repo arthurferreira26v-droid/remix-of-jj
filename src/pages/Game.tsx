@@ -22,6 +22,7 @@ import {
 } from "@/data/players";
 import { Loader2, Zap, ShoppingCart } from "lucide-react";
 import { useChampionship } from "@/hooks/useChampionship";
+import { getLeagueTeamNames, getAllPlayableTeamNames } from "@/data/teams";
 import { useLibertadores } from "@/hooks/useLibertadores";
 import { useTeamForm } from "@/hooks/useTeamForm";
 import { useTeamBudget } from "@/hooks/useTeamBudget";
@@ -49,7 +50,7 @@ const Game = () => {
   useEffect(() => {
     if (isTemp) {
       setTempMode(teamName, true);
-      const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
+      const brazilianTeams = getAllPlayableTeamNames();
       brazilianTeams.forEach(t => {
         localStorage.removeItem(`players_${t}`);
         localStorage.removeItem(`starter_order_${t}`);
@@ -127,7 +128,7 @@ const Game = () => {
   // Process CPU offers + generate active CPU offers on mount
   useEffect(() => {
     if (!adminSquadReady) return;
-    const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
+    const brazilianTeams = getLeagueTeamNames(teamName);
     processCpuOffers([teamName]);
     const newOffers = generateCpuOffers([teamName], brazilianTeams);
     notifyNewOffers(newOffers);
@@ -311,7 +312,7 @@ const Game = () => {
     refreshChampionship();
     setBudget(getLocalBudget(teamName));
     // Process transfers after match
-    const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
+    const brazilianTeams = getLeagueTeamNames(teamName);
     processCpuOffers([teamName]);
     const newOffers = generateCpuOffers([teamName], brazilianTeams);
     notifyNewOffers(newOffers);
@@ -584,7 +585,7 @@ const Game = () => {
         offersCount={offersCount}
         onReceivedOffers={() => setShowReceivedOffers(true)}
         onExit={() => {
-          const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
+          const brazilianTeams = getAllPlayableTeamNames();
           brazilianTeams.forEach(t => {
             localStorage.removeItem(`players_${t}`);
             localStorage.removeItem(`starter_order_${t}`);

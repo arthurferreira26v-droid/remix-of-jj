@@ -28,7 +28,7 @@ export const ScoutTab = ({ userTeamName, budget, onOfferSent, onBudgetChanged, m
   const loadWatchedPlayers = () => {
     if (!userTeamName) return;
     const watchlist = getWatchlist(userTeamName);
-    const allTeams = teams.filter(t => t.league === "brasileiro");
+    const allTeams = teams.filter(t => ["brasileiro","ingles","espanhol"].includes(t.league));
     const result: { player: Player; ownerTeam: string }[] = [];
 
     for (const entry of watchlist) {

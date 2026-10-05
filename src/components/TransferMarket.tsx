@@ -1,3 +1,4 @@
+import { getAllPlayableTeamNames } from "@/data/teams";
 import { useState, useEffect } from "react";
 import { X, Search, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Minus, Loader2, Send, Inbox, Binoculars, XCircle } from "lucide-react";
 import { Player } from "@/data/players";
@@ -36,7 +37,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const brazilianTeams = teams.filter(t => t.league === "brasileiro").map(t => t.name);
+      const brazilianTeams = getAllPlayableTeamNames();
       const all: { player: Player; ownerTeam: string }[] = [];
 
       for (const teamName of brazilianTeams) {

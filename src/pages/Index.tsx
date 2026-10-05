@@ -86,8 +86,8 @@ const Index = () => {
             className="w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-xl bg-[#141414] border border-white/5 text-white/40 cursor-not-allowed"
           >
             <div className="flex items-center gap-3">
-              <BrazilFlagIcon />
-              <span className="text-sm font-semibold">Campeonato Brasileiro Série A</span>
+              <span className="w-6 h-6 flex items-center justify-center text-lg">{selectedLeague === "brasileiro" ? <BrazilFlagIcon /> : leagues.find(l => l.id === selectedLeague)?.flag}</span>
+              <span className="text-sm font-semibold">{leagues.find(l => l.id === selectedLeague)?.competition}</span>
             </div>
             <ChevronDown className="w-5 h-5" />
           </button>
