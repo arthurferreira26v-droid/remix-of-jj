@@ -6,11 +6,14 @@ import { ChevronLeft, ChevronDown, ChevronUp, Check } from "lucide-react";
 import { useLibertadores } from "@/hooks/useLibertadores";
 import { useChampionship } from "@/hooks/useChampionship";
 
-type Competition = "brasileirao" | "libertadores";
+type Competition = "brasileirao" | "premier" | "laliga" | "libertadores";
+type LeagueKey = "brasileiro" | "ingles" | "espanhol";
 
-const competitions = [
-  { id: "brasileirao" as Competition, label: "Brasileirão" },
-  { id: "libertadores" as Competition, label: "Libertadores" },
+const competitions: { id: Competition; label: string; league?: LeagueKey }[] = [
+  { id: "brasileirao", label: "Brasileirão", league: "brasileiro" },
+  { id: "premier", label: "Premier League", league: "ingles" },
+  { id: "laliga", label: "LaLiga", league: "espanhol" },
+  { id: "libertadores", label: "Libertadores" },
 ];
 
 const Standings = () => {
