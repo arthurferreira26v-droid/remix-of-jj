@@ -1,22 +1,46 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { getLocalStandings, type LocalStanding } from "@/utils/localChampionship";
+import { getLocalChampionship, getLocalStandings, type LocalStanding } from "@/utils/localChampionship";
+import { getSimulatedStandings } from "@/utils/leagueSimStandings";
 import { getTeamLogo } from "@/utils/teamLogos";
+import { teams } from "@/data/teams";
 import { Loader2 } from "lucide-react";
 
-export const StandingsTable = () => {
+export type LeagueKey = "brasileiro" | "ingles" | "espanhol";
+
+const LEAGUE_TITLES: Record<LeagueKey, string> = {
+  brasileiro: "BRASILEIRÃO – SÉRIE A",
+  ingles: "PREMIER LEAGUE 2025/26",
+  espanhol: "LALIGA 2025/26",
+};
+
+interface StandingsTableProps {
+  league: LeagueKey;
+}
+
+export const StandingsTable = ({ league }: StandingsTableProps) => {
   const [searchParams] = useSearchParams();
   const teamName = searchParams.get("time") || "Botafogo";
+
+  const userLeague = teams.find(t => t.name === teamName)?.league ?? "brasileiro";
+  const isUserLeague = league === userLeague;
 
   const [standings, setStandings] = useState<(LocalStanding & { position: number })[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const data = getLocalStandings(teamName);
+    let data: LocalStanding[];
+    if (isUserLeague) {
+      data = getLocalStandings(teamName);
+    } else {
+      const champ = getLocalChampionship(teamName);
+      const roundsPlayed = champ ? Math.max(0, champ.current_round - 1) : 7;
+      data = getSimulatedStandings(league, roundsPlayed);
+    }
     const sorted = [...data].sort((a, b) => b.points - a.points || b.goal_difference - a.goal_difference || b.goals_for - a.goals_for);
     setStandings(sorted.map((t, i) => ({ ...t, position: i + 1 })));
     setLoading(false);
-  }, [teamName]);
+  }, [league, teamName, isUserLeague]);
 
   if (loading) {
     return (
@@ -30,7 +54,7 @@ export const StandingsTable = () => {
     <div className="bg-black rounded-xl border border-border">
       <div className="px-4 py-3 border-b border-border">
         <h2 className="text-lg font-bold text-white">
-          BRASILEIRÃO – SÉRIE A
+          {LEAGUE_TITLES[league]}
         </h2>
       </div>
 
