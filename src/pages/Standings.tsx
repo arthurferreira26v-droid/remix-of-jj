@@ -99,14 +99,14 @@ const Standings = () => {
 
       <div className="flex-1 overflow-y-auto">
         <div className="container mx-auto px-4 py-4">
-          {selected === "brasileirao" ? (
-            <StandingsTable />
-          ) : (
+          {selected === "libertadores" ? (
             <LibertadoresGroups 
               groups={groups} 
               loading={libertLoading}
               preLibertadoresResults={preLibertadoresResults}
             />
+          ) : (
+            <StandingsTable league={competitions.find(c => c.id === selected)!.league!} />
           )}
         </div>
       </div>
