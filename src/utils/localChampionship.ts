@@ -398,13 +398,7 @@ export function saveLocalBudget(teamName: string, budget: number) {
 }
 
 function getDefaultBudget(teamName: string): number {
-  const budgets: Record<string, number> = {
-    "Flamengo": 18000000, "Palmeiras": 17000000, "Botafogo": 15000000,
-    "Corinthians": 12000000, "Internacional": 11000000, "São Paulo": 10000000,
-    "Fluminense": 9000000, "Cruzeiro": 9000000, "Santos": 7000000,
-    "Grêmio": 7000000, "Atlético Mineiro": 7000000, "Vasco da Gama": 5000000,
-  };
-  return budgets[teamName] || 5000000;
+  return getTeamDefaultBudget(teamName);
 }
 
 export function isChampionshipComplete(teamName: string): { complete: boolean; winner: string | null } {
