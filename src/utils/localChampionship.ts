@@ -1,4 +1,5 @@
 import { teams } from "@/data/teams";
+import { getDefaultBudget } from "@/utils/teamBudgets";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -397,9 +398,6 @@ export function saveLocalBudget(teamName: string, budget: number) {
   localStorage.setItem(KEYS.budget(teamName), String(budget));
 }
 
-function getDefaultBudget(teamName: string): number {
-  return getTeamDefaultBudget(teamName);
-}
 
 export function isChampionshipComplete(teamName: string): { complete: boolean; winner: string | null } {
   const matches = getLocalMatches(teamName);
