@@ -6,12 +6,13 @@ import { getTeamLogo } from "@/utils/teamLogos";
 import { teams } from "@/data/teams";
 import { Loader2 } from "lucide-react";
 
-export type LeagueKey = "brasileiro" | "ingles" | "espanhol";
+export type LeagueKey = "brasileiro" | "ingles" | "espanhol" | "frances";
 
 const LEAGUE_TITLES: Record<LeagueKey, string> = {
   brasileiro: "BRASILEIRÃO – SÉRIE A",
   ingles: "PREMIER LEAGUE 2025/26",
   espanhol: "LALIGA 2025/26",
+  frances: "LIGUE 1 2025/26",
 };
 
 interface StandingsTableProps {
