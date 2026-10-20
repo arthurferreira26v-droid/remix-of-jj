@@ -5,7 +5,7 @@ plugin({ name: "test-image-imports", setup(build) {
   build.onLoad({ filter: /\.(png|svg)$/ }, args => ({ contents: `export default ${JSON.stringify(args.path)}`, loader: "js" }));
 } });
 
-let registry: typeof import("./teams");
+let registry;
 beforeAll(async () => { registry = await import("./teams"); });
 
 test("France is the fourth selectable playable league", () => {
