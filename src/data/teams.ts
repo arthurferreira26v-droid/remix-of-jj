@@ -31,6 +31,7 @@ import auxerreAsset from "@/assets/teams/auxerre.png.asset.json";
 import leHavreAsset from "@/assets/teams/le-havre.png.asset.json";
 import angersAsset from "@/assets/teams/angers.png.asset.json";
 import metzAsset from "@/assets/teams/metz.png.asset.json";
+import { assetUrl } from "@/lib/assetUrl";
 
 export interface Team {
   id: string;
@@ -110,24 +111,24 @@ export const teams: Team[] = [
   { id: "levante", name: "Levante", league: "espanhol", rating: 3, logo: "https://tmssl.akamaized.net/images/wappen/head/3368.png", playable: true },
 
   // Ligue 1 2025/26 (18 times)
-  { id: "psg", name: "Paris Saint-Germain", league: "frances", rating: 5, logo: psgAsset.url, playable: true },
-  { id: "monaco", name: "Monaco", league: "frances", rating: 4, logo: monacoAsset.url, playable: true },
-  { id: "marseille", name: "Marseille", league: "frances", rating: 4, logo: marseilleAsset.url, playable: true },
-  { id: "strasbourg", name: "Strasbourg", league: "frances", rating: 3, logo: strasbourgAsset.url, playable: true },
-  { id: "lyon", name: "Lyon", league: "frances", rating: 4, logo: lyonAsset.url, playable: true },
-  { id: "lille", name: "Lille", league: "frances", rating: 4, logo: lilleAsset.url, playable: true },
-  { id: "rennes", name: "Rennes", league: "frances", rating: 3, logo: rennesAsset.url, playable: true },
-  { id: "lens", name: "Lens", league: "frances", rating: 3, logo: lensAsset.url, playable: true },
-  { id: "nice", name: "Nice", league: "frances", rating: 4, logo: niceAsset.url, playable: true },
-  { id: "toulouse", name: "Toulouse", league: "frances", rating: 3, logo: toulouseAsset.url, playable: true },
-  { id: "paris-fc", name: "Paris FC", league: "frances", rating: 2, logo: parisFcAsset.url, playable: true },
-  { id: "nantes", name: "Nantes", league: "frances", rating: 2, logo: nantesAsset.url, playable: true },
-  { id: "lorient", name: "Lorient", league: "frances", rating: 2, logo: lorientAsset.url, playable: true },
-  { id: "brest", name: "Brest", league: "frances", rating: 3, logo: brestAsset.url, playable: true },
-  { id: "auxerre", name: "Auxerre", league: "frances", rating: 2, logo: auxerreAsset.url, playable: true },
-  { id: "le-havre", name: "Le Havre", league: "frances", rating: 2, logo: leHavreAsset.url, playable: true },
-  { id: "angers", name: "Angers", league: "frances", rating: 2, logo: angersAsset.url, playable: true },
-  { id: "metz", name: "Metz", league: "frances", rating: 2, logo: metzAsset.url, playable: true },
+  { id: "psg", name: "Paris Saint-Germain", league: "frances", rating: 5, logo: assetUrl(psgAsset), playable: true },
+  { id: "monaco", name: "Monaco", league: "frances", rating: 4, logo: assetUrl(monacoAsset), playable: true },
+  { id: "marseille", name: "Marseille", league: "frances", rating: 4, logo: assetUrl(marseilleAsset), playable: true },
+  { id: "strasbourg", name: "Strasbourg", league: "frances", rating: 3, logo: assetUrl(strasbourgAsset), playable: true },
+  { id: "lyon", name: "Lyon", league: "frances", rating: 4, logo: assetUrl(lyonAsset), playable: true },
+  { id: "lille", name: "Lille", league: "frances", rating: 4, logo: assetUrl(lilleAsset), playable: true },
+  { id: "rennes", name: "Rennes", league: "frances", rating: 3, logo: assetUrl(rennesAsset), playable: true },
+  { id: "lens", name: "Lens", league: "frances", rating: 3, logo: assetUrl(lensAsset), playable: true },
+  { id: "nice", name: "Nice", league: "frances", rating: 4, logo: assetUrl(niceAsset), playable: true },
+  { id: "toulouse", name: "Toulouse", league: "frances", rating: 3, logo: assetUrl(toulouseAsset), playable: true },
+  { id: "paris-fc", name: "Paris FC", league: "frances", rating: 2, logo: assetUrl(parisFcAsset), playable: true },
+  { id: "nantes", name: "Nantes", league: "frances", rating: 2, logo: assetUrl(nantesAsset), playable: true },
+  { id: "lorient", name: "Lorient", league: "frances", rating: 2, logo: assetUrl(lorientAsset), playable: true },
+  { id: "brest", name: "Brest", league: "frances", rating: 3, logo: assetUrl(brestAsset), playable: true },
+  { id: "auxerre", name: "Auxerre", league: "frances", rating: 2, logo: assetUrl(auxerreAsset), playable: true },
+  { id: "le-havre", name: "Le Havre", league: "frances", rating: 2, logo: assetUrl(leHavreAsset), playable: true },
+  { id: "angers", name: "Angers", league: "frances", rating: 2, logo: assetUrl(angersAsset), playable: true },
+  { id: "metz", name: "Metz", league: "frances", rating: 2, logo: assetUrl(metzAsset), playable: true },
 
   // === CLUBES CONTINENTAIS (IA-only, playable: false) ===
 

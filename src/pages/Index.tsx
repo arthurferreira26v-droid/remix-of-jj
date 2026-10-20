@@ -7,7 +7,8 @@ import { ChevronDown } from "lucide-react";
 import brasileiraoIcon from "@/assets/brasileirao-icon.png";
 import laligaIcon from "@/assets/laliga-icon.png";
 import premierLeagueIcon from "@/assets/premier-league-icon.svg";
-import ligue1Asset from "@/assets/leagues/ligue1.png.asset.json";
+import ligue1Asset from "@/assets/leagues/ligue1-icon.png.asset.json";
+import { assetUrl } from "@/lib/assetUrl";
 
 
 const BrazilFlagIcon = () => (
@@ -21,7 +22,7 @@ const BrazilFlagIcon = () => (
 
 const leagueIcons: Record<string, React.ReactNode> = {
   frances: (
-    <img src={ligue1Asset.url} alt="Ligue 1" className="w-full h-full object-contain" draggable={false} />
+    <img src={assetUrl(ligue1Asset)} alt="Ligue 1" className="w-full h-full object-contain" draggable={false} />
   ),
   brasileiro: (
     <img
@@ -90,7 +91,7 @@ const Index = () => {
             className="w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-xl bg-[#141414] border border-white/5 text-white/40 cursor-not-allowed"
           >
             <div className="flex items-center gap-3">
-              <span className="w-6 h-6 flex items-center justify-center text-lg">{selectedLeague === "brasileiro" ? <BrazilFlagIcon /> : <img src={selectedLeague === "ingles" ? premierLeagueIcon : selectedLeague === "frances" ? ligue1Asset.url : laligaIcon} alt="" className="w-6 h-6 object-contain" />}</span>
+              <span className="w-6 h-6 flex items-center justify-center text-lg">{selectedLeague === "brasileiro" ? <BrazilFlagIcon /> : <img src={selectedLeague === "ingles" ? premierLeagueIcon : selectedLeague === "frances" ? assetUrl(ligue1Asset) : laligaIcon} alt="" className="w-6 h-6 object-contain" />}</span>
               <span className="text-sm font-semibold">{leagues.find(l => l.id === selectedLeague)?.competition}</span>
             </div>
             <ChevronDown className="w-5 h-5" />
