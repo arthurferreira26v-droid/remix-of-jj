@@ -13,6 +13,24 @@ import vitoriaLogo from "@/assets/teams/vitoria.png";
 import athleticoPrLogo from "@/assets/teams/athletico-pr.svg";
 import coritibaLogo from "@/assets/teams/coritiba.svg";
 import chapecoenseLogo from "@/assets/teams/chapecoense.png";
+import psgAsset from "@/assets/teams/psg.png.asset.json";
+import monacoAsset from "@/assets/teams/monaco.png.asset.json";
+import marseilleAsset from "@/assets/teams/marseille.png.asset.json";
+import strasbourgAsset from "@/assets/teams/strasbourg.png.asset.json";
+import lyonAsset from "@/assets/teams/lyon.png.asset.json";
+import lilleAsset from "@/assets/teams/lille.png.asset.json";
+import rennesAsset from "@/assets/teams/rennes.png.asset.json";
+import lensAsset from "@/assets/teams/lens.png.asset.json";
+import niceAsset from "@/assets/teams/nice.png.asset.json";
+import toulouseAsset from "@/assets/teams/toulouse.png.asset.json";
+import parisFcAsset from "@/assets/teams/paris-fc.png.asset.json";
+import nantesAsset from "@/assets/teams/nantes.png.asset.json";
+import lorientAsset from "@/assets/teams/lorient.png.asset.json";
+import brestAsset from "@/assets/teams/brest.png.asset.json";
+import auxerreAsset from "@/assets/teams/auxerre.png.asset.json";
+import leHavreAsset from "@/assets/teams/le-havre.png.asset.json";
+import angersAsset from "@/assets/teams/angers.png.asset.json";
+import metzAsset from "@/assets/teams/metz.png.asset.json";
 
 export interface Team {
   id: string;
@@ -90,6 +108,26 @@ export const teams: Team[] = [
   { id: "real-oviedo", name: "Real Oviedo", league: "espanhol", rating: 2, logo: "https://tmssl.akamaized.net/images/wappen/head/2497.png", playable: true },
   { id: "real-sociedad", name: "Real Sociedad", league: "espanhol", rating: 4, logo: "https://tmssl.akamaized.net/images/wappen/head/681.png", playable: true },
   { id: "levante", name: "Levante", league: "espanhol", rating: 3, logo: "https://tmssl.akamaized.net/images/wappen/head/3368.png", playable: true },
+
+  // Ligue 1 2025/26 (18 times)
+  { id: "psg", name: "Paris Saint-Germain", league: "frances", rating: 5, logo: psgAsset.url, playable: true },
+  { id: "monaco", name: "Monaco", league: "frances", rating: 4, logo: monacoAsset.url, playable: true },
+  { id: "marseille", name: "Marseille", league: "frances", rating: 4, logo: marseilleAsset.url, playable: true },
+  { id: "strasbourg", name: "Strasbourg", league: "frances", rating: 3, logo: strasbourgAsset.url, playable: true },
+  { id: "lyon", name: "Lyon", league: "frances", rating: 4, logo: lyonAsset.url, playable: true },
+  { id: "lille", name: "Lille", league: "frances", rating: 4, logo: lilleAsset.url, playable: true },
+  { id: "rennes", name: "Rennes", league: "frances", rating: 3, logo: rennesAsset.url, playable: true },
+  { id: "lens", name: "Lens", league: "frances", rating: 3, logo: lensAsset.url, playable: true },
+  { id: "nice", name: "Nice", league: "frances", rating: 4, logo: niceAsset.url, playable: true },
+  { id: "toulouse", name: "Toulouse", league: "frances", rating: 3, logo: toulouseAsset.url, playable: true },
+  { id: "paris-fc", name: "Paris FC", league: "frances", rating: 2, logo: parisFcAsset.url, playable: true },
+  { id: "nantes", name: "Nantes", league: "frances", rating: 2, logo: nantesAsset.url, playable: true },
+  { id: "lorient", name: "Lorient", league: "frances", rating: 2, logo: lorientAsset.url, playable: true },
+  { id: "brest", name: "Brest", league: "frances", rating: 3, logo: brestAsset.url, playable: true },
+  { id: "auxerre", name: "Auxerre", league: "frances", rating: 2, logo: auxerreAsset.url, playable: true },
+  { id: "le-havre", name: "Le Havre", league: "frances", rating: 2, logo: leHavreAsset.url, playable: true },
+  { id: "angers", name: "Angers", league: "frances", rating: 2, logo: angersAsset.url, playable: true },
+  { id: "metz", name: "Metz", league: "frances", rating: 2, logo: metzAsset.url, playable: true },
 
   // === CLUBES CONTINENTAIS (IA-only, playable: false) ===
 
@@ -195,10 +233,11 @@ export const leagues = [
   { id: "brasileiro", name: "Brasileiro", flag: "🇧🇷", competition: "Campeonato Brasileiro Série A" },
   { id: "ingles", name: "Inglês", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", competition: "Premier League" },
   { id: "espanhol", name: "Espanhol", flag: "🇪🇸", competition: "LaLiga" },
+  { id: "frances", name: "Francês", flag: "🇫🇷", competition: "Ligue 1" },
 ];
 
 /** Ligas jogáveis (campanha) */
-export const PLAYABLE_LEAGUES = ["brasileiro", "ingles", "espanhol"];
+export const PLAYABLE_LEAGUES = ["brasileiro", "ingles", "espanhol", "frances"];
 
 /** Times da mesma liga de um time */
 export const getLeagueTeamNames = (teamName: string): string[] => {
@@ -212,5 +251,5 @@ export const getAllPlayableTeamNames = (): string[] =>
 
 export const getCompetitionShortName = (teamName: string): string => {
   const l = teams.find((x) => x.name === teamName)?.league;
-  return l === "ingles" ? "Premier League" : l === "espanhol" ? "LaLiga" : "Brasileirão";
+  return l === "ingles" ? "Premier League" : l === "espanhol" ? "LaLiga" : l === "frances" ? "Ligue 1" : "Brasileirão";
 };

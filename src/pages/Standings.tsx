@@ -1,18 +1,19 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { StandingsTable } from "@/components/StandingsTable";
+import { StandingsTable, type LeagueKey } from "@/components/StandingsTable";
 import { LibertadoresGroups } from "@/components/LibertadoresGroups";
 import { ChevronLeft, ChevronDown, ChevronUp, Check } from "lucide-react";
 import { useLibertadores } from "@/hooks/useLibertadores";
 import { useChampionship } from "@/hooks/useChampionship";
+import { teams } from "@/data/teams";
 
-type Competition = "brasileirao" | "premier" | "laliga" | "libertadores";
-type LeagueKey = "brasileiro" | "ingles" | "espanhol";
+type Competition = "brasileirao" | "premier" | "laliga" | "ligue1" | "libertadores";
 
 const competitions: { id: Competition; label: string; league?: LeagueKey }[] = [
   { id: "brasileirao", label: "Brasileirão", league: "brasileiro" },
   { id: "premier", label: "Premier League", league: "ingles" },
   { id: "laliga", label: "LaLiga", league: "espanhol" },
+  { id: "ligue1", label: "Ligue 1", league: "frances" },
   { id: "libertadores", label: "Libertadores" },
 ];
 
@@ -21,7 +22,10 @@ const Standings = () => {
   const [searchParams] = useSearchParams();
   const teamName = searchParams.get("time") || "Botafogo";
 
-  const [selected, setSelected] = useState<Competition>("brasileirao");
+  const [selected, setSelected] = useState<Competition>(() => {
+    const league = teams.find(t => t.name === teamName)?.league;
+    return competitions.find(c => c.league === league)?.id ?? "brasileirao";
+  });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +48,8 @@ const Standings = () => {
     navigate(`/jogo?time=${teamName}`);
   };
 
-  const currentLabel = competitions.find((c) => c.id === selected)!.label;
+  const currentCompetition = competitions.find((c) => c.id === selected);
+  const currentLabel = currentCompetition?.label ?? "Brasileirão";
 
   return (
     <div className="h-screen bg-black flex flex-col overflow-hidden">
@@ -106,7 +111,7 @@ const Standings = () => {
               preLibertadoresResults={preLibertadoresResults}
             />
           ) : (
-            <StandingsTable league={competitions.find(c => c.id === selected)!.league!} />
+            <StandingsTable league={currentCompetition?.league ?? "brasileiro"} />
           )}
         </div>
       </div>
