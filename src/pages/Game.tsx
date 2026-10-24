@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { ExitConfirmModal } from "@/components/ExitConfirmModal";
 import { AbandonDetector } from "@/components/AbandonDetector";
@@ -20,7 +20,7 @@ import {
   generateTeamPlayers,
   type Player,
 } from "@/data/players";
-import { Loader2, Zap, ShoppingCart } from "lucide-react";
+import { Loader2, Zap } from "lucide-react";
 import { useChampionship } from "@/hooks/useChampionship";
 import { getLeagueTeamNames, getAllPlayableTeamNames, getCompetitionShortName } from "@/data/teams";
 import { useLibertadores } from "@/hooks/useLibertadores";
@@ -71,13 +71,18 @@ const Game = () => {
   const [showReceivedOffers, setShowReceivedOffersRaw] = useState(false);
   const [showFinances, setShowFinancesRaw] = useState(false);
 
-  // Wrap overlay setters to push/pop history state for Android back button
+  const overlayOpenRef = useRef(false);
+
+  // Reuse the game's back-button guard instead of accumulating overlay entries.
   const openOverlay = useCallback((setter: (v: boolean) => void) => {
-    window.history.pushState({ overlay: true }, '');
+    overlayOpenRef.current = true;
+    window.history.replaceState({ ...window.history.state, overlay: true }, '');
     setter(true);
   }, []);
 
   const closeAllOverlays = useCallback(() => {
+    overlayOpenRef.current = false;
+    window.history.replaceState({ ...window.history.state, overlay: false }, '');
     setShowTransferMarketRaw(false);
     setShowReceivedOffersRaw(false);
     setShowFinancesRaw(false);
@@ -85,36 +90,37 @@ const Game = () => {
 
   const setShowTransferMarket = useCallback((v: boolean) => {
     if (v) openOverlay(setShowTransferMarketRaw);
-    else { setShowTransferMarketRaw(false); }
-  }, [openOverlay]);
+    else closeAllOverlays();
+  }, [openOverlay, closeAllOverlays]);
 
   const setShowReceivedOffers = useCallback((v: boolean) => {
     if (v) openOverlay(setShowReceivedOffersRaw);
-    else { setShowReceivedOffersRaw(false); }
-  }, [openOverlay]);
+    else closeAllOverlays();
+  }, [openOverlay, closeAllOverlays]);
 
   const setShowFinances = useCallback((v: boolean) => {
     if (v) openOverlay(setShowFinancesRaw);
-    else { setShowFinancesRaw(false); }
-  }, [openOverlay]);
+    else closeAllOverlays();
+  }, [openOverlay, closeAllOverlays]);
 
   // Handle Android back button (popstate)
   useEffect(() => {
-    // Push initial state so we can intercept back
-    window.history.pushState({ game: true }, '');
-    const handlePopState = (e: PopStateEvent) => {
-      const anyOverlayOpen = showTransferMarket || showReceivedOffers || showFinances;
-      if (anyOverlayOpen) {
+    const guard = window.location.pathname + window.location.search;
+    if (window.history.state?.gameGuard !== guard) {
+      window.history.pushState({ ...window.history.state, gameGuard: guard }, '');
+    }
+    const handlePopState = () => {
+      // Restore the guard on this same route before closing or confirming exit.
+      window.history.pushState({ ...window.history.state, gameGuard: guard }, '');
+      if (overlayOpenRef.current) {
         closeAllOverlays();
       } else {
-        // No overlay open → show exit confirmation
-        window.history.pushState({ game: true }, '');
         setShowExitModal(true);
       }
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [closeAllOverlays, showTransferMarket, showReceivedOffers, showFinances]);
+  }, [closeAllOverlays]);
   const [offersCount, setOffersCount] = useState(0);
   const [adminSquadReady, setAdminSquadReady] = useState(false);
 
@@ -567,12 +573,6 @@ const Game = () => {
               <span className="text-xs text-green-400 font-medium">$ {(budget / 1000000).toFixed(1)} M</span>
             </div>
           </div>
-          <button
-            onClick={() => navigate(`/loja?from=/jogo?time=${encodeURIComponent(teamName)}`)}
-            className="p-2 rounded-lg hover:bg-white/5 active:scale-95 transition-all"
-          >
-            <ShoppingCart className="w-5 h-5 text-white" />
-          </button>
         </div>
       </header>
 

@@ -147,6 +147,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
           <div className="flex items-center gap-2">
             {onOpenOffers && (
               <button
+                aria-label="Abrir ofertas"
                 onClick={() => { onClose(); onOpenOffers(); }}
                 className="relative p-2 rounded-full hover:bg-zinc-800 transition-colors"
               >
@@ -158,7 +159,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
                 )}
               </button>
             )}
-            <button onClick={onClose} className="p-2 rounded-full hover:bg-zinc-800 transition-colors">
+            <button aria-label="Fechar mercado" onClick={onClose} className="p-2 rounded-full hover:bg-zinc-800 transition-colors">
               <X className="w-6 h-6 text-white" />
             </button>
           </div>

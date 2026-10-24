@@ -89,6 +89,7 @@ export const GameMenu = ({
 
             {/* Circle icon */}
             <button
+              aria-label={item.label}
               onClick={() => handleItemClick(item.onClick)}
               className="relative w-11 h-11 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
               style={{
@@ -108,6 +109,7 @@ export const GameMenu = ({
 
       {/* FAB */}
       <button
+        aria-label={open ? "Fechar menu" : "Abrir menu"}
         onClick={() => setOpen((v) => !v)}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-95 transition-all duration-200"
         style={{ background: 'hsl(0 0% 5%)' }}
