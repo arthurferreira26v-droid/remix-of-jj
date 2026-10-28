@@ -20,8 +20,11 @@ export const RoundsCalendar = ({ teamName, currentRound, onMarketClick }: Rounds
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
-      if (currentRef.current && scrollRef.current) {
-        scrollRef.current.scrollLeft = currentRef.current.offsetLeft;
+      const card = currentRef.current;
+      const parent = scrollRef.current;
+      if (card && parent) {
+        const delta = card.getBoundingClientRect().left - parent.getBoundingClientRect().left;
+        parent.scrollLeft += delta;
       }
     });
     return () => cancelAnimationFrame(frame);
