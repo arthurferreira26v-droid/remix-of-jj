@@ -19,10 +19,15 @@ export const RoundsCalendar = ({ teamName, currentRound, onMarketClick }: Rounds
     .sort((a, b) => a.round - b.round);
 
   useEffect(() => {
-    if (currentRef.current && scrollRef.current) {
+    const frame = requestAnimationFrame(() => {
+      const card = currentRef.current;
       const parent = scrollRef.current;
-      parent.scrollTo({ left: Math.max(0, currentRef.current.offsetLeft - 16), behavior: "smooth" });
-    }
+      if (card && parent) {
+        const delta = card.getBoundingClientRect().left - parent.getBoundingClientRect().left;
+        parent.scrollLeft += delta;
+      }
+    });
+    return () => cancelAnimationFrame(frame);
   }, [currentRound, matches.length]);
 
   if (matches.length === 0) return null;
