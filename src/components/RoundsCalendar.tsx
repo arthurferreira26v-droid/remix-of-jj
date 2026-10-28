@@ -21,7 +21,7 @@ export const RoundsCalendar = ({ teamName, currentRound, onMarketClick }: Rounds
   useEffect(() => {
     if (currentRef.current && scrollRef.current) {
       const parent = scrollRef.current;
-      parent.scrollTo({ left: Math.max(0, currentRef.current.offsetLeft - 16), behavior: "smooth" });
+      parent.scrollTo({ left: currentRef.current.offsetLeft, behavior: "auto" });
     }
   }, [currentRound, matches.length]);
 
