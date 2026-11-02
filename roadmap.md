@@ -1,4 +1,5 @@
 # Tasks
+- [ ] Preserve home tactics and lineup independently of temporary match changes, and verify the full match flow.
 - [x] Update Santos and Flamengo from verified current rosters and check both squads in the game.
 - [x] Fix transfer-market closing and verify return to the campaign without errors.
 - [x] Remove the upper-right store cart and test team selection and campaign entry.
