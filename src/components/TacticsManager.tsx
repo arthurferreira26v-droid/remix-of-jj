@@ -23,21 +23,6 @@ interface TacticsManagerProps {
 }
 
 export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStarterClick, canSubstitute = false, selectedStarterId, allPlayers, onPlayersChanged, hideSavedFormations = false, persistent = true, tactics, onTacticsChanged }: TacticsManagerProps) => {
-  const getInitialFormation = () => {
-    const saved = localStorage.getItem(`tactics_formation_${teamName}`);
-    return saved || "4-3-3";
-  };
-
-  const getInitialPlayStyle = () => {
-    const saved = localStorage.getItem(`tactics_playstyle_${teamName}`);
-    return saved || "counter";
-  };
-
-  const getInitialGameStyle = () => {
-    const saved = localStorage.getItem(`tactics_gamestyle_${teamName}`);
-    return saved || "through_middle";
-  };
-
   const [localTactics, setLocalTactics] = useState(() => readTeamTactics(teamName));
   const activeTactics = tactics ?? localTactics;
   const selectedFormation = activeTactics.formation;

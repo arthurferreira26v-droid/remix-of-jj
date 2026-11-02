@@ -840,7 +840,7 @@ const Match = () => {
     }, 167); // 15000ms / 90 = ~167ms
 
     return () => clearInterval(interval);
-  }, [isPlaying, minute, showPenaltyModal, isHalftime, halftimeDone, pressaoActive, pressaoTriggered]);
+  }, [isPlaying, minute, showPenaltyModal, showPenaltyShot, isHalftime, halftimeDone, pressaoActive, pressaoTriggered, matchTactics.gameStyle]);
 
   // Função para renderizar ícone do evento
   const getEventIcon = (type: MatchEvent['type']) => {
