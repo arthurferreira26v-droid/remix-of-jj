@@ -156,7 +156,9 @@ const Game = () => {
   
   // Initialize players state - always prefer localStorage (preserves energy state)
   const getInitialPlayers = () => {
+    const hasSavedRoster = localStorage.getItem(`players_${teamName}`) !== null;
     const rosterPlayers = getTeamRosterPlayers(teamName);
+    if (hasSavedRoster && rosterPlayers.filter(p => p.isStarter).length === 11) return rosterPlayers;
     const { players: optimized, starterOrder } = optimizeStartersDefault(rosterPlayers);
     saveTeamRosterPlayers(teamName, optimized);
     localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
@@ -212,7 +214,11 @@ const Game = () => {
             return { ...adminP, energy: adminP.energy ?? 100, consecutiveMatches: 0 };
           });
           const allPlayers = [...merged, ...transferredPlayers];
-          // Ensure exactly 11 starters and optimize positions for current formation
+          // Preserve deliberate home selections; optimize only an incomplete lineup.
+          if (allPlayers.filter(p => p.isStarter).length === 11) {
+            saveTeamRosterPlayers(teamName, allPlayers);
+            return allPlayers;
+          }
           const { players: optimized, starterOrder } = optimizeStartersDefault(allPlayers);
           saveTeamRosterPlayers(teamName, optimized);
           localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(starterOrder));
