@@ -22,6 +22,7 @@ import { getYellowCardChance, applyCardToPlayer, finalizeCardsAfterMatch } from 
 import { tickOffers } from "@/utils/transferOffers";
 import { sortPlayersByReserveOrder } from "@/utils/playerOrder";
 import { getTeamRosterPlayers, saveTeamRosterPlayers } from "@/utils/teamRoster";
+import { readTeamTactics, mergeMatchOutcomes } from "@/utils/teamConfiguration";
 
 interface MatchEvent {
   minute: number;
@@ -192,12 +193,16 @@ const Match = () => {
     const afterSuspensions = applySuspensions(players);
     // Reset match-specific card fields
     const resetCards = afterSuspensions.map(p => ({ ...p, matchYellowCards: 0, matchRedCard: false }));
-    saveTeamRosterPlayers(teamName, resetCards);
     // Initialize matchEnergy from energy at start of match
     return initMatchEnergy(resetCards);
   };
 
   const [userPlayers, setUserPlayers] = useState<Player[]>(getInitialUserPlayers);
+  const [matchTactics, setMatchTactics] = useState(() => readTeamTactics(teamName));
+  const [matchStarterOrder, setMatchStarterOrder] = useState<string[]>(() => {
+    const saved = localStorage.getItem(`starter_order_${teamName}`);
+    return saved ? JSON.parse(saved) : userPlayers.filter(p => p.isStarter).map(p => p.id);
+  });
   
   const opponentPlayers = getTeamRosterPlayers(opponentName);
   
@@ -211,9 +216,8 @@ const Match = () => {
 
   // Ordenar titulares respeitando a ordem salva no localStorage
   const getOrderedStarters = () => {
-    const savedOrder = localStorage.getItem(`starter_order_${teamName}`);
-    if (savedOrder) {
-      const orderIds = JSON.parse(savedOrder) as string[];
+    if (matchStarterOrder.length > 0) {
+      const orderIds = matchStarterOrder;
       return [...userStarters].sort((a, b) => {
         const indexA = orderIds.indexOf(a.id);
         const indexB = orderIds.indexOf(b.id);
@@ -236,7 +240,7 @@ const Match = () => {
 
   const saveStarterOrder = (newOrder: Player[]) => {
     const orderIds = newOrder.map(p => p.id);
-    localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(orderIds));
+    setMatchStarterOrder(orderIds);
   };
 
   const handleStarterClick = (starter: Player) => {
@@ -282,7 +286,6 @@ const Match = () => {
       setSubstitutedOutIds(prev => new Set(prev).add(starter.id));
 
       setUserPlayers(updatedPlayers);
-      localStorage.setItem(`players_${teamName}`, JSON.stringify(updatedPlayers));
       setSelectedReserve(null);
       return;
     }
@@ -359,7 +362,7 @@ const Match = () => {
       // Finalize energy and cards
       const afterEnergy = finalizeMatchEnergy(userPlayers);
       const finalizedPlayers = finalizeCardsAfterMatch(afterEnergy);
-      saveTeamRosterPlayers(teamName, finalizedPlayers);
+      saveTeamRosterPlayers(teamName, mergeMatchOutcomes(getTeamRosterPlayers(teamName), finalizedPlayers));
       
       // Evolução de OVR é aplicada apenas no final da temporada
 
@@ -504,7 +507,7 @@ const Match = () => {
         
         // Simular eventos aleatórios — chance de gol baseada em tática e overall adversário
         // Apply game style bonuses to effective OVR
-        const userGameStyleId = localStorage.getItem(`tactics_gamestyle_${teamName}`) || "balanced_style";
+        const userGameStyleId = matchTactics.gameStyle;
         const getGameStyleOvrBonus = (position: string): number => {
           if (userGameStyleId === "through_middle") {
             if (['MC', 'VOL', 'MEI'].includes(position)) return 3;
@@ -837,7 +840,7 @@ const Match = () => {
     }, 167); // 15000ms / 90 = ~167ms
 
     return () => clearInterval(interval);
-  }, [isPlaying, minute, showPenaltyModal, isHalftime, halftimeDone, pressaoActive, pressaoTriggered]);
+  }, [isPlaying, minute, showPenaltyModal, showPenaltyShot, isHalftime, halftimeDone, pressaoActive, pressaoTriggered, matchTactics.gameStyle]);
 
   // Função para renderizar ícone do evento
   const getEventIcon = (type: MatchEvent['type']) => {
@@ -926,7 +929,10 @@ const Match = () => {
                   canSubstitute={!!selectedReserve || !!selectedStarter}
                   selectedStarterId={selectedReserve?.id || selectedStarter?.id}
                   allPlayers={userPlayers}
-                  onPlayersChanged={(updated) => { setUserPlayers(updated); saveTeamRosterPlayers(teamName, updated); }}
+                  onPlayersChanged={setUserPlayers}
+                  persistent={false}
+                  tactics={matchTactics}
+                  onTacticsChanged={setMatchTactics}
                   hideSavedFormations
                 />
                 </div>
@@ -1086,7 +1092,10 @@ const Match = () => {
                   canSubstitute={!!selectedReserve || !!selectedStarter}
                   selectedStarterId={selectedReserve?.id || selectedStarter?.id}
                   allPlayers={userPlayers}
-                  onPlayersChanged={(updated) => { setUserPlayers(updated); saveTeamRosterPlayers(teamName, updated); }}
+                  onPlayersChanged={setUserPlayers}
+                  persistent={false}
+                  tactics={matchTactics}
+                  onTacticsChanged={setMatchTactics}
                   hideSavedFormations
                 />
                 </div>

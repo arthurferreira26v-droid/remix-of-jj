@@ -5,7 +5,7 @@ import { formations, playStyles, gameStyles, SavedFormation } from "@/data/forma
 import { Player } from "@/data/players";
 import { ChevronDown, Save, FolderOpen, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
-import { optimizeStartersForFormation } from "@/utils/formationOptimizer";
+import { readTeamTactics, persistTeamTactics, type TeamTactics } from "@/utils/teamConfiguration";
 
 interface TacticsManagerProps {
   teamName: string;
@@ -17,27 +17,25 @@ interface TacticsManagerProps {
   allPlayers?: Player[];
   onPlayersChanged?: (players: Player[]) => void;
   hideSavedFormations?: boolean;
+  persistent?: boolean;
+  tactics?: TeamTactics;
+  onTacticsChanged?: (tactics: TeamTactics) => void;
 }
 
-export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStarterClick, canSubstitute = false, selectedStarterId, allPlayers, onPlayersChanged, hideSavedFormations = false }: TacticsManagerProps) => {
-  const getInitialFormation = () => {
-    const saved = localStorage.getItem(`tactics_formation_${teamName}`);
-    return saved || "4-3-3";
+export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStarterClick, canSubstitute = false, selectedStarterId, allPlayers, onPlayersChanged, hideSavedFormations = false, persistent = true, tactics, onTacticsChanged }: TacticsManagerProps) => {
+  const [localTactics, setLocalTactics] = useState(() => readTeamTactics(teamName));
+  const activeTactics = tactics ?? localTactics;
+  const selectedFormation = activeTactics.formation;
+  const selectedPlayStyle = activeTactics.playStyle;
+  const selectedGameStyle = activeTactics.gameStyle;
+  const updateTactics = (updated: TeamTactics) => {
+    if (onTacticsChanged) onTacticsChanged(updated);
+    else setLocalTactics(updated);
+    persistTeamTactics(teamName, updated, persistent);
   };
-
-  const getInitialPlayStyle = () => {
-    const saved = localStorage.getItem(`tactics_playstyle_${teamName}`);
-    return saved || "counter";
-  };
-
-  const getInitialGameStyle = () => {
-    const saved = localStorage.getItem(`tactics_gamestyle_${teamName}`);
-    return saved || "through_middle";
-  };
-
-  const [selectedFormation, setSelectedFormation] = useState(getInitialFormation);
-  const [selectedPlayStyle, setSelectedPlayStyle] = useState(getInitialPlayStyle);
-  const [selectedGameStyle, setSelectedGameStyle] = useState(getInitialGameStyle);
+  const setSelectedFormation = (formation: string) => updateTactics({ ...activeTactics, formation });
+  const setSelectedPlayStyle = (playStyle: string) => updateTactics({ ...activeTactics, playStyle });
+  const setSelectedGameStyle = (gameStyle: string) => updateTactics({ ...activeTactics, gameStyle });
   const [openDropdown, setOpenDropdown] = useState<"style" | "formation" | "gamestyle" | "saved" | null>(null);
   const [savedFormations, setSavedFormations] = useState<SavedFormation[]>([]);
   const [showSaveInput, setShowSaveInput] = useState(false);
@@ -52,18 +50,6 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
     const saved = localStorage.getItem(`saved_formations_${teamName}`);
     if (saved) setSavedFormations(JSON.parse(saved));
   }, [teamName]);
-
-  useEffect(() => {
-    localStorage.setItem(`tactics_formation_${teamName}`, selectedFormation);
-  }, [selectedFormation, teamName]);
-
-  useEffect(() => {
-    localStorage.setItem(`tactics_playstyle_${teamName}`, selectedPlayStyle);
-  }, [selectedPlayStyle, teamName]);
-
-  useEffect(() => {
-    localStorage.setItem(`tactics_gamestyle_${teamName}`, selectedGameStyle);
-  }, [selectedGameStyle, teamName]);
 
   const toggleDropdown = (dropdown: "style" | "formation" | "gamestyle" | "saved") => {
     setOpenDropdown(openDropdown === dropdown ? null : dropdown);
@@ -104,9 +90,7 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
     }
 
     // Update formation, play style, game style
-    setSelectedFormation(saved.formationId);
-    setSelectedPlayStyle(saved.playStyleId);
-    setSelectedGameStyle(saved.gameStyleId);
+    updateTactics({ formation: saved.formationId, playStyle: saved.playStyleId, gameStyle: saved.gameStyleId });
 
     // Update starters: set saved starters as isStarter, rest as reserves
     const starterSet = new Set(saved.starterIds);
@@ -116,8 +100,10 @@ export const TacticsManager = ({ teamName, players = [], orderedPlayers, onStart
     }));
 
     // Save starter order
-    localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(saved.starterOrder));
-    localStorage.setItem(`players_${teamName}`, JSON.stringify(updatedPlayers));
+    if (persistent) {
+      localStorage.setItem(`starter_order_${teamName}`, JSON.stringify(saved.starterOrder));
+      localStorage.setItem(`players_${teamName}`, JSON.stringify(updatedPlayers));
+    }
 
     if (onPlayersChanged) {
       onPlayersChanged(updatedPlayers);
