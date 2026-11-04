@@ -22,7 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useAdminData, invalidateAdminCache } from "@/hooks/useAdminData";
 
-const POSITIONS = ["GOL", "LD", "ALD", "LE", "ALE", "ZAG", "VOL", "MC", "MEI", "PD", "MD", "PE", "ME", "ATA"];
+const POSITIONS = ["GOL", "LD", "ALD", "LE", "ALE", "ZAG", "VOL", "MC", "MD", "ME", "ATA"];
 
 const countryFlags: Record<string, string> = {
   brasil: "🇧🇷", argentina: "🇦🇷", uruguai: "🇺🇾", colombia: "🇨🇴",
@@ -481,8 +481,8 @@ const AdminPanel = () => {
                     const pos = formData.position;
                     if (pos === 'GOL') return '3';
                     if (['ZAG','LE','LD'].includes(pos)) return '27';
-                    if (['MC','VOL','MEI','MD','ME'].includes(pos)) return '20';
-                    if (['ATA','PE','PD'].includes(pos)) return '10';
+                    if (['MC','VOL'].includes(pos)) return '20';
+                    if (['ATA','ME','MD'].includes(pos)) return '10';
                     return '15';
                   })()}% pela posição)`}
                   value={formData.yellowCardChance ?? ""}

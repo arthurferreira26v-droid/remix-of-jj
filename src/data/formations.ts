@@ -40,9 +40,9 @@ export const formations: Formation[] = [
       { x: 35, y: 55, role: "VOL" },
       { x: 50, y: 50, role: "MC" },
       { x: 65, y: 55, role: "VOL" },
-      { x: 20, y: 20, role: "PE" },
+      { x: 20, y: 20, role: "ME" },
       { x: 50, y: 15, role: "ATA" },
-      { x: 80, y: 20, role: "PD" },
+      { x: 80, y: 20, role: "MD" },
     ],
   },
   {
@@ -74,7 +74,7 @@ export const formations: Formation[] = [
       { x: 50, y: 60, role: "VOL" },
       { x: 35, y: 45, role: "MC" },
       { x: 65, y: 45, role: "MC" },
-      { x: 50, y: 33, role: "MEI" },
+      { x: 50, y: 33, role: "MC" },
       { x: 38, y: 18, role: "ATA" },
       { x: 62, y: 18, role: "ATA" },
     ],
@@ -91,9 +91,9 @@ export const formations: Formation[] = [
       { x: 40, y: 50, role: "MC" },
       { x: 60, y: 50, role: "MC" },
       { x: 85, y: 50, role: "ALD" },
-      { x: 20, y: 20, role: "PE" },
+      { x: 20, y: 20, role: "ME" },
       { x: 50, y: 15, role: "ATA" },
-      { x: 80, y: 20, role: "PD" },
+      { x: 80, y: 20, role: "MD" },
     ],
   },
   {
@@ -141,9 +141,9 @@ export const formations: Formation[] = [
       { x: 80, y: 75, role: "LD" },
       { x: 38, y: 58, role: "VOL" },
       { x: 62, y: 58, role: "VOL" },
-      { x: 20, y: 35, role: "PE" },
-      { x: 50, y: 32, role: "MEI" },
-      { x: 80, y: 35, role: "PD" },
+      { x: 20, y: 35, role: "ME" },
+      { x: 50, y: 32, role: "MC" },
+      { x: 80, y: 35, role: "MD" },
       { x: 50, y: 15, role: "ATA" },
     ],
   },
@@ -159,7 +159,7 @@ export const formations: Formation[] = [
       { x: 30, y: 55, role: "MC" },
       { x: 50, y: 50, role: "VOL" },
       { x: 70, y: 55, role: "MC" },
-      { x: 50, y: 33, role: "MEI" },
+      { x: 50, y: 33, role: "MC" },
       { x: 38, y: 18, role: "ATA" },
       { x: 62, y: 18, role: "ATA" },
     ],
@@ -176,8 +176,8 @@ export const formations: Formation[] = [
       { x: 40, y: 55, role: "MC" },
       { x: 60, y: 55, role: "MC" },
       { x: 85, y: 55, role: "ALD" },
-      { x: 35, y: 30, role: "MEI" },
-      { x: 65, y: 30, role: "MEI" },
+      { x: 35, y: 30, role: "MC" },
+      { x: 65, y: 30, role: "MC" },
       { x: 50, y: 15, role: "ATA" },
     ],
   },
@@ -210,8 +210,8 @@ export const formations: Formation[] = [
       { x: 30, y: 55, role: "MC" },
       { x: 50, y: 50, role: "VOL" },
       { x: 70, y: 55, role: "MC" },
-      { x: 35, y: 30, role: "MEI" },
-      { x: 65, y: 30, role: "MEI" },
+      { x: 35, y: 30, role: "MC" },
+      { x: 65, y: 30, role: "MC" },
       { x: 50, y: 15, role: "ATA" },
     ],
   },
@@ -275,7 +275,7 @@ export interface GameStyle {
   description: string;
   bonuses: {
     mcVolBonus: number;   // bonus for MC/VOL positions
-    wingLateralBonus: number; // bonus for PD/PE/LD/LE positions
+    wingLateralBonus: number; // bonus for MD/ME/LD/LE positions
     mcVolPenalty: number;
     wingLateralPenalty: number;
   };
