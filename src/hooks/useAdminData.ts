@@ -1,3 +1,4 @@
+import { normalizePlayerPositions } from "@/utils/positionCodes";
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Player } from '@/data/players';
@@ -46,7 +47,7 @@ export async function fetchAdminPlayers(forceRefresh = false): Promise<Record<st
       .from('admin_player_overrides')
       .select('team_id, players');
     const map: Record<string, Player[]> = {};
-    data?.forEach(r => { map[r.team_id] = r.players as unknown as Player[]; });
+    data?.forEach(r => { map[r.team_id] = (r.players as unknown as Player[]).map(normalizePlayerPositions); });
     cachedPlayers = map;
     playersFetched = true;
     return map;

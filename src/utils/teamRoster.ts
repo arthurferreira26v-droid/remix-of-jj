@@ -1,3 +1,4 @@
+import { normalizePlayerPositions } from "@/utils/positionCodes";
 import { Player, generateTeamPlayers } from "@/data/players";
 import { teams } from "@/data/teams";
 import { getAdminPlayersSync } from "@/hooks/useAdminData";
@@ -18,7 +19,7 @@ const getPlayersStorageKey = (teamName: string) => `players_${resolveTeamName(te
 const getStarterOrderStorageKey = (teamName: string) => `starter_order_${resolveTeamName(teamName).storageTeamName}`;
 
 const normalizePlayer = (player: Player): Player => ({
-  ...player,
+  ...normalizePlayerPositions(player),
   isStarter: Boolean(player.isStarter),
   isListed: player.isListed !== false, // default true for backwards compat
   energy: player.energy ?? 100,
