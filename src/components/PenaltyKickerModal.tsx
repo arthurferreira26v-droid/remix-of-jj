@@ -42,8 +42,6 @@ export function PenaltyKickerModal({
       case "MD":
         return "bg-emerald-500/20 text-emerald-400";
       case "ATA":
-      case "PE":
-      case "PD":
         return "bg-rose-500/20 text-rose-400";
       default:
         return "bg-gray-500/20 text-gray-400";

@@ -5,10 +5,9 @@ import { Player } from "@/data/players";
  */
 const ENERGY_DRAIN_PER_MINUTE: Record<string, number> = {
   ATA: 1.2,
-  PE: 1.3,
-  PD: 1.3,
+  ME: 1.3,
+  MD: 1.3,
   MC: 1.1,
-  MEI: 1.1,
   VOL: 1.0,
   LD: 1.0,
   LE: 1.0,
@@ -23,10 +22,9 @@ const ENERGY_DRAIN_PER_MINUTE: Record<string, number> = {
  */
 const ENERGY_DRAIN_PER_MATCH: Record<string, number> = {
   ATA: 14,
-  PE: 15,
-  PD: 15,
+  ME: 15,
+  MD: 15,
   MC: 13,
-  MEI: 13,
   VOL: 12,
   LD: 12,
   LE: 12,
