@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { normalizePositionCode, normalizePlayerPositions } from "./positionCodes";
-import { FORMATIONS } from "../data/formations";
+import { formations } from "../data/formations";
 
 test("PE vira ME, PD vira MD, MEI vira MC", () => {
   expect(normalizePositionCode("PE")).toBe("ME");
@@ -16,7 +16,7 @@ test("alternativas convertidas sem duplicar a principal", () => {
 });
 
 test("nenhuma formação usa códigos antigos", () => {
-  const roles = Object.values(FORMATIONS).flatMap((f) => (f.positions ?? []).map((s) => s.role));
+  const roles = formations.flatMap((f) => (f.positions ?? []).map((s) => s.role));
   expect(roles.length).toBeGreaterThan(0);
   expect(roles.filter((r) => ["PE", "PD", "MEI"].includes(r))).toEqual([]);
 });
