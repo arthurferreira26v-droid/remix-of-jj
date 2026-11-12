@@ -32,7 +32,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
 
   const getMarketKey = (playerId: string, ownerTeam: string) => `${ownerTeam.toLowerCase()}::${playerId}`;
 
-  const positions = ["ALL", "GOL", "ZAG", "LD", "LE", "VOL", "MC", "MEI", "PD", "PE", "ATA"];
+  const positions = ["ALL", "GOL", "ZAG", "LD", "LE", "VOL", "MC", "MEI", "PD", "PE", "MD", "ME", "ATA"];
 
   useEffect(() => {
     (async () => {
