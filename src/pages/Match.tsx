@@ -510,11 +510,11 @@ const Match = () => {
         const userGameStyleId = matchTactics.gameStyle;
         const getGameStyleOvrBonus = (position: string): number => {
           if (userGameStyleId === "through_middle") {
-            if (['MC', 'VOL'].includes(position)) return 3;
-            if (['MD', 'ME', 'LD', 'LE'].includes(position)) return -2;
+            if (['MC', 'VOL', 'MEI'].includes(position)) return 3;
+            if (['PD', 'PE', 'LD', 'LE'].includes(position)) return -2;
           } else if (userGameStyleId === "through_wings") {
-            if (['MD', 'ME', 'LD', 'LE'].includes(position)) return 3;
-            if (['MC', 'VOL'].includes(position)) return -2;
+            if (['PD', 'PE', 'LD', 'LE'].includes(position)) return 3;
+            if (['MC', 'VOL', 'MEI'].includes(position)) return -2;
           }
           return 0;
         };
@@ -547,9 +547,9 @@ const Match = () => {
               extraGoalAgainst += 0.15;
             } else if (pos === 'VOL') {
               extraGoalAgainst += 0.20;
-            } else if (pos === 'MC') {
+            } else if (pos === 'MC' || pos === 'MEI') {
               extraGoalAgainst += 0.15;
-            } else if (pos === 'MD' || pos === 'ME') {
+            } else if (pos === 'PD' || pos === 'PE') {
               attackReduction += 0.20;
             } else if (pos === 'ATA') {
               attackReduction += 0.20;
@@ -602,7 +602,7 @@ const Match = () => {
             if (!isHomeGoal) {
               if (isQuickMatch) {
                 // Auto-resolve penalty in quick match
-                const kicker = userStarters.find(p => ['ATA', 'ME', 'MD'].includes(p.position)) || userStarters[0];
+                const kicker = userStarters.find(p => ['ATA', 'PE', 'PD'].includes(p.position)) || userStarters[0];
                 const kickerName = kicker?.name || 'Jogador';
                 const isGoal = Math.random() < 0.75;
                 if (isGoal) {
@@ -796,7 +796,7 @@ const Match = () => {
               setPressaoEventText(`⚽ GOL! ${scorer} marca no momento decisivo!`);
             } else if (roll < goalProb + penaltyProb) {
               // Pênalti para o usuário
-              const kicker = userActiveStarters.find(p => ['ATA', 'ME', 'MD'].includes(p.position)) || userActiveStarters[0];
+              const kicker = userActiveStarters.find(p => ['ATA', 'PE', 'PD'].includes(p.position)) || userActiveStarters[0];
               const kickerName = kicker?.name || 'Jogador';
               const isGoal = Math.random() < 0.75;
               if (isGoal) {

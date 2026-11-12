@@ -1,13 +1,14 @@
 import type { Player } from "@/data/players";
 
-/** Legacy position codes mapped to the current ones. */
-export const LEGACY_POSITION_MAP: Record<string, string> = { PE: "ME", PD: "MD", MEI: "MC" };
-
-export const normalizePositionCode = (pos: string): string => LEGACY_POSITION_MAP[pos] ?? pos;
+/** Paired codes: a player with one code can also play the other (dual role). */
+export const POSITION_PAIRS: Record<string, string> = {
+  PE: "ME", ME: "PE", PD: "MD", MD: "PD", MEI: "MC", MC: "MEI",
+};
 
 export const normalizePlayerPositions = <T extends Player>(player: T): T => {
-  const position = normalizePositionCode(player.position);
-  if (!player.altPositions) return position === player.position ? player : { ...player, position };
-  const alts = Array.from(new Set(player.altPositions.map(normalizePositionCode))).filter((p) => p !== position);
-  return { ...player, position, altPositions: alts };
+  const partner = POSITION_PAIRS[player.position];
+  if (!partner) return player;
+  const alts = player.altPositions || [];
+  if (alts.includes(partner)) return player;
+  return { ...player, altPositions: [...alts, partner] };
 };

@@ -7,8 +7,9 @@ export const RESERVE_POSITION_ORDER = [
   "LD",
   "VOL",
   "MC",
-  "ME",
-  "MD",
+  "MEI",
+  "PE",
+  "PD",
   "ATA",
 ] as const;
 

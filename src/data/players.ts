@@ -48,13 +48,13 @@ export const generateTeamPlayers = (teamName: string): Player[] => {
     { pos: "VOL", name: "VOL Reserva", isStarter: false },
     { pos: "MC", name: "Meia Central", isStarter: true },
     { pos: "MC", name: "MC Reserva", isStarter: false },
-    { pos: "MC", name: "Meia Armador", isStarter: false },
+    { pos: "MEI", name: "Meia Atacante", isStarter: false },
     { pos: "ATA", name: "Atacante", isStarter: true },
     { pos: "ATA", name: "ATA Reserva", isStarter: false },
-    { pos: "MD", name: "Meia Direita", isStarter: true },
-    { pos: "MD", name: "MD Reserva", isStarter: false },
-    { pos: "ME", name: "Meia Esquerda", isStarter: true },
-    { pos: "ME", name: "ME Reserva", isStarter: false },
+    { pos: "PD", name: "Ponta Direita", isStarter: true },
+    { pos: "PD", name: "PD Reserva", isStarter: false },
+    { pos: "PE", name: "Ponta Esquerda", isStarter: true },
+    { pos: "PE", name: "PE Reserva", isStarter: false },
   ];
 
   return positions.map((p, i) => ({
