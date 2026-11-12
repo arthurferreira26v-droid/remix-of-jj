@@ -15,8 +15,8 @@ const RED_CARD_CHANCE_PER_FOUL = 2.5;
 export const getDefaultYellowCardChance = (position: string): number => {
   if (position === 'GOL') return 2;
   if (['ZAG', 'LE', 'LD'].includes(position)) return 12;
-  if (['MC', 'VOL'].includes(position)) return 9;
-  if (['ATA', 'ME', 'MD'].includes(position)) return 5;
+  if (['MC', 'VOL', 'MEI', 'MD', 'ME'].includes(position)) return 9;
+  if (['ATA', 'PE', 'PD'].includes(position)) return 5;
   return 7; // fallback
 };
 

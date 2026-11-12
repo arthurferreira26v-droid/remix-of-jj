@@ -35,8 +35,11 @@ const POSITION_LABELS: Record<string, string> = {
   LE: "Lateral Esquerdo",
   VOL: "Volantes",
   MC: "Meias",
-  ME: "Meia Esquerda",
+  MEI: "Meias Atacantes",
+  PD: "Ponta Direita",
+  PE: "Ponta Esquerda",
   MD: "Meia Direita",
+  ME: "Meia Esquerda",
   ATA: "Atacantes",
 };
 
