@@ -30,6 +30,7 @@ import { getTeamLogo } from "@/utils/teamLogos";
 import { getLocalStandings, deleteLocalChampionship, getLocalBudget, setTempMode, isTempMode, clearTempMode } from "@/utils/localChampionship";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { isMarketOpen } from "@/utils/marketWindow";
+import { simulateCpuTransfers } from "@/utils/cpuTransfers";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { getTeamRosterPlayers, removePlayerFromTeamRoster, saveTeamRosterPlayers, adjustSquadBalance } from "@/utils/teamRoster";
@@ -328,8 +329,14 @@ const Game = () => {
     processCpuOffers([teamName]);
     const newOffers = generateCpuOffers([teamName], brazilianTeams);
     notifyNewOffers(newOffers);
+    const round = nextMatch?.round ?? 0;
+    if (round > 0 && isMarketOpen(round)) {
+      simulateCpuTransfers([teamName], brazilianTeams, round).forEach((d) =>
+        toast(`${d.toTeam} contratou ${d.playerName} do ${d.fromTeam}`, { duration: 3500 })
+      );
+    }
     refreshOffersCount();
-  }, [teamName, refreshChampionship, setBudget]);
+  }, [teamName, refreshChampionship, setBudget, nextMatch?.round]);
 
   const [selectedReserve, setSelectedReserve] = useState<Player | null>(null);
   const [selectedStarter, setSelectedStarter] = useState<Player | null>(null);
