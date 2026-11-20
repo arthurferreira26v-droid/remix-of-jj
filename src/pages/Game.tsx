@@ -36,6 +36,9 @@ import { optimizeStartersDefault } from "@/utils/formationOptimizer";
 import { getTeamRosterPlayers, removePlayerFromTeamRoster, saveTeamRosterPlayers, adjustSquadBalance } from "@/utils/teamRoster";
 import { sortPlayersByReserveOrder } from "@/utils/playerOrder";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { ManagerOfferList, ManagerOffersModal } from "@/components/ManagerOffers";
+import { generateManagerOffers, declineManagerOffer, acceptManagerOffer, clearManagerCareer, type ManagerOffer } from "@/utils/managerOffers";
 
 const Game = () => {
   
@@ -65,12 +68,14 @@ const Game = () => {
       localStorage.removeItem(`lib_prelib_teams`);
       localStorage.removeItem(`lib_direct_qualifiers`);
       clearAllOffers();
+      clearManagerCareer();
     }
   }, [isTemp, teamName]);
 
   const [showTransferMarket, setShowTransferMarketRaw] = useState(false);
   const [showReceivedOffers, setShowReceivedOffersRaw] = useState(false);
   const [showFinances, setShowFinancesRaw] = useState(false);
+  const [showManagerOffers, setShowManagerOffers] = useState(false);
 
   const overlayOpenRef = useRef(false);
 
@@ -87,6 +92,7 @@ const Game = () => {
     setShowTransferMarketRaw(false);
     setShowReceivedOffersRaw(false);
     setShowFinancesRaw(false);
+    setShowManagerOffers(false);
   }, []);
 
   const setShowTransferMarket = useCallback((v: boolean) => {
@@ -124,6 +130,7 @@ const Game = () => {
   }, [closeAllOverlays]);
   const [offersCount, setOffersCount] = useState(0);
   const [adminSquadReady, setAdminSquadReady] = useState(false);
+  const [managerOffers, setManagerOffers] = useState<ManagerOffer[]>([]);
 
   // Notifica brevemente novas ofertas recebidas
   const notifyNewOffers = (newOffers: ReturnType<typeof generateCpuOffers>) => {
@@ -176,6 +183,12 @@ const Game = () => {
     (async () => {
       const [adminPlayers] = await Promise.all([fetchAdminPlayers(true), fetchAdminLogos()]);
       if (!active) return;
+
+      if (localStorage.getItem(`career_roster_${teamName}`) === "true") {
+        setPlayers(getInitialPlayers());
+        setAdminSquadReady(true);
+        return;
+      }
 
       const team = teams.find(t => t.name === teamName);
       const teamId = team?.id ?? teamName;
@@ -255,7 +268,29 @@ const Game = () => {
   const selectedTeam = teams.find(t => t.name === teamName);
   
   // Get championship data
-  const { championship, nextMatch, loading, isChampionComplete, userWonChampionship, resetChampionship, refreshChampionship } = useChampionship(teamName);
+  const { championship, nextMatch, loading, isChampionComplete, userWonChampionship, resetChampionship, startSeasonAtClub, refreshChampionship } = useChampionship(teamName);
+
+  useEffect(() => {
+    if (!championship || loading || !adminSquadReady) return;
+    const offers = generateManagerOffers(teamName, isChampionComplete);
+    setManagerOffers(offers);
+    if (offers.length > 0 && !isChampionComplete) openOverlay(setShowManagerOffers);
+  }, [teamName, championship?.id, championship?.current_round, isChampionComplete, loading, adminSquadReady, openOverlay]);
+
+  const declineClub = (id: string) => {
+    const remaining = declineManagerOffer(teamName, id);
+    setManagerOffers(remaining);
+    if (!remaining.length) closeAllOverlays();
+  };
+
+  const acceptClub = (id: string) => {
+    const destination = acceptManagerOffer(teamName, id);
+    if (!destination) return;
+    closeAllOverlays();
+    toast.success(`Você agora é o treinador do ${destination}!`);
+    if (isChampionComplete) startSeasonAtClub(destination);
+    else navigate(`/jogo?time=${encodeURIComponent(destination)}`, { replace: true });
+  };
 
   
   // Dynamic Libertadores team lists
@@ -509,52 +544,18 @@ const Game = () => {
 
 
   // Tela de fim de campeonato
-  if (isChampionComplete && !loading) {
-    if (userWonChampionship) {
-      // Tela de celebração
-      return (
-        <div className="min-h-screen bg-gradient-to-b from-yellow-500/20 via-black to-black flex items-center justify-center">
-          <div className="text-center px-4 max-w-2xl">
-            <div className="mb-8 animate-bounce">
-              <div className="text-8xl mb-4">🏆</div>
-              <h1 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 mb-4">
-                CAMPEÃO!
-              </h1>
-              <p className="text-2xl md:text-3xl text-white font-bold mb-2">
-                {teamName}
-              </p>
-              <p className="text-lg text-muted-foreground">
-                Parabéns! Você conquistou o {getCompetitionShortName(teamName)}!
-              </p>
-            </div>
-            
-            <button
-              onClick={resetChampionship}
-              className="bg-white hover:bg-gray-100 text-black font-bold text-xl py-4 px-12 rounded-lg transition-all transform hover:scale-105"
-            >
-              Avançar
-            </button>
-          </div>
+  if (isChampionComplete && !loading && adminSquadReady) {
+    return (
+      <div className="min-h-dvh bg-background px-4 py-10 text-foreground">
+        <div className="mx-auto max-w-md">
+          <h1 className="text-center text-3xl font-bold">{userWonChampionship ? "CAMPEÃO!" : "Temporada finalizada"}</h1>
+          <p className="mt-2 text-center text-muted-foreground">{teamName} · {userPositionStr} lugar</p>
+          <h2 className="mb-4 mt-8 text-lg font-semibold">Propostas de clubes</h2>
+          <ManagerOfferList offers={managerOffers} onAccept={acceptClub} onDecline={declineClub} />
+          <Button className="mt-6 w-full" variant="secondary" onClick={() => resetChampionship()}>Continuar no {teamName}</Button>
         </div>
-      );
-    } else {
-      // Botão de avançar simples
-      return (
-        <div className="min-h-screen bg-black flex items-center justify-center">
-          <div className="text-center px-4">
-            <h2 className="text-3xl font-bold text-white mb-4">Campeonato Finalizado</h2>
-            <p className="text-muted-foreground mb-8">O campeonato chegou ao fim.</p>
-            
-            <button
-              onClick={resetChampionship}
-              className="bg-white hover:bg-gray-100 text-black font-bold text-xl py-4 px-12 rounded-lg transition-colors"
-            >
-              Avançar
-            </button>
-          </div>
-        </div>
-      );
-    }
+      </div>
+    );
   }
 
   if (!nextMatch && !nextLibertadoresMatch && !loading) {
@@ -586,6 +587,7 @@ const Game = () => {
               <span className="text-xs text-green-400 font-medium">$ {(budget / 1000000).toFixed(1)} M</span>
             </div>
           </div>
+          {managerOffers.length > 0 && <Button variant="secondary" size="sm" onClick={() => openOverlay(setShowManagerOffers)} aria-label="Propostas para treinador">Propostas ({managerOffers.length})</Button>}
         </div>
       </header>
 
@@ -612,6 +614,7 @@ const Game = () => {
           localStorage.removeItem(`lib_prelib_teams`);
           localStorage.removeItem(`lib_direct_qualifiers`);
           clearAllOffers();
+          clearManagerCareer();
           if (isTempMode(teamName)) {
             clearTempMode(teamName);
           }
@@ -872,6 +875,8 @@ const Game = () => {
       )}
 
       <AbandonDetector teamName={teamName} onDismiss={() => window.location.reload()} />
+
+      <ManagerOffersModal open={showManagerOffers} offers={managerOffers} onAccept={acceptClub} onDecline={declineClub} onClose={closeAllOverlays} />
 
       <ExitConfirmModal
         open={showExitModal}

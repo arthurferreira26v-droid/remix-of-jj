@@ -94,6 +94,7 @@ function cacheSet(key: string, value: any) {
 
 function cacheDelete(key: string) {
   delete cache[key];
+  pendingWrites.delete(key);
   localStorage.removeItem(key);
 }
 

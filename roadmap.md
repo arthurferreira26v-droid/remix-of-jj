@@ -1,4 +1,7 @@
 # Tasks
+- [ ] Add coach offers during the season and five placement-based offers at season end.
+- [ ] Preserve current destination rosters and campaign progress when accepting; reset only the destination budget.
+- [ ] Test accepting, declining, persistence, season-end offers and match entry.
 - [x] Preserve home tactics and lineup independently of temporary match changes; verified home swaps/reload, match substitutions/tactics, halftime, completion and home reload, with energy retained and no runtime errors.
 - [x] Update Santos and Flamengo from verified current rosters and check both squads in the game.
 - [x] Fix transfer-market closing and verify return to the campaign without errors.

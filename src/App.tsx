@@ -27,7 +27,7 @@ import PostMatch2P from "./pages/PostMatch2P";
 
 const GameRouter = () => {
   const [params] = useSearchParams();
-  return params.get("modo") === "2p" ? <Game2P /> : <Game />;
+  return params.get("modo") === "2p" ? <Game2P /> : <Game key={params.get("time")} />;
 };
 
 const MatchRouter = () => {

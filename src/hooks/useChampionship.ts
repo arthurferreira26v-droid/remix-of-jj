@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { teams } from "@/data/teams";
 import {
   getOrCreateLocalChampionship,
@@ -13,6 +14,7 @@ import { evolveTeamPlayers, clearOvrChanges } from "@/utils/playerEvolution";
 import { toast } from "sonner";
 
 export const useChampionship = (userTeamName: string) => {
+  const navigate = useNavigate();
   const [championship, setChampionship] = useState<LocalChampionship | null>(null);
   const [nextMatch, setNextMatch] = useState<LocalMatch | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,7 +57,7 @@ export const useChampionship = (userTeamName: string) => {
     return () => { initRef.current = false; };
   }, [userTeamName]);
 
-  const resetChampionship = () => {
+  const resetChampionship = (nextTeam = userTeamName) => {
     // ══════════════════════════════════════════════════════════════════════════
     // EVOLUÇÃO DE JOGADORES AO FINAL DA TEMPORADA
     // ══════════════════════════════════════════════════════════════════════════
@@ -98,9 +100,11 @@ export const useChampionship = (userTeamName: string) => {
     }
 
     deleteLocalChampionship(userTeamName);
+    if (nextTeam !== userTeamName) deleteLocalChampionship(nextTeam);
     setIsChampionComplete(false);
     setUserWonChampionship(false);
-    window.location.href = `/jogo?time=${encodeURIComponent(userTeamName)}`;
+    if (nextTeam === userTeamName) loadChampionshipData();
+    navigate(`/jogo?time=${encodeURIComponent(nextTeam)}`, { replace: true });
   };
 
   return {
@@ -109,7 +113,8 @@ export const useChampionship = (userTeamName: string) => {
     loading,
     isChampionComplete,
     userWonChampionship,
-    resetChampionship,
+    resetChampionship: () => resetChampionship(),
+    startSeasonAtClub: (teamName: string) => resetChampionship(teamName),
     refreshChampionship: loadChampionshipData,
   };
 };
