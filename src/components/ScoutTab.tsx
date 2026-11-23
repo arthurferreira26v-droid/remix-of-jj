@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Player } from "@/data/players";
 import { X, Send, TrendingUp, TrendingDown, Minus, Binoculars } from "lucide-react";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
+import { parseOfferValue, formatOfferValue } from "@/utils/offerValue";
 import { getWatchlist, removeFromWatchlist } from "@/utils/watchlist";
 import { getTeamRosterPlayers } from "@/utils/teamRoster";
 import { teams } from "@/data/teams";
@@ -64,9 +65,8 @@ export const ScoutTab = ({ userTeamName, budget, onOfferSent, onBudgetChanged, m
 
   const handleSendOffer = () => {
     if (!offerModal) return;
-    const value = parseFloat(offerValue.replace(/[^0-9.]/g, ""));
-    if (isNaN(value) || value <= 0) { toast.error("Informe um valor válido!"); return; }
-    const valueInUnits = value * 1000000;
+    const valueInUnits = parseOfferValue(offerValue);
+    if (valueInUnits <= 0) { toast.error("Informe um valor válido!"); return; }
     if (valueInUnits > budget) { toast.error("Caixa insuficiente!"); return; }
 
     try {
@@ -153,7 +153,7 @@ export const ScoutTab = ({ userTeamName, budget, onOfferSent, onBudgetChanged, m
                             return;
                           }
                           setOfferModal({ player, ownerTeam });
-                          setOfferValue((price / 1000000).toFixed(1));
+                          setOfferValue(formatOfferValue(price));
                         }}
                         disabled={!marketOpen}
                         className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-1.5 transition-colors ${
@@ -190,14 +190,13 @@ export const ScoutTab = ({ userTeamName, budget, onOfferSent, onBudgetChanged, m
             <div className="relative mb-4">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm font-bold">$</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
+                inputMode="numeric"
                 value={offerValue}
-                onChange={(e) => setOfferValue(e.target.value)}
-                className="w-full bg-zinc-800 text-white pl-8 pr-12 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c8ff00] text-lg font-bold"
-                placeholder="0.0"
+                onChange={(e) => setOfferValue(formatOfferValue(parseOfferValue(e.target.value)))}
+                className="w-full bg-zinc-800 text-white pl-8 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c8ff00] text-lg font-bold"
+                placeholder="5.000.000"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm">M</span>
             </div>
             <p className="text-xs text-zinc-500 mb-4">Seu caixa: {formatMarketValue(budget)}</p>
             <div className="flex gap-3">

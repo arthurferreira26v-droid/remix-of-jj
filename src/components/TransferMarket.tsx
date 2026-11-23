@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { X, Search, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Minus, Loader2, Send, Inbox, Binoculars, XCircle } from "lucide-react";
 import { Player } from "@/data/players";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
+import { parseOfferValue, formatOfferValue } from "@/utils/offerValue";
 import { teams } from "@/data/teams";
 import { sendOffer, getSentOffers, countPendingOffers } from "@/utils/transferOffers";
 import { getLocalBudget } from "@/utils/localChampionship";
@@ -78,13 +79,12 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
       return;
     }
 
-    const value = parseFloat(offerValue.replace(/[^0-9.]/g, ""));
-    if (isNaN(value) || value <= 0) {
+    const valueInUnits = parseOfferValue(offerValue);
+    if (valueInUnits <= 0) {
       toast.error("Informe um valor válido!");
       return;
     }
 
-    const valueInUnits = value * 1000000; // Input em milhões
     if (valueInUnits > budget) {
       toast.error("Você não tem caixa suficiente!");
       return;
@@ -290,7 +290,7 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
                                 return;
                               }
                               setOfferModal({ player, ownerTeam });
-                              setOfferValue((price / 1000000).toFixed(1));
+                              setOfferValue(formatOfferValue(price));
                             }}
                             disabled={!marketOpen}
                             className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-1.5 transition-colors ${
@@ -333,14 +333,13 @@ export const TransferMarket = ({ budget, userTeamName, onClose, onOpenOffers, on
             <div className="relative mb-4">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm font-bold">$</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
+                inputMode="numeric"
                 value={offerValue}
-                onChange={(e) => setOfferValue(e.target.value)}
-                className="w-full bg-zinc-800 text-white pl-8 pr-12 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c8ff00] text-lg font-bold"
-                placeholder="0.0"
+                onChange={(e) => setOfferValue(formatOfferValue(parseOfferValue(e.target.value)))}
+                 className="w-full bg-zinc-800 text-white pl-8 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c8ff00] text-lg font-bold"
+                placeholder="5.000.000"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm">M</span>
             </div>
 
             <p className="text-xs text-zinc-500 mb-4">
