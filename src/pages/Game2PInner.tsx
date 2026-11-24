@@ -20,7 +20,7 @@ import { getLocalStandings } from "@/utils/localChampionship";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
-import { getTeamRosterPlayers, removePlayerFromTeamRoster, saveTeamRosterPlayers } from "@/utils/teamRoster";
+import { getTeamRosterPlayers, getDepartedPlayerIds, removePlayerFromTeamRoster, saveTeamRosterPlayers } from "@/utils/teamRoster";
 import { sortPlayersByReserveOrder } from "@/utils/playerOrder";
 import { toast } from "sonner";
 import { useSwipePages } from "@/hooks/useSwipePages";
@@ -87,7 +87,8 @@ const Game2PInner = ({ activeTeam, currentTurn, onPlay, onExit, turnLabel }: Gam
       const teamId = team?.id ?? activeTeam;
       if (adminPlayers[teamId]?.length > 0) {
         setPlayers(prev => {
-          const merged = adminPlayers[teamId].map((adminP: any) => {
+          const departed = getDepartedPlayerIds(activeTeam);
+          const merged = adminPlayers[teamId].filter((p: any) => !departed.has(p.id)).map((adminP: any) => {
             const existing = prev.find(p => p.id === adminP.id);
             if (existing) return { ...adminP, isStarter: existing.isStarter, energy: existing.energy, matchEnergy: existing.matchEnergy, consecutiveMatches: existing.consecutiveMatches, seasonStarterMatches: existing.seasonStarterMatches, seasonBenchMatches: existing.seasonBenchMatches, ovrChange: existing.ovrChange, accumulatedYellows: existing.accumulatedYellows, suspensionMatches: existing.suspensionMatches, matchYellowCards: 0, matchRedCard: false };
             return { ...adminP, energy: adminP.energy ?? 100, consecutiveMatches: 0 };
