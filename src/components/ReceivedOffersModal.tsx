@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { X, Inbox, Check, XIcon, DollarSign, ArrowRight, MessageSquare, Send, Clock } from "lucide-react";
+import { X, Inbox, Check, XIcon, DollarSign, ArrowRight, Clock } from "lucide-react";
 import { getReceivedOffers, getCounterOffers, getSentOffers, acceptOffer, acceptCounterOffer, rejectOffer, claimOffer, dismissRejectedOffer, TransferOffer } from "@/utils/transferOffers";
 import { getLocalBudget } from "@/utils/localChampionship";
 import { calculateMarketValue, formatMarketValue } from "@/utils/marketValue";
@@ -17,7 +17,6 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
   const [offers, setOffers] = useState<TransferOffer[]>([]);
   const [counterOffers, setCounterOffers] = useState<TransferOffer[]>([]);
   const [sentOffers, setSentOffers] = useState<TransferOffer[]>([]);
-  const [tab, setTab] = useState<"received" | "sent" | "counter">("received");
 
   const currentTeamPlayers = useMemo(() => {
     return getTeamRosterPlayers(teamName) as Array<{
@@ -130,45 +129,17 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
           </button>
         </div>
 
-        {/* Tabs */}
-        <div className="grid grid-cols-3 gap-1.5 px-3 min-[402px]:gap-2 min-[402px]:px-4 pb-3">
-          <button
-            onClick={() => setTab("received")}
-            className={`min-w-0 px-1 py-2 rounded-lg text-[11px] min-[402px]:text-xs font-bold transition-colors ${
-              tab === "received" ? "bg-[#c8ff00] text-black" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-            }`}
-          >
-            Recebidas {totalReceived > 0 && `(${totalReceived})`}
-          </button>
-          <button
-            onClick={() => setTab("sent")}
-            className={`min-w-0 px-1 py-2 rounded-lg text-[11px] min-[402px]:text-xs font-bold transition-colors ${
-              tab === "sent" ? "bg-[#c8ff00] text-black" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-            }`}
-          >
-            Enviadas {totalSent > 0 && `(${totalSent})`}
-          </button>
-          <button
-            onClick={() => setTab("counter")}
-            className={`min-w-0 px-1 py-2 rounded-lg text-[11px] min-[402px]:text-xs font-bold transition-colors ${
-              tab === "counter" ? "bg-[#c8ff00] text-black" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-            }`}
-          >
-            Contra {totalCounters > 0 && `(${totalCounters})`}
-          </button>
-        </div>
       </div>
 
       <div className="min-w-0 p-3 min-[402px]:p-4 space-y-4">
-        {tab === "received" && (
+        {totalReceived === 0 && totalCounters === 0 && totalSent === 0 ? (
+          <div className="text-center py-16 text-zinc-400">
+            <Inbox className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <p>Nenhuma negociação no momento</p>
+          </div>
+        ) : (
           <>
-            {Object.keys(grouped).length === 0 ? (
-              <div className="text-center py-16 text-zinc-400">
-                <Inbox className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>Nenhuma oferta pendente</p>
-              </div>
-            ) : (
-              Object.entries(grouped).map(([playerId, playerOffers]) => {
+            {Object.entries(grouped).map(([playerId, playerOffers]) => {
                 const first = playerOffers[0];
                 const resolvedFirstPlayer = resolveReceivedPlayer(first);
                 return (
@@ -228,18 +199,8 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
                 );
               })
             )}
-          </>
-        )}
 
-        {tab === "sent" && (
-          <>
-            {sentOffers.length === 0 ? (
-              <div className="text-center py-16 text-zinc-400">
-                <Send className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>Nenhuma oferta enviada</p>
-              </div>
-            ) : (
-              sentOffers.map((offer) => {
+            {sentOffers.map((offer) => {
                 const maxMatches = offer.isFromCpu ? 1 : 3;
                 const remaining = maxMatches - (offer.matchesPassed || 0);
                 const isAccepted = offer.status === "accepted";
@@ -314,18 +275,8 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
                 );
               })
             )}
-          </>
-        )}
 
-        {tab === "counter" && (
-          <>
-            {counterOffers.length === 0 ? (
-              <div className="text-center py-16 text-zinc-400">
-                <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>Nenhuma contraproposta</p>
-              </div>
-            ) : (
-              counterOffers.map((offer) => (
+            {counterOffers.map((offer) => (
                 <div key={offer.id} className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
                    <div className="flex min-w-0 items-center gap-3 p-3 min-[402px]:p-4 border-b border-zinc-800">
                      <div className="w-10 h-10 shrink-0 bg-black border-2 border-white rounded-full flex items-center justify-center">
@@ -371,7 +322,7 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
                   </div>
                 </div>
               ))
-            )}
+            }
           </>
         )}
       </div>
