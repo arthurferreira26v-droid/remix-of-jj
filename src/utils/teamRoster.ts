@@ -18,6 +18,23 @@ const resolveTeamName = (teamName: string) => {
 const getPlayersStorageKey = (teamName: string) => `players_${resolveTeamName(teamName).storageTeamName}`;
 const getStarterOrderStorageKey = (teamName: string) => `starter_order_${resolveTeamName(teamName).storageTeamName}`;
 
+const getDepartedKey = (teamName: string) => `departed_players_${resolveTeamName(teamName).storageTeamName}`;
+
+/** IDs of athletes who left this club (sold/transferred); admin refreshes must not bring them back. */
+export const getDepartedPlayerIds = (teamName: string): Set<string> => {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(getDepartedKey(teamName)) || "[]") as string[]);
+  } catch {
+    return new Set();
+  }
+};
+
+const setDeparted = (teamName: string, playerId: string, departed: boolean) => {
+  const ids = getDepartedPlayerIds(teamName);
+  if (departed) ids.add(playerId); else ids.delete(playerId);
+  localStorage.setItem(getDepartedKey(teamName), JSON.stringify([...ids]));
+};
+
 const normalizePlayer = (player: Player): Player => ({
   ...normalizePlayerPositions(player),
   isStarter: Boolean(player.isStarter),
@@ -54,7 +71,8 @@ const getFallbackPlayers = (teamName: string): Player[] => {
     adminPlayers[teamName] ??
     generateTeamPlayers(storageTeamName);
 
-  return enforceReserveLimit(sourcePlayers.map(normalizePlayer));
+  const departed = getDepartedPlayerIds(teamName);
+  return enforceReserveLimit(sourcePlayers.filter((p) => !departed.has(p.id)).map(normalizePlayer));
 };
 
 export const getTeamRosterPlayers = (teamName: string): Player[] => {
@@ -117,6 +135,7 @@ const removePlayerFromOtherRosters = (playerId: string, ownerTeam: string) => {
 
     const updatedPlayers = roster.filter((player) => player.id !== playerId);
     saveTeamRosterPlayers(team.name, updatedPlayers);
+    setDeparted(team.name, playerId, true);
 
     const starterOrder = getStarterOrder(team.name);
     if (starterOrder.length > 0) {
@@ -153,6 +172,7 @@ export const removePlayerFromTeamRoster = (teamName: string, playerId: string) =
   }
 
   let updatedPlayers = players.filter((player) => player.id !== playerId);
+  setDeparted(teamName, playerId, true);
   let replacement: Player | null = null;
 
   if (removedPlayer.isStarter) {
@@ -235,6 +255,7 @@ export const adjustSquadBalance = (players: Player[]): Player[] => {
 
 export const addPlayerToTeamRoster = (teamName: string, player: Player) => {
   removePlayerFromOtherRosters(player.id, teamName);
+  setDeparted(teamName, player.id, false);
 
   const players = getTeamRosterPlayers(teamName);
 

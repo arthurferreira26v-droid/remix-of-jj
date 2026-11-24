@@ -33,7 +33,7 @@ import { isMarketOpen } from "@/utils/marketWindow";
 import { simulateCpuTransfers } from "@/utils/cpuTransfers";
 import { fetchAdminPlayers, fetchAdminLogos } from "@/hooks/useAdminData";
 import { optimizeStartersDefault } from "@/utils/formationOptimizer";
-import { getTeamRosterPlayers, removePlayerFromTeamRoster, saveTeamRosterPlayers, adjustSquadBalance } from "@/utils/teamRoster";
+import { getTeamRosterPlayers, getDepartedPlayerIds, removePlayerFromTeamRoster, saveTeamRosterPlayers, adjustSquadBalance } from "@/utils/teamRoster";
 import { sortPlayersByReserveOrder } from "@/utils/playerOrder";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -193,7 +193,8 @@ const Game = () => {
       const team = teams.find(t => t.name === teamName);
       const teamId = team?.id ?? teamName;
       if (adminPlayers[teamId] && adminPlayers[teamId].length > 0) {
-        const adminList = adminPlayers[teamId];
+        const departed = getDepartedPlayerIds(teamName);
+        const adminList = adminPlayers[teamId].filter(p => !departed.has(p.id));
         setPlayers(prev => {
           // Build set of admin IDs for lookup
           const adminIds = new Set(adminList.map(p => p.id));
