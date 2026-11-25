@@ -198,7 +198,7 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
                   </div>
                 );
               })
-            )}
+            }
 
             {sentOffers.map((offer) => {
                 const maxMatches = offer.isFromCpu ? 1 : 3;
@@ -274,7 +274,7 @@ export const ReceivedOffersModal = ({ teamName, onClose, onAccepted, onBudgetCha
                   </div>
                 );
               })
-            )}
+            }
 
             {counterOffers.map((offer) => (
                 <div key={offer.id} className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
