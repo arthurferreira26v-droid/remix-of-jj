@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { teams } from "@/data/teams";
 import { generateTeamPlayers, Player } from "@/data/players";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { TacticsManager } from "@/components/TacticsManager";
 import { ChevronLeft, Loader2, ArrowLeftRight, X } from "lucide-react";
 import { PressaoFinal } from "@/components/PressaoFinal";
@@ -912,7 +912,7 @@ const Match = () => {
                 <span className="text-xs font-semibold text-white/70 tracking-wide">{teamName.slice(0, 3).toUpperCase()}</span>
               </button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="bg-black border-none h-[100dvh] p-0">
+            <SheetContent side="bottom" className="bg-black border-none h-[100dvh] p-0" hideClose>
               <VisuallyHidden>
                 <SheetTitle>Gerenciar Time</SheetTitle>
               </VisuallyHidden>
@@ -968,6 +968,13 @@ const Match = () => {
                     )}
                   </div>
                 </div>
+              </div>
+              <div className="absolute inset-x-0 bottom-0 z-[60] bg-black px-4 pb-4 pt-3">
+                <SheetClose asChild>
+                  <button className="w-full h-12 rounded-full bg-white text-black font-bold text-sm tracking-[0.2em] uppercase hover:bg-white/90 active:scale-[0.98] transition-all">
+                    Voltar ao Jogo
+                  </button>
+                </SheetClose>
               </div>
             </SheetContent>
           </Sheet>
